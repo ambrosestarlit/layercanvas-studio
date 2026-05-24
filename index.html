@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LayerCanvas Studio</title>
+  <meta name="description" content="A browser-based layered image editor for character variants, illustration variations, and thumbnails." />
+  <style>
+    :root {
+      --bg: #f7fbf8;
+      --panel: #ffffff;
+      --mint: #d8eee8;
+      --mint-dark: #92c9ba;
+      --mint-deep: #3d7f70;
+      --line: #d7e6e1;
+      --text: #263633;
+      --muted: #6a7f79;
+      --danger: #d66b6b;
+      --shadow: 0 10px 30px rgba(60, 100, 90, 0.12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(216, 238, 232, 0.9), transparent 32rem),
+        linear-gradient(135deg, #ffffff 0%, var(--bg) 50%, #eef8f5 100%);
+      color: var(--text);
+      font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--mint-dark);
+      color: #fff;
+      padding: 0.55rem 0.9rem;
+      cursor: pointer;
+      transition: 0.16s ease;
+      white-space: nowrap;
+    }
+
+    button:hover { filter: brightness(0.96); transform: translateY(-1px); }
+    button.secondary { background: #eff8f5; color: var(--mint-deep); border: 1px solid var(--line); }
+    button.danger { background: #fff0f0; color: #b84b4b; border: 1px solid #f2c6c6; }
+    button.small { padding: 0.35rem 0.65rem; font-size: 0.85rem; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    input[type="text"], input[type="number"], select, textarea {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    select, input[type="text"], input[type="number"] { border-radius: 999px; }
+    textarea { min-height: 5.5rem; resize: vertical; line-height: 1.55; }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+      border-color: var(--mint-dark);
+      box-shadow: 0 0 0 3px rgba(146, 201, 186, 0.22);
+    }
+
+    input[type="file"] { display: none; }
+    input[type="color"] { width: 48px; height: 34px; border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 3px; }
+
+    label { color: var(--muted); font-size: 0.88rem; }
+
+    .app-shell {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .app-header {
+      margin: 1rem 1rem 0;
+      padding: 0.85rem 1rem;
+      border: 1px solid rgba(215, 230, 225, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex: 0 0 auto;
+    }
+
+    .app-header-title { min-width: 260px; }
+    .app-header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.45rem; align-items: center; }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(240px, 0.55fr) minmax(640px, 1.7fr) minmax(300px, 0.7fr);
+      gap: 0.8rem;
+      padding: 0.8rem;
+      height: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(215, 230, 225, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .left, .center, .right { min-height: 0; display: flex; flex-direction: column; }
+
+    .header {
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(216, 238, 232, 0.34);
+    }
+
+    .title { font-weight: 800; font-size: 1.18rem; letter-spacing: 0.03em; }
+    .subtitle { margin-top: 0.25rem; color: var(--muted); font-size: 0.86rem; line-height: 1.45; }
+    .preview-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .preview-title-row .title { flex: 0 0 auto; }
+    .preview-header-tools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.8rem; }
+    .header-title-block { min-width: 0; }
+    .header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.45rem; align-items: center; max-width: 58%; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .toolbar.grouped { align-items: end; }
+
+    .preview-toolbar {
+      display: grid;
+      grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+      align-items: end;
+      gap: 0.65rem 0.75rem;
+    }
+
+    .preview-toolbar .field,
+    .preview-toolbar .field.wide {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .preview-bg-field { grid-column: 1; }
+    .preview-tool-field { grid-column: 2; display: grid; gap: 0.25rem; min-width: 0; }
+    .preview-bg-field select { width: 100%; }
+
+    .field { display: grid; gap: 0.25rem; min-width: 140px; }
+    .field.wide { flex: 1; min-width: 210px; }
+    .field.full { width: 100%; }
+
+    .content-scroll { overflow: auto; padding: 1rem; min-height: 0; }
+
+    details.control-section {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      margin-bottom: 0.8rem;
+      overflow: hidden;
+    }
+
+    details.control-section > summary {
+      cursor: pointer;
+      padding: 0.75rem 0.85rem;
+      background: linear-gradient(90deg, rgba(216, 238, 232, 0.85), rgba(255, 255, 255, 0.8));
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+      list-style: none;
+    }
+
+    details.control-section > summary::-webkit-details-marker { display: none; }
+
+    .control-section.always-open { overflow: visible; }
+    .control-section.always-open .section-title {
+      padding: 0.75rem 0.85rem;
+      background: linear-gradient(90deg, rgba(216, 238, 232, 0.85), rgba(255, 255, 255, 0.8));
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+    }
+
+    .section-body { padding: 0.75rem; display: grid; gap: 0.65rem; }
+
+    .layer-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      margin-bottom: 0.8rem;
+      overflow: hidden;
+    }
+
+    .layer-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 0.85rem;
+      background: linear-gradient(90deg, rgba(216, 238, 232, 0.85), rgba(255, 255, 255, 0.8));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .layer-name { font-weight: 700; }
+    .layer-note { color: var(--muted); font-size: 0.78rem; margin-top: 0.1rem; line-height: 1.4; }
+
+    .layer-control-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.45rem;
+      align-items: end;
+      margin-top: 0.55rem;
+    }
+
+    .layer-control-row select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .layer-header-actions {
+      justify-content: flex-end;
+      align-items: end;
+    }
+
+    .category-type-field {
+      min-width: 150px;
+      max-width: 210px;
+    }
+
+    .category-type-field select { width: 100%; }
+
+    .effect-layer-card {
+      border-color: rgba(146, 201, 186, 0.9);
+      background: rgba(248, 255, 252, 0.96);
+    }
+
+    .effect-layer-card .layer-head {
+      background: linear-gradient(90deg, rgba(211, 232, 255, 0.84), rgba(255, 255, 255, 0.86));
+    }
+
+    .effect-layer-card.active {
+      box-shadow: 0 0 0 2px rgba(61, 127, 112, 0.24), var(--shadow);
+    }
+
+    .effect-card-body {
+      padding: 0.65rem;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 0.15rem;
+      line-height: 1.4;
+    }
+
+    .part-list { display: grid; gap: 0.4rem; padding: 0.65rem; }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 0.55rem 0.65rem;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: #fbfefd;
+    }
+
+    .part-row, .text-row, .font-row {
+      display: grid;
+      grid-template-columns: auto 48px 1fr auto;
+      gap: 0.55rem;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 0.45rem;
+      cursor: pointer;
+    }
+
+    .text-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .font-row { grid-template-columns: 1fr auto; cursor: default; }
+    .part-row:hover, .text-row:hover { background: #f8fffc; }
+    .part-row.active, .text-row.active { border-color: var(--mint-dark); background: #f1fbf8; }
+    .part-row input[type="checkbox"], .text-row input[type="checkbox"] { width: 1.05rem; height: 1.05rem; accent-color: var(--mint-deep); }
+    .part-row.diff-mode { grid-template-columns: 48px 1fr auto; }
+
+    .thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(45deg, #e6eee9 25%, transparent 25%),
+        linear-gradient(-45deg, #e6eee9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e6eee9 75%),
+        linear-gradient(-45deg, transparent 75%, #e6eee9 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    }
+
+    .part-meta, .text-meta { min-width: 0; display: grid; gap: 0.25rem; }
+    .part-meta input, .text-meta input { width: 100%; border-radius: 12px; padding: 0.38rem 0.5rem; }
+    .part-size, .text-note { color: var(--muted); font-size: 0.74rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .preview-wrap { padding: 1rem; min-height: 0; display: flex; flex-direction: column; gap: 0.85rem; flex: 1; }
+
+    .preview-stage {
+      position: relative;
+      flex: 1;
+      min-height: 320px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: auto;
+      display: grid;
+      place-items: center;
+      background: #f7fbf9;
+    }
+
+    #previewCanvas {
+      max-width: 92%;
+      max-height: 92%;
+      object-fit: contain;
+      image-rendering: auto;
+      cursor: grab;
+      touch-action: none;
+      transform-origin: center center;
+      will-change: transform;
+      display: block;
+      box-shadow: 0 0 0 1px rgba(123, 150, 140, 0.18);
+    }
+
+    #previewCanvas.bg-transparent {
+      background-color: transparent;
+      background-image:
+        linear-gradient(45deg, #dfe9e5 25%, transparent 25%),
+        linear-gradient(-45deg, #dfe9e5 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #dfe9e5 75%),
+        linear-gradient(-45deg, transparent 75%, #dfe9e5 75%);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+    }
+
+    #previewCanvas.bg-white { background: #fff; }
+    #previewCanvas.bg-mint { background: #e4f3ee; }
+
+    #previewCanvas[data-tool-mode="pan"] { cursor: grab; }
+    #previewCanvas.dragging { cursor: grabbing; }
+
+    .preview-view-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .preview-view-controls .zoom-wrap {
+      display: grid;
+      grid-template-columns: auto minmax(150px, 1fr) 58px;
+      gap: 0.5rem;
+      align-items: center;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .preview-info {
+      position: absolute;
+      top: 0.7rem;
+      left: 0.7rem;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.78rem;
+      pointer-events: none;
+    }
+
+    .slider-grid {
+      display: grid;
+      gap: 0.6rem;
+      padding: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .slider-row { display: grid; grid-template-columns: 112px 1fr 78px; align-items: center; gap: 0.65rem; }
+
+    .slider-row.canvas-size { grid-template-columns: 82px 1fr 106px; }
+    .slider-row.canvas-size input[type="number"] { width: 100%; text-align: right; font-variant-numeric: tabular-nums; }
+    .slider-row.compact { grid-template-columns: 82px 1fr 70px; }
+    input[type="range"] { width: 100%; accent-color: var(--mint-deep); }
+    .value { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.85rem; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+    .tool-button-group { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+    .tool-btn { background: #eff8f5; color: var(--mint-deep); border: 1px solid var(--line); }
+    .tool-btn.active { background: var(--mint-deep); color: #fff; border-color: var(--mint-deep); box-shadow: 0 4px 12px rgba(61, 127, 112, 0.22); }
+    .target-check-row { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; min-width: 0; }
+    .target-check { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.42rem 0.7rem; border: 1px solid var(--line); border-radius: 999px; background: #eff8f5; color: var(--mint-deep); cursor: pointer; user-select: none; font-size: 0.88rem; white-space: nowrap; }
+    .target-check input { accent-color: var(--mint-deep); }
+    .target-check.active { background: var(--mint-deep); color: #fff; border-color: var(--mint-deep); box-shadow: 0 4px 12px rgba(61, 127, 112, 0.22); }
+    .target-text-select { flex: 1 1 240px; min-width: 180px; max-width: 100%; }
+    .target-text-select:disabled { opacity: 0.55; cursor: not-allowed; }
+    .preview-target-controls { display: grid; gap: 0.45rem; padding: 0.65rem; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, 0.78); }
+    .preview-target-controls .field { margin: 0; }
+    .check-row { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+    .check-row label { display: inline-flex; gap: 0.35rem; align-items: center; color: var(--text); }
+
+    .inline-style-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.65rem;
+      background: #fbfefd;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .inline-style-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-weight: 700; }
+    .color-line { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; align-items: end; }
+
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(20, 35, 31, 0.42);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-card {
+      width: min(520px, 100%);
+      max-height: min(86vh, 720px);
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 24px 70px rgba(34, 62, 56, 0.28);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(216, 238, 232, 0.56);
+    }
+
+    .modal-title { font-weight: 800; font-size: 1.08rem; }
+    .modal-body { display: grid; gap: 0.8rem; padding: 1rem 1.1rem 1.1rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.55rem; align-items: center; margin-top: 0.25rem; }
+
+    .status { color: var(--muted); font-size: 0.82rem; min-height: 1.2em; }
+    .hint { color: var(--muted); font-size: 0.78rem; line-height: 1.5; }
+    .danger-text { color: var(--danger); }
+    .hidden { display: none !important; }
+
+    @media (max-width: 1180px) {
+      .preview-toolbar { grid-template-columns: 1fr; }
+      .preview-bg-field,
+      .preview-tool-field { grid-column: 1; }
+    }
+
+    @media (max-width: 1060px) {
+      .app-shell { height: auto; min-height: 100vh; }
+      .app-header { align-items: flex-start; flex-direction: column; }
+      .app-header-actions { justify-content: flex-start; }
+
+      .app { grid-template-columns: 1fr; height: auto; }
+      .center { min-height: 760px; }
+      .right { min-height: 760px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header-title">
+        <div class="title" data-i18n="appTitle">LayerCanvas Studio</div>
+        <div class="subtitle" data-i18n="appSubtitle">レイヤー画像・テキスト・背景を重ねて、差分画像やサムネイルをPNGで書き出します。</div>
+      </div>
+      <div class="app-header-actions">
+        <button id="openExportSettingsBtn" class="small" data-i18n="exportSettingsButton">書き出し</button>
+        <button id="addFontBtn" class="small secondary" data-i18n="registerFont">フォント登録</button>
+        <button id="downloadJsonBtn" class="small secondary" data-i18n="jsonSaveButton">JSON保存</button>
+        <button id="importJsonBtn" class="small secondary" data-i18n="jsonLoadButton">JSON読込</button>
+        <button id="saveCacheBtn" class="small" data-i18n="cacheSaveButton">キャッシュ保存</button>
+        <button id="loadCacheBtn" class="small secondary" data-i18n="cacheLoadButton">キャッシュ読込</button>
+        <button id="clearCacheBtn" class="small danger" data-i18n="cacheDeleteButton">キャッシュ削除</button>
+        <input id="jsonFileInput" type="file" accept="application/json,.json" />
+        <input id="fontFileInput" type="file" accept=".ttf,.otf,.woff,.woff2,font/*" multiple />
+      </div>
+    </header>
+
+    <main class="app">
+      <section class="panel left">
+      <div class="toolbar grouped">
+        <div class="field">
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <select id="languageSelect">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+            <option value="ko">한국어</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar grouped">
+        <div class="field wide">
+          <label for="layerPresetSelect" data-i18n="layerPresetLabel">レイヤー構成プリセット</label>
+          <select id="layerPresetSelect"></select>
+        </div>
+        <div class="field wide">
+          <label for="layerPresetNameInput" data-i18n="layerPresetNameLabel">プリセット名</label>
+          <input id="layerPresetNameInput" type="text" data-i18n-placeholder="layerPresetNamePlaceholder" placeholder="例：画像差分セット" />
+        </div>
+        <button id="addLayerPresetBtn" data-i18n="newCreateButton">新規作成</button>
+        <button id="deleteLayerPresetBtn" class="danger" data-i18n="deleteButton">削除</button>
+      </div>
+
+      <div class="toolbar grouped">
+        <div class="field wide">
+          <label for="characterSelect" data-i18n="characterLabel">キャラクター</label>
+          <select id="characterSelect"></select>
+        </div>
+        <div class="field wide">
+          <label for="characterNameInput" data-i18n="characterNameLabel">キャラクター名</label>
+          <input id="characterNameInput" type="text" placeholder="キャラクター名" data-i18n-placeholder="characterNamePlaceholder" />
+        </div>
+        <button id="addCharacterBtn" data-i18n="addButton">追加</button>
+        <button id="renameCharacterBtn" class="secondary" data-i18n="renameButton">名前変更</button>
+        <button id="deleteCharacterBtn" class="danger" data-i18n="deleteButton">削除</button>
+      </div>
+
+      <section id="canvasBasicSettings" class="control-section always-open">
+        <div class="section-title" data-i18n="basicSettings">基本設定</div>
+        <div class="section-body">
+          <div class="slider-grid">
+            <div class="slider-row canvas-size">
+              <label for="canvasHeightRange" data-i18n="canvasHeightLabel">縦幅</label>
+              <input id="canvasHeightRange" type="range" min="1" max="8000" step="1" value="1200" />
+              <input id="canvasHeightInput" type="number" min="1" max="8000" step="1" value="1200" />
+            </div>
+            <div class="slider-row canvas-size">
+              <label for="canvasWidthRange" data-i18n="canvasWidthLabel">横幅</label>
+              <input id="canvasWidthRange" type="range" min="1" max="8000" step="1" value="1200" />
+              <input id="canvasWidthInput" type="number" min="1" max="8000" step="1" value="1200" />
+            </div>
+          </div>
+          <div class="field wide">
+            <label for="canvasPresetSelect" data-i18n="canvasSizePresetLabel">キャンバスサイズプリセット</label>
+            <select id="canvasPresetSelect"></select>
+          </div>
+          <div class="button-row">
+            <div class="field wide">
+              <label for="canvasPresetNameInput" data-i18n="canvasPresetNameLabel">プリセット名</label>
+              <input id="canvasPresetNameInput" type="text" data-i18n-placeholder="canvasPresetNamePlaceholder" placeholder="例：配信用サムネ" />
+            </div>
+            <button id="saveCanvasPresetBtn" type="button" data-i18n="canvasPresetRegister">プリセット登録</button>
+            <button id="deleteCanvasPresetBtn" type="button" class="danger" data-i18n="deleteButton">削除</button>
+          </div>
+        </div>
+      </section>
+
+
+      <div id="presetToolbar" class="toolbar grouped">
+        <div class="field wide">
+          <label for="presetSelect" data-i18n="presetLabel">プリセット</label>
+          <select id="presetSelect"></select>
+        </div>
+        <div class="field wide">
+          <label for="presetNameInput" data-i18n="presetNameLabel">プリセット名</label>
+          <input id="presetNameInput" type="text" placeholder="例：通常笑顔 / 照れ / 怒り" data-i18n-placeholder="presetNamePlaceholder" />
+        </div>
+        <button id="savePresetBtn" data-i18n="savePresetButton">現在の組み合わせを保存</button>
+        <button id="applyPresetBtn" class="secondary" data-i18n="applyButton">適用</button>
+        <button id="deletePresetBtn" class="danger" data-i18n="deleteButton">削除</button>
+      </div>
+
+      <div class="toolbar layer-order-toolbar">
+        <label class="target-check">
+          <input id="browsAboveHairFrontToggle" type="checkbox" />
+          <span data-i18n="browsAboveHairFront">眉毛を髪の毛(手前)より前に表示</span>
+        </label>
+      </div>
+
+    </section>
+
+    <section class="panel center">
+      <div class="header">
+        <div class="preview-title-row">
+          <div class="title" data-i18n="previewTitle">プレビュー / 書き出し</div>
+        </div>
+        <div class="subtitle" data-i18n="previewSubtitle">プレビュー上で立ち絵全体またはテキストを移動・回転・拡大縮小できます。背景は専用スライダーで調整します。</div>
+      </div>
+
+      <div class="toolbar grouped preview-toolbar">
+        <div class="field preview-bg-field">
+          <label for="previewBgSelect" data-i18n="previewBgLabel">プレビュー背景</label>
+          <select id="previewBgSelect">
+            <option value="transparent" data-i18n="bgTransparent">透明確認</option>
+            <option value="white" data-i18n="bgWhite">白</option>
+            <option value="mint" data-i18n="bgMint">くすみミント</option>
+          </select>
+        </div>
+        <div class="preview-tool-field">
+          <label data-i18n="toolModeLabel">プレビュー操作</label>
+          <div id="toolModeButtons" class="tool-button-group" role="group" aria-label="プレビュー操作">
+            <button type="button" class="tool-btn small" data-tool-mode="pan" data-i18n="toolPan">表示移動</button>
+            <button type="button" class="tool-btn small" data-tool-mode="move" data-i18n="toolMove">ドラッグ移動</button>
+            <button type="button" class="tool-btn small" data-tool-mode="scale" data-i18n="toolScale">ドラッグでサイズ</button>
+            <button type="button" class="tool-btn small" data-tool-mode="rotate" data-i18n="toolRotate">ドラッグで回転</button>
+            <button type="button" id="undoBtn" class="small secondary" data-i18n="undoButton" title="Ctrl+Z">戻る</button>
+            <button type="button" id="redoBtn" class="small secondary" data-i18n="redoButton" title="Ctrl+Shift+Z">やり直す</button>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="preview-wrap">
+        <div class="preview-target-controls">
+          <div class="field full transform-target-field">
+            <label data-i18n="toolTargetLabel">操作対象</label>
+            <div id="toolTargetChecks" class="target-check-row"></div>
+          </div>
+        </div>
+
+        <div id="previewStage" class="preview-stage bg-transparent">
+          <div id="previewInfo" class="preview-info">0 × 0</div>
+          <canvas id="previewCanvas"></canvas>
+        </div>
+
+        <div class="preview-view-controls">
+          <button id="previewFitBtn" type="button" class="small secondary" data-i18n="previewFit">全体表示</button>
+          <button id="previewOriginalBtn" type="button" class="small secondary" data-i18n="previewOriginal">原寸表示</button>
+          <div class="zoom-wrap">
+            <label for="previewZoom" data-i18n="previewZoom">倍率</label>
+            <input id="previewZoom" type="range" min="0.1" max="3" step="0.01" value="1" />
+            <div id="previewZoomValue" class="value">100%</div>
+          </div>
+        </div>
+
+        <div id="status" class="status"></div>
+        <div class="hint" data-i18n="hintText">背景1→背景2→背面テキスト→立ち絵→前面テキストの順に描画します。プレビュー操作の変更はPNG書き出しにも反映されます。</div>
+      </div>
+    </section>
+
+    <section class="panel right">
+      <div class="content-scroll">
+        <details class="control-section" open>
+          <summary data-i18n="transformSection">選択対象の位置・サイズ・角度</summary>
+          <div class="section-body">
+            <div class="hint" data-i18n="transformHint">操作対象をチェックで選び、移動・サイズ・回転ボタンを選んでプレビュー上をドラッグできます。数値調整はここで行います。</div>
+            <div class="slider-grid">
+              <div class="slider-row">
+                <label for="targetX" data-i18n="xMoveLabel">X移動</label>
+                <input id="targetX" type="range" min="-1200" max="1200" step="1" value="0" />
+                <div id="targetXValue" class="value">0px</div>
+              </div>
+              <div class="slider-row">
+                <label for="targetY" data-i18n="yMoveLabel">Y移動</label>
+                <input id="targetY" type="range" min="-1200" max="1200" step="1" value="0" />
+                <div id="targetYValue" class="value">0px</div>
+              </div>
+              <div class="slider-row">
+                <label for="targetScale" data-i18n="scaleLabel">スケール</label>
+                <input id="targetScale" type="range" min="0.05" max="4" step="0.01" value="1" />
+                <div id="targetScaleValue" class="value">1.00</div>
+              </div>
+              <div class="slider-row">
+                <label for="targetRotation" data-i18n="rotationLabel">角度</label>
+                <input id="targetRotation" type="range" min="-180" max="180" step="1" value="0" />
+                <div id="targetRotationValue" class="value">0°</div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="textSection">テキストレイヤー</summary>
+          <div class="section-body">
+            <div class="button-row">
+              <button id="addTextLayerBtn" data-i18n="addTextLayer">テキスト追加</button>
+              <button id="duplicateTextLayerBtn" class="secondary" data-i18n="duplicateButton">複製</button>
+              <button id="deleteTextLayerBtn" class="danger" data-i18n="deleteButton">削除</button>
+            </div>
+            <div id="textLayerList" class="part-list"></div>
+          </div>
+        </details>
+
+        <details class="control-section">
+          <summary data-i18n="commonFontSection">共通フォント一覧</summary>
+          <div class="section-body">
+            <div class="hint" data-i18n="commonFontHint">ヘッダーのフォント登録から追加したフォントは、すべてのテキストレイヤーのフォントプルダウンに共通で追加されます。</div>
+            <div id="customFontList" class="part-list"></div>
+          </div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="textDetailSection">選択中テキスト詳細</summary>
+          <div id="textDetailEditor" class="section-body"></div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="effectSection">エフェクトレイヤー</summary>
+          <div class="section-body">
+            <div class="button-row">
+              <button id="addEffectLayerBtn" data-i18n="addEffectLayer">エフェクト追加</button>
+              <button id="duplicateEffectLayerBtn" class="secondary" data-i18n="duplicateButton">複製</button>
+              <button id="deleteEffectLayerBtn" class="danger" data-i18n="deleteButton">削除</button>
+            </div>
+            <div class="hint" data-i18n="effectOrderHint">エフェクトレイヤーはこの位置までに描かれた下のレイヤーだけに適用されます。</div>
+            <div id="effectLayerList" class="part-list"></div>
+          </div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="effectDetailSection">選択中エフェクト詳細</summary>
+          <div id="effectDetailEditor" class="section-body"></div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="categorySection">カテゴリ管理</summary>
+          <div class="section-body">
+            <div class="button-row">
+              <div class="field wide">
+                <label for="categoryNameInput" data-i18n="categoryNameLabel">カテゴリ名</label>
+                <input id="categoryNameInput" type="text" data-i18n-placeholder="categoryNamePlaceholder" placeholder="例：髪の毛(前)" />
+              </div>
+              <button id="addCategoryBtn" data-i18n="addLayerButton">レイヤー追加</button>
+            </div>
+            <div class="check-row">
+              <label><input id="newCategoryMulti" type="checkbox" checked> <span data-i18n="categoryTypeMulti">組み合わせレイヤー</span></label>
+              <label><input id="newCategorySingle" type="checkbox"> <span data-i18n="categoryTypeSingle">単独レイヤー</span></label>
+            </div>
+            <div class="hint" data-i18n="categoryTypeHint">追加前にカテゴリの種類を選ぶと、複数組み合わせ可能か、1つだけ反映かを切り替えられます。</div>
+            <div class="hint" data-i18n="categoryOrderHint">カテゴリパネルの ↑ / ↓ で並び替えると、描画順も同じ構成で更新されます。</div>
+          </div>
+        </details>
+
+        <div id="layersRoot"></div>
+
+        <details class="control-section" open>
+          <summary data-i18n="backgroundSection">背景レイヤー</summary>
+          <div id="backgroundControls" class="section-body"></div>
+        </details>
+      </div>
+
+      </section>
+    </main>
+  </div>
+
+  <div id="exportModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+      <div class="modal-head">
+        <div id="exportModalTitle" class="modal-title" data-i18n="exportSettingsTitle">書き出し設定</div>
+        <button id="closeExportModalBtn" type="button" class="small secondary" data-i18n="closeButton">閉じる</button>
+      </div>
+      <div class="modal-body">
+        <div class="field full">
+          <label for="exportHeightInput" data-i18n="exportHeightLabel">書き出し縦幅(px)</label>
+          <input id="exportHeightInput" type="number" min="1" step="1" value="1200" />
+        </div>
+        <div class="field full">
+          <label for="exportOriginalSelect" data-i18n="sizeLabel">サイズ</label>
+          <select id="exportOriginalSelect">
+            <option value="original" data-i18n="sizeOriginal">原寸</option>
+            <option value="height" data-i18n="sizeHeight">縦幅指定</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button id="exportPngBtn" type="button" data-i18n="exportPngButton">PNG書き出し</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const I18N = {
+      ja: {
+        appTitle: "LayerCanvas Studio",
+        appSubtitle: "レイヤー画像・テキスト・背景を重ねて、キャラクター差分・イラスト差分・サムネイルをPNGで書き出します。",
+        languageLabel: "Language",
+        layerPresetLabel: "レイヤー構成プリセット", layerPresetNameLabel: "プリセット名", layerPresetNamePlaceholder: "例：画像差分セット", newCreateButton: "新規作成", defaultLayerPresetName: "キャラクター差分セット", categorySection: "カテゴリ管理", categoryNameLabel: "カテゴリ名", categoryNamePlaceholder: "例：髪の毛(前)", addLayerButton: "レイヤー追加", categoryTypeMulti: "組み合わせレイヤー", categoryTypeSingle: "単独レイヤー", categoryTarget: "カテゴリ", categoryTypeHint: "追加前にカテゴリの種類を選ぶと、複数組み合わせ可能か、1つだけ反映かを切り替えられます。", categoryOrderHint: "カテゴリパネルの ↑ / ↓ で並び替えると、描画順も同じ構成で更新されます。", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "このプリセットでは背景画像レイヤーは使わず、背景パネルのみ使えます。",
+        characterLabel: "キャラクター", characterNameLabel: "キャラクター名", characterNamePlaceholder: "キャラクター名", addButton: "追加", renameButton: "名前変更", deleteButton: "削除",
+        presetLabel: "プリセット", presetNameLabel: "プリセット名", presetNamePlaceholder: "例：通常笑顔 / 照れ / 怒り", savePresetButton: "現在の組み合わせを保存", applyButton: "適用",
+        basicSettings: "基本設定", canvasHeightLabel: "縦幅", canvasWidthLabel: "横幅", canvasSizePresetLabel: "キャンバスサイズプリセット", canvasPresetNameLabel: "プリセット名", canvasPresetNamePlaceholder: "例：配信用サムネ / DLsite用", canvasPresetRegister: "プリセット登録", canvasPresetImageSize: "画像サイズ", canvasPresetSaved: "キャンバスサイズプリセットを登録しました。", selectCanvasPresetDelete: "削除するキャンバスサイズプリセットを選択してください。", canvasPresetDeleted: "キャンバスサイズプリセットを削除しました。", canvasPresetApplied: "キャンバスサイズを適用しました。",
+        previewTitle: "プレビュー / 書き出し", previewSubtitle: "プレビュー上で立ち絵全体またはテキストを移動・回転・拡大縮小できます。背景は専用スライダーで調整します。",
+        previewBgLabel: "プレビュー背景", bgTransparent: "透明確認", bgWhite: "白", bgMint: "くすみミント", exportHeightLabel: "書き出し縦幅(px)", sizeLabel: "サイズ", sizeOriginal: "原寸", sizeHeight: "縦幅指定", exportPngButton: "PNG書き出し", exportSettingsButton: "書き出し", exportSettingsTitle: "書き出し設定", closeButton: "閉じる",
+        jsonSaveButton: "JSON保存", jsonLoadButton: "JSON読込", cacheSaveButton: "キャッシュ保存", cacheLoadButton: "キャッシュ読込", cacheDeleteButton: "キャッシュ削除",
+        backgroundSection: "背景レイヤー", textSection: "テキストレイヤー", textDetailSection: "選択中テキスト詳細", effectSection: "エフェクトレイヤー", effectDetailSection: "選択中エフェクト詳細", commonFontSection: "共通フォント一覧", customFontSection: "任意フォント", registerFont: "フォント登録", commonFontHint: "登録したフォントはすべてのテキストレイヤーで共通利用できます。フォントのプルダウンには default の後に登録フォントが追加されます。", fontHint: "登録したフォントはテキストレイヤーと文字部分指定で選択できます。", transformSection: "選択対象の位置・サイズ・角度", transformHint: "操作対象をチェックで選び、表示移動 / 移動 / サイズ / 回転を選んでプレビュー上でドラッグできます。細かい数値調整はここで行います。",
+        addTextLayer: "テキスト追加", addEffectLayer: "エフェクト追加", duplicateButton: "複製", toolTargetLabel: "操作対象", toolModeLabel: "プレビュー操作", toolPan: "表示移動", toolMove: "ドラッグ移動", toolScale: "ドラッグでサイズ", toolRotate: "ドラッグで回転", undoButton: "戻る", redoButton: "やり直す", undoDone: "操作を戻しました。", redoDone: "操作をやり直しました。", standingTarget: "立ち絵", textTarget: "テキスト", previewFit: "全体表示", previewOriginal: "原寸表示", previewZoom: "倍率",
+        scaleLabel: "スケール", xMoveLabel: "X移動", yMoveLabel: "Y移動", rotationLabel: "角度",
+        hintText: "背景1→背景2→背面テキスト→立ち絵→前面テキストの順に描画します。プレビュー操作の変更はPNG書き出しにも反映されます。",
+        bg1: "背景1", bg2: "背景2", bgVisible: "表示", bgRegister: "背景画像登録", bgClear: "背景削除", bgNotLoaded: "未登録", bgLoaded: "登録済み：{name}", bgScale: "背景スケール", bgX: "背景X", bgY: "背景Y", bgPanel: "背景パネル", bgPanelColor: "背景色", bgPanelVisible: "プレビューに表示", bgPanelExport: "背景パネルを書き出す", browsAboveHairFront: "眉毛を髪の毛(手前)より前に表示", browsYOffset: "眉毛Y",
+        textName: "レイヤー名", textBody: "テキスト", textBodyPlaceholder: "表示する文字を入力", textVisible: "表示", textPlacement: "表示位置", textBack: "立ち絵の背面", textFront: "立ち絵の前面", textAlign: "文字揃え", alignLeft: "左", alignCenter: "中央", alignRight: "右", writingMode: "文字方向", writingHorizontal: "横書き", writingVertical: "縦書き", verticalLatinRotate: "英数字を横倒しにする", verticalColumnGap: "縦書き列間", wrapWidth: "折り返し幅", wrapHeight: "折り返し高さ", font: "フォント", fontSize: "フォントサイズ", textColor: "文字色", lineHeight: "行間", letterSpacing: "字間", stroke: "縁取り", strokeColor: "フチ色", strokeWidth: "フチ太さ", shadow: "ドロップシャドウ", shadowColor: "影色", shadowBlur: "影ぼかし", shadowX: "影X", shadowY: "影Y", effectName: "レイヤー名", effectType: "エフェクト種類", effectPlacement: "適用位置", effectVisible: "表示", effectTypeVignette: "ビネット", effectTypeChromatic: "色収差", effectTypeBlur: "ぼかし", effectTypeTone: "グレー / セピア", effectPlacementBg: "背景の上", effectPlacementBackText: "背面テキストの上", effectPlacementStanding: "立ち絵の上", effectPlacementFrontText: "前面テキストの上", effectColor: "色", effectIntensity: "強さ", effectRadius: "広がり", effectShift: "ずらし量", effectBlur: "ぼかし量", effectToneMode: "色調", effectToneGray: "グレー", effectToneSepia: "セピア", effectRgbOpacityHint: "R / G / B の配分は自動で合計100%になるよう調整されます。", effectRedOpacity: "R透明度", effectGreenOpacity: "G透明度", effectBlueOpacity: "B透明度", effectRedShift: "Rずらし", effectGreenShift: "Gずらし", effectBlueShift: "Bずらし",
+        inlineStyleTitle: "文字部分指定", inlineStyleHint: "指定した文字列だけフォント・色・サイズ・フチ・影を変更できます。複数指定はコンマで区切ってください。", inlineStyleEmpty: "指定はまだありません。", inlineStyleItem: "指定 {number}", inlineStyleTargets: "指定したい文字列", inlineStyleTargetsPlaceholder: "例：赤い, 海", inlineStyleFont: "指定フォント", inlineStyleColor: "色", inlineStyleSize: "サイズ", inlineStyleStrokeColor: "フチ色", inlineStyleStrokeWidth: "フチ太さ", inlineStyleShadowColor: "影色", inlineStyleShadowBlur: "影ぼかし", addInlineStyle: "+ 追加",
+        layer_armFront: "腕(手前)", layer_itemFront: "アイテム(手前)", layer_hairFront: "髪の毛(手前)", layer_eyes: "目元", layer_brows: "眉毛", layer_mouth: "口", layer_effect: "表情効果", layer_armBack: "腕(奥)", layer_itemMiddle: "アイテム(中)", layer_base: "ベース", layer_itemBack: "アイテム(奥)", layer_hairBack: "髪の毛(奥)", layer_diffBase: "ベース",
+        noteParts: "複数チェックで同カテゴリ内の重ね合わせが可能", noteExclusive: "1種類選択すると、同カテゴリ内の前の選択は自動で解除されます。", noteDiff: "完成済み差分をクリックで切り替え。複数選択はできません。", registerImage: "画像登録", emptyParts: "まだ画像が登録されていません。", emptyDiff: "完成済み差分画像を登録してください。", partNamePlaceholder: "パーツ名", unnamed: "名称未設定", newCharacter: "新規キャラクター", presetEmpty: "プリセットを選択", displaying: "表示中", applyDisplay: "表示適用",
+        noTextLayer: "テキストレイヤーがありません。", noSelectedText: "編集するテキストレイヤーを選択してください。", noEffectLayer: "エフェクトレイヤーがありません。", noSelectedEffect: "編集するエフェクトレイヤーを選択してください。", defaultTextLayerName: "テキスト", defaultTextBody: "TEXT", defaultEffectLayerName: "エフェクト", defaultFont: "default", effectOrderHint: "エフェクトはリスト内の↑↓と「上へ／下へ」で移動できます。各エフェクトは、その位置より下に描画済みのレイヤーにだけ反映されます。", effectMoveUp: "上へ", effectMoveDown: "下へ",
+        languageChanged: "表示言語を変更しました。", addedImages: "{count}件の画像を登録しました。", fontAdded: "フォントを登録しました。", bgAdded: "背景画像を登録しました。", pngExported: "PNGを書き出しました。{width} × {height}px", pngExportFailed: "PNG書き出しに失敗しました。", jsonSaved: "JSONを保存しました。", jsonLoaded: "JSONを読み込みました。", jsonLoadFailed: "JSONの読み込みに失敗しました。", cacheSaved: "ブラウザキャッシュに保存しました。", cacheSaveFailed: "キャッシュ保存に失敗しました。", cacheMissing: "保存済みキャッシュがありません。", cacheLoaded: "キャッシュから読み込みました。", cacheLoadFailed: "キャッシュ読込に失敗しました。", cacheDeleteConfirm: "ブラウザに保存したキャッシュを削除しますか？", cacheDeleted: "キャッシュを削除しました。", cacheDeleteFailed: "キャッシュ削除に失敗しました。", cacheAutoLoaded: "保存済みキャッシュを自動読込しました。", enterCharacterName: "キャラクター名を入力してください。", characterAdded: "キャラクターを追加しました。", characterRenamed: "キャラクター名を変更しました。", cannotDeleteLastCharacter: "最後のキャラクターは削除できません。", deleteCharacterConfirm: "現在のキャラクターを削除しますか？", characterDeleted: "キャラクターを削除しました。", enterPresetName: "プリセット名を入力してください。", presetSaved: "プリセットを保存しました。", selectPresetDelete: "削除するプリセットを選択してください。", presetDeleted: "プリセットを削除しました。", presetApplied: "プリセット「{name}」を適用しました。", enterLayerPresetName: "レイヤー構成プリセット名を入力してください。", layerPresetAdded: "レイヤー構成プリセットを作成しました。", cannotDeleteLastLayerPreset: "最後のレイヤー構成プリセットは削除できません。", layerPresetDeleted: "レイヤー構成プリセットを削除しました。", layerPresetChanged: "レイヤー構成プリセットを切り替えました。", enterCategoryName: "カテゴリ名を入力してください。", categoryAdded: "カテゴリを追加しました。", categoryMoved: "カテゴリの並び順を変更しました。", effectMoveUp: "上へ", effectMoveDown: "下へ", effectListUp: "リスト上へ", effectListDown: "リスト下へ", effectAdded: "エフェクトレイヤーを追加しました。"
+      },
+      en: {},
+      ko: {}
+    };
+
+    I18N.en = { ...I18N.ja,
+      appTitle: "LayerCanvas Studio", appSubtitle: "Create character variants, illustration variations, and thumbnails by layering images, text, and backgrounds, then export as PNG.", layerPresetLabel: "Layer Structure Preset", layerPresetNameLabel: "Preset name", layerPresetNamePlaceholder: "Example: Image Variant Set", newCreateButton: "New", defaultLayerPresetName: "Character Variant Set", categorySection: "Category Management", categoryNameLabel: "Category name", categoryNamePlaceholder: "Example: Front Hair", addLayerButton: "Add Layer", categoryTypeMulti: "Combinable layer", categoryTypeSingle: "Single layer", categoryTarget: "Category", categoryTypeHint: "Choose the category type before adding to control whether multiple items can be combined or only one can be active.", categoryOrderHint: "Use ↑ / ↓ on category panels to reorder; drawing order follows the same structure.", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "This preset uses only the background panel. Background image layers are disabled.", characterLabel: "Character", characterNameLabel: "Character name", characterNamePlaceholder: "Character name", addButton: "Add", renameButton: "Rename", deleteButton: "Delete", presetLabel: "Preset", presetNameLabel: "Preset name", presetNamePlaceholder: "Example: Normal smile / Shy / Angry", savePresetButton: "Save current combination", applyButton: "Apply",
+      basicSettings: "Basic Settings", canvasHeightLabel: "Height", canvasWidthLabel: "Width", canvasSizePresetLabel: "Canvas Size Preset", canvasPresetNameLabel: "Preset name", canvasPresetNamePlaceholder: "Example: Thumbnail / DLsite", canvasPresetRegister: "Save preset", canvasPresetImageSize: "Image size", canvasPresetSaved: "Canvas size preset saved.", selectCanvasPresetDelete: "Select a canvas size preset to delete.", canvasPresetDeleted: "Canvas size preset deleted.", canvasPresetApplied: "Canvas size applied.",
+      previewTitle: "Preview / Export", previewSubtitle: "Move, rotate, and scale the whole standing image or text layers on the preview. Backgrounds use their own sliders.", previewBgLabel: "Preview background", bgTransparent: "Transparency check", bgWhite: "White", bgMint: "Muted mint", exportHeightLabel: "Export height (px)", sizeLabel: "Size", sizeOriginal: "Original", sizeHeight: "Custom height", exportPngButton: "Export PNG", exportSettingsButton: "Export", exportSettingsTitle: "Export Settings", closeButton: "Close", jsonSaveButton: "Save JSON", jsonLoadButton: "Load JSON", cacheSaveButton: "Save cache", cacheLoadButton: "Load cache", cacheDeleteButton: "Delete cache",
+      backgroundSection: "Background Layers", textSection: "Text Layers", textDetailSection: "Selected Text Details", commonFontSection: "Shared Font List", registerFont: "Add Font", commonFontHint: "Registered fonts are shared by all text layers. The font dropdown shows default first, then added custom fonts.", transformSection: "Selected Target Position / Size / Rotation", transformHint: "Choose the target with checkboxes, select Move / Size / Rotate, then drag on the preview. Fine adjustment is here.", addTextLayer: "Add Text", duplicateButton: "Duplicate", toolTargetLabel: "Target", toolModeLabel: "Preview Tool", toolPan: "Pan view", toolMove: "Move", toolScale: "Scale", toolRotate: "Rotate", undoButton: "Undo", redoButton: "Redo", undoDone: "Undid the last operation.", redoDone: "Redid the operation.", standingTarget: "Standing image", textTarget: "Text", previewFit: "Fit", previewOriginal: "Original", previewZoom: "Zoom", scaleLabel: "Scale", xMoveLabel: "X Move", yMoveLabel: "Y Move", rotationLabel: "Rotation", hintText: "Draw order: Background 1 → Background 2 → Back Text → Standing Image → Front Text. Preview edits are applied to PNG export.", noteExclusive: "Selecting one item automatically clears the previous selection in this category.", noteParts: "Multiple items can be combined in this category.", noteDiff: "Click a completed variant to switch. Multiple selection is not allowed.",
+      bg1: "Background 1", bg2: "Background 2", bgVisible: "Visible", bgRegister: "Add background", bgClear: "Clear background", bgNotLoaded: "Not loaded", bgLoaded: "Loaded: {name}", bgScale: "BG Scale", bgX: "BG X", bgY: "BG Y", bgPanel: "Background Panel", bgPanelColor: "Background color", bgPanelVisible: "Show in preview", bgPanelExport: "Export background panel", browsAboveHairFront: "Show brows above front hair", browsYOffset: "Brows Y",
+      textName: "Layer name", textBody: "Text", textBodyPlaceholder: "Enter text", textVisible: "Visible", textPlacement: "Position", textBack: "Behind standing image", textFront: "In front of standing image", textAlign: "Alignment", alignLeft: "Left", alignCenter: "Center", alignRight: "Right", writingMode: "Writing direction", writingHorizontal: "Horizontal", writingVertical: "Vertical", verticalLatinRotate: "Rotate Latin/numbers sideways", verticalColumnGap: "Vertical column gap", wrapWidth: "Wrap width", wrapHeight: "Wrap height", font: "Font", fontSize: "Font size", textColor: "Text color", lineHeight: "Line height", letterSpacing: "Letter spacing", stroke: "Stroke", strokeColor: "Stroke color", strokeWidth: "Stroke width", shadow: "Drop shadow", shadowColor: "Shadow color", shadowBlur: "Shadow blur", shadowX: "Shadow X", shadowY: "Shadow Y", effectChromaticTarget: "Chromatic target", effectChromaticTargetFull: "Whole image", effectChromaticTargetLine: "Line art extraction only", effectLineExtractHint: "Automatically extracts dark lines and outline edges, then applies chromatic aberration only to those areas. Pale or white lines may appear weaker.",
+      inlineStyleTitle: "Partial Text Styling", inlineStyleHint: "Change font, color, size, stroke, and shadow only for specified text. Separate multiple strings with commas.", inlineStyleEmpty: "No assignments yet.", inlineStyleItem: "Assignment {number}", inlineStyleTargets: "Target text", inlineStyleTargetsPlaceholder: "e.g. red, sea", inlineStyleFont: "Assigned font", inlineStyleColor: "Color", inlineStyleSize: "Size", inlineStyleStrokeColor: "Stroke color", inlineStyleStrokeWidth: "Stroke width", inlineStyleShadowColor: "Shadow color", inlineStyleShadowBlur: "Shadow blur", addInlineStyle: "+ Add",
+      noTextLayer: "No text layers yet.", noSelectedText: "Select a text layer to edit.", defaultTextLayerName: "Text", defaultTextBody: "TEXT", defaultFont: "default", languageChanged: "Language changed.", addedImages: "Added {count} image(s).", fontAdded: "Font registered.", bgAdded: "Background image registered.", pngExported: "PNG exported. {width} × {height}px", pngExportFailed: "Failed to export PNG.", jsonSaved: "JSON saved.", jsonLoaded: "JSON loaded.", jsonLoadFailed: "Failed to load JSON.", cacheSaved: "Saved to browser cache.", cacheSaveFailed: "Failed to save cache.", cacheMissing: "No saved cache was found.", cacheLoaded: "Loaded from cache.", cacheLoadFailed: "Failed to load cache.", cacheDeleteConfirm: "Delete the cache saved in this browser?", cacheDeleted: "Cache deleted.", cacheDeleteFailed: "Failed to delete cache.", cacheAutoLoaded: "Saved cache was loaded automatically.", switchedDiff: "Switched to Variant Switch Mode.", switchedParts: "Switched to Parts Assembly Mode.", enterCharacterName: "Enter a character name.", characterAdded: "Character added.", characterRenamed: "Character renamed.", cannotDeleteLastCharacter: "The last character cannot be deleted.", deleteCharacterConfirm: "Delete the current character?", characterDeleted: "Character deleted.", enterPresetName: "Enter a preset name.", presetSaved: "Preset saved.", selectPresetDelete: "Select a preset to delete.", presetDeleted: "Preset deleted.", presetApplied: "Preset \"{name}\" applied."
+    };
+
+    I18N.ko = { ...I18N.ja,
+      appTitle: "LayerCanvas Studio", appSubtitle: "이미지, 텍스트, 배경을 레이어로 겹쳐 캐릭터 차분, 일러스트 차분, 썸네일을 만들고 PNG로 내보냅니다.", layerPresetLabel: "레이어 구성 프리셋", layerPresetNameLabel: "프리셋 이름", layerPresetNamePlaceholder: "예: 이미지 차분 세트", newCreateButton: "새로 만들기", defaultLayerPresetName: "캐릭터 차분 세트", categorySection: "카테고리 관리", categoryNameLabel: "카테고리명", categoryNamePlaceholder: "예: 앞머리", addLayerButton: "레이어 추가", categoryTypeMulti: "조합 레이어", categoryTypeSingle: "단독 레이어", categoryTarget: "카테고리", categoryTypeHint: "추가 전에 카테고리 종류를 선택하면, 여러 항목 조합 가능 여부와 1개만 활성화할지를 정할 수 있습니다.", categoryOrderHint: "카테고리 패널의 ↑ / ↓로 순서를 바꾸면 그리기 순서도 함께 변경됩니다.", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "이 프리셋에서는 배경 이미지 레이어를 사용하지 않고 배경 패널만 사용할 수 있습니다.", characterLabel: "캐릭터", characterNameLabel: "캐릭터 이름", characterNamePlaceholder: "캐릭터 이름", addButton: "추가", renameButton: "이름 변경", deleteButton: "삭제", presetLabel: "프리셋", presetNameLabel: "프리셋 이름", presetNamePlaceholder: "예: 기본 미소 / 부끄러움 / 화남", savePresetButton: "현재 조합 저장", applyButton: "적용",
+      basicSettings: "기본 설정", canvasHeightLabel: "세로", canvasWidthLabel: "가로", canvasSizePresetLabel: "캔버스 크기 프리셋", canvasPresetNameLabel: "프리셋 이름", canvasPresetNamePlaceholder: "예: 썸네일 / DLsite", canvasPresetRegister: "프리셋 등록", canvasPresetImageSize: "이미지 크기", canvasPresetSaved: "캔버스 크기 프리셋을 등록했습니다.", selectCanvasPresetDelete: "삭제할 캔버스 크기 프리셋을 선택해 주세요.", canvasPresetDeleted: "캔버스 크기 프리셋을 삭제했습니다.", canvasPresetApplied: "캔버스 크기를 적용했습니다.",
+      previewTitle: "미리보기 / 내보내기", previewSubtitle: "미리보기에서 스탠딩 이미지 전체 또는 텍스트를 이동, 회전, 크기 조절할 수 있습니다. 배경은 전용 슬라이더로 조정합니다.", previewBgLabel: "미리보기 배경", bgTransparent: "투명 확인", bgWhite: "흰색", bgMint: "차분한 민트", exportHeightLabel: "내보내기 세로(px)", sizeLabel: "크기", sizeOriginal: "원본", sizeHeight: "세로 지정", exportPngButton: "PNG 내보내기", exportSettingsButton: "내보내기", exportSettingsTitle: "내보내기 설정", closeButton: "닫기", jsonSaveButton: "JSON 저장", jsonLoadButton: "JSON 불러오기", cacheSaveButton: "캐시 저장", cacheLoadButton: "캐시 불러오기", cacheDeleteButton: "캐시 삭제",
+      backgroundSection: "배경 레이어", textSection: "텍스트 레이어", textDetailSection: "선택한 텍스트 상세", commonFontSection: "공통 폰트 목록", registerFont: "폰트 등록", commonFontHint: "등록한 폰트는 모든 텍스트 레이어에서 공통으로 사용됩니다. 폰트 드롭다운에는 default 다음에 사용자 폰트가 추가됩니다.", transformSection: "선택 대상 위치 / 크기 / 각도", transformHint: "조작 대상을 체크로 선택하고 이동 / 크기 / 회전 버튼을 고른 뒤 미리보기에서 드래그하세요. 세부 조정은 여기서 합니다.", addTextLayer: "텍스트 추가", duplicateButton: "복제", toolTargetLabel: "조작 대상", toolModeLabel: "미리보기 조작", toolPan: "표시 이동", toolMove: "이동", toolScale: "크기", toolRotate: "회전", undoButton: "되돌리기", redoButton: "다시 실행", undoDone: "작업을 되돌렸습니다.", redoDone: "작업을 다시 실행했습니다.", standingTarget: "스탠딩 이미지", textTarget: "텍스트", previewFit: "전체 표시", previewOriginal: "원본 표시", previewZoom: "배율", scaleLabel: "스케일", xMoveLabel: "X 이동", yMoveLabel: "Y 이동", rotationLabel: "각도", hintText: "배경1→배경2→뒤 텍스트→스탠딩 이미지→앞 텍스트 순서로 그립니다. 미리보기 조작은 PNG 내보내기에 반영됩니다.", noteExclusive: "하나를 선택하면 같은 카테고리의 이전 선택은 자동으로 해제됩니다.", noteParts: "같은 카테고리 안에서 여러 항목을 겹칠 수 있습니다.", noteDiff: "완성된 차분을 클릭해 전환합니다. 복수 선택은 불가능합니다.",
+      bg1: "배경1", bg2: "배경2", bgVisible: "표시", bgRegister: "배경 이미지 등록", bgClear: "배경 삭제", bgNotLoaded: "미등록", bgLoaded: "등록됨: {name}", bgScale: "배경 스케일", bgX: "배경 X", bgY: "배경 Y", bgPanel: "배경 패널", bgPanelColor: "배경색", bgPanelVisible: "미리보기에 표시", bgPanelExport: "배경 패널 내보내기", browsAboveHairFront: "눈썹을 앞머리보다 위에 표시", browsYOffset: "눈썹 Y",
+      textName: "레이어 이름", textBody: "텍스트", textBodyPlaceholder: "표시할 텍스트 입력", textVisible: "표시", textPlacement: "표시 위치", textBack: "스탠딩 이미지 뒤", textFront: "스탠딩 이미지 앞", textAlign: "문자 정렬", alignLeft: "왼쪽", alignCenter: "가운데", alignRight: "오른쪽", writingMode: "문자 방향", writingHorizontal: "가로쓰기", writingVertical: "세로쓰기", verticalLatinRotate: "영문/숫자 옆으로 회전", verticalColumnGap: "세로 열 간격", wrapWidth: "줄바꿈 폭", wrapHeight: "줄바꿈 높이", font: "폰트", fontSize: "폰트 크기", textColor: "문자색", lineHeight: "줄 간격", letterSpacing: "자간", stroke: "외곽선", strokeColor: "외곽선 색", strokeWidth: "외곽선 두께", shadow: "드롭 섀도", shadowColor: "그림자 색", shadowBlur: "그림자 흐림", shadowX: "그림자 X", shadowY: "그림자 Y", effectChromaticTarget: "색수차 대상", effectChromaticTargetFull: "이미지 전체", effectChromaticTargetLine: "선화 추출만", effectLineExtractHint: "어두운 선과 윤곽 에지를 자동 추출해 그 부분에만 색수차를 겹칩니다. 연한 선이나 흰 선은 약하게 반영될 수 있습니다.",
+      inlineStyleTitle: "부분 텍스트 지정", inlineStyleHint: "지정한 문자열에만 폰트, 색상, 크기, 외곽선, 그림자를 변경할 수 있습니다. 여러 항목은 쉼표로 구분하세요.", inlineStyleEmpty: "아직 지정이 없습니다.", inlineStyleItem: "지정 {number}", inlineStyleTargets: "지정할 문자열", inlineStyleTargetsPlaceholder: "예: 빨간, 바다", inlineStyleFont: "지정 폰트", inlineStyleColor: "색상", inlineStyleSize: "크기", inlineStyleStrokeColor: "외곽선 색", inlineStyleStrokeWidth: "외곽선 두께", inlineStyleShadowColor: "그림자 색", inlineStyleShadowBlur: "그림자 흐림", addInlineStyle: "+ 추가",
+      noTextLayer: "텍스트 레イヤーがありません。", noSelectedText: "편집할 텍스트 레이어를 선택해 주세요.", defaultTextLayerName: "텍스트", defaultTextBody: "TEXT", defaultFont: "default", languageChanged: "표시 언어를 변경했습니다.", addedImages: "이미지 {count}개를 등록했습니다.", fontAdded: "폰트를 등록했습니다.", bgAdded: "배경 이미지를 등록했습니다.", pngExported: "PNG를 내보냈습니다. {width} × {height}px", pngExportFailed: "PNG 내보내기에 실패했습니다.", jsonSaved: "JSON을 저장했습니다.", jsonLoaded: "JSON을 불러왔습니다.", jsonLoadFailed: "JSON 불러오기에 실패했습니다.", cacheSaved: "브라우저 캐시에 저장했습니다.", cacheSaveFailed: "캐시 저장에 실패했습니다.", cacheMissing: "저장된 캐시가 없습니다.", cacheLoaded: "캐시에서 불러왔습니다.", cacheLoadFailed: "캐시 불러오기에 실패했습니다.", cacheDeleteConfirm: "브라우저에 저장된 캐시를 삭제할까요?", cacheDeleted: "캐시를 삭제했습니다.", cacheDeleteFailed: "캐시 삭제에 실패했습니다.", cacheAutoLoaded: "저장된 캐시를 자동으로 불러왔습니다.", switchedDiff: "차분 전환 모드로 변경했습니다.", switchedParts: "파츠 조합 모드로 변경했습니다.", enterCharacterName: "캐릭터 이름을 입력해 주세요.", characterAdded: "캐릭터를 추가했습니다.", characterRenamed: "캐릭터 이름을 변경했습니다.", cannotDeleteLastCharacter: "마지막 캐릭터는 삭제할 수 없습니다.", deleteCharacterConfirm: "현재 캐릭터를 삭제할까요?", characterDeleted: "캐릭터를 삭제했습니다.", enterPresetName: "프리셋 이름을 입력해 주세요.", presetSaved: "프리셋을 저장했습니다.", selectPresetDelete: "삭제할 프리셋을 선택해 주세요.", presetDeleted: "프리셋을 삭제했습니다.", presetApplied: "프리셋 \"{name}\"을 적용했습니다."
+    };
+
+    Object.assign(I18N.ja, {
+      categoryTypeSelect: "カテゴリ種類",
+      categoryChanged: "カテゴリ種類を変更しました。",
+      deleteCategoryConfirm: "このカテゴリと登録画像を削除しますか？",
+      categoryDeleted: "カテゴリを削除しました。",
+      effectStackInfo: "エフェクトカードは下のカテゴリ一覧内で上下移動できます。カードより下にあるレイヤーだけに反映されます。",
+      effectLayerStackNote: "このカードより下のレイヤーに適用",
+      effectLayerSelected: "エフェクトレイヤーを選択しました。"
+    });
+    Object.assign(I18N.en, {
+      categoryTypeSelect: "Category type",
+      categoryChanged: "Category type changed.",
+      deleteCategoryConfirm: "Delete this category and its registered images?",
+      categoryDeleted: "Category deleted.",
+      effectStackInfo: "Effect cards can be moved up and down inside the category list below. Each effect is applied only to layers below its card.",
+      effectLayerStackNote: "Applies to layers below this card",
+      effectLayerSelected: "Effect layer selected."
+    });
+    Object.assign(I18N.ko, {
+      categoryTypeSelect: "카테고리 종류",
+      categoryChanged: "카테고리 종류를 변경했습니다.",
+      deleteCategoryConfirm: "이 카테고리와 등록 이미지를 삭제할까요?",
+      categoryDeleted: "카테고리를 삭제했습니다.",
+      effectStackInfo: "효과 카드는 아래 카테고리 목록 안에서 위아래로 이동할 수 있습니다. 카드보다 아래에 있는 레이어에만 적용됩니다.",
+      effectLayerStackNote: "이 카드보다 아래 레이어에 적용",
+      effectLayerSelected: "효과 레이어를 선택했습니다."
+    });
+
+
+    const DEFAULT_LAYER_CATEGORIES = [
+      { id: "armFront", name: "腕(手前)", exclusive: false }, { id: "itemFront", name: "アイテム(手前)", exclusive: false }, { id: "hairFront", name: "髪の毛(手前)", exclusive: false }, { id: "eyes", name: "目元", exclusive: true }, { id: "brows", name: "眉毛", exclusive: true }, { id: "mouth", name: "口", exclusive: true }, { id: "effect", name: "表情効果", exclusive: false }, { id: "armBack", name: "腕(奥)", exclusive: false }, { id: "itemMiddle", name: "アイテム(中)", exclusive: false }, { id: "base", name: "ベース", exclusive: false }, { id: "itemBack", name: "アイテム(奥)", exclusive: false }, { id: "hairBack", name: "髪の毛(奥)", exclusive: false }
+    ];
+    const LAYERS = DEFAULT_LAYER_CATEGORIES;
+    const DIFF_LAYERS = [{ id: "diffBase", name: "ベース" }];
+    const DEFAULT_FONT_STACK = '"Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
+    const DB_NAME = "stand-diff-generator-db";
+    const DB_VERSION = 2;
+    const STORE_NAME = "projects";
+    const CACHE_KEY = "current-project";
+    const LANG_STORAGE_KEY = "stand-diff-generator-language";
+    const DEFAULT_CANVAS_PRESETS = [
+      { id: "default-1920x1080", name: "1920×1080(16：9)", width: 1920, height: 1080 },
+      { id: "default-1280x720", name: "1280×720(16：9)", width: 1280, height: 720 },
+      { id: "default-1080x1920", name: "1080×1920(9：16)", width: 1080, height: 1920 },
+      { id: "default-720x1280", name: "720×1280(9：16)", width: 720, height: 1280 },
+      { id: "default-300x300", name: "300×300(1：1)", width: 300, height: 300 },
+      { id: "default-400x400", name: "400×400(1：1)", width: 400, height: 400 },
+      { id: "default-500x500", name: "500×500(1：1)", width: 500, height: 500 },
+      { id: "default-1000x1000", name: "1000×1000(1：1)", width: 1000, height: 1000 },
+      { id: "default-560x420", name: "560×420(DLsite)", width: 560, height: 420 },
+      { id: "default-1000x750", name: "1000×750(DLsite)", width: 1000, height: 750 }
+    ];
+
+    const $ = (selector) => document.querySelector(selector);
+    const uid = (prefix = "id") => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    const imageCache = new Map();
+    const registeredFonts = new Set();
+    let previewRenderToken = 0;
+    let pointerState = null;
+    let state;
+    const undoStack = [];
+    const redoStack = [];
+    const MAX_HISTORY = 80;
+    let isRestoringHistory = false;
+    let sliderHistoryArmed = false;
+
+    function safeStorageGet(key) { try { return window.localStorage?.getItem(key) || null; } catch (error) { return null; } }
+    function safeStorageSet(key, value) { try { window.localStorage?.setItem(key, value); } catch (error) {} }
+
+    function getInitialLanguage() {
+      const stored = safeStorageGet(LANG_STORAGE_KEY);
+      if (stored && I18N[stored]) return stored;
+      const browser = (navigator.language || "ja").toLowerCase();
+      if (browser.startsWith("ko")) return "ko";
+      if (browser.startsWith("en")) return "en";
+      return "ja";
+    }
+
+    function currentLanguage() { const code = state?.settings?.uiLanguage || getInitialLanguage(); return I18N[code] ? code : getInitialLanguage(); }
+    function t(key, vars = {}) {
+      const lang = currentLanguage();
+      let text = I18N[lang]?.[key] ?? I18N.ja[key] ?? key;
+      for (const [name, value] of Object.entries(vars)) text = text.replaceAll(`{${name}}`, String(value));
+      return text;
+    }
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value) || 0)); }
+    function safeArray(value) { return Array.isArray(value) ? value : []; }
+    function clone(value) { return JSON.parse(JSON.stringify(value)); }
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => {
+        if (ch === "&") return "&amp;";
+        if (ch === "<") return "&lt;";
+        if (ch === ">") return "&gt;";
+        if (ch === "\"") return "&quot;";
+        if (ch === "'") return "&#39;";
+        return ch;
+      });
+    }
+
+    function snapshotState() { return JSON.stringify(state); }
+    function pushUndoSnapshot() {
+      if (!state || isRestoringHistory) return;
+      const snapshot = snapshotState();
+      if (undoStack[undoStack.length - 1] === snapshot) return;
+      undoStack.push(snapshot);
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack.length = 0;
+      syncUndoRedoButtons();
+    }
+    async function restoreHistorySnapshot(snapshot) {
+      isRestoringHistory = true;
+      try {
+        state = normalizeState(JSON.parse(snapshot));
+        pointerState = null;
+        imageCache.clear();
+        registeredFonts.clear();
+        await registerCustomFonts();
+        renderAll();
+      } finally {
+        isRestoringHistory = false;
+        syncUndoRedoButtons();
+      }
+    }
+    async function undoAction() {
+      if (!undoStack.length || !state) return;
+      const current = snapshotState();
+      const previous = undoStack.pop();
+      redoStack.push(current);
+      if (redoStack.length > MAX_HISTORY) redoStack.shift();
+      await restoreHistorySnapshot(previous);
+      setStatusT("undoDone");
+    }
+    async function redoAction() {
+      if (!redoStack.length || !state) return;
+      const current = snapshotState();
+      const next = redoStack.pop();
+      undoStack.push(current);
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      await restoreHistorySnapshot(next);
+      setStatusT("redoDone");
+    }
+    function syncUndoRedoButtons() {
+      const undoBtn = $("#undoBtn");
+      const redoBtn = $("#redoBtn");
+      if (undoBtn) undoBtn.disabled = !undoStack.length;
+      if (redoBtn) redoBtn.disabled = !redoStack.length;
+    }
+
+    function applyLanguage() {
+      const lang = currentLanguage();
+      document.documentElement.lang = lang;
+      document.title = t("appTitle");
+      safeStorageSet(LANG_STORAGE_KEY, lang);
+      document.querySelectorAll("[data-i18n]").forEach((element) => { element.textContent = t(element.dataset.i18n); });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => { element.placeholder = t(element.dataset.i18nPlaceholder); });
+      const languageSelect = $("#languageSelect");
+      if (languageSelect) languageSelect.value = lang;
+    }
+
+    function defaultTransform() { return { x: 0, y: 0, scale: 1, rotation: 0 }; }
+    function createBackgroundLayer(index) { return { id: `bg${index}`, nameKey: `bg${index}`, visible: false, dataUrl: "", fileName: "", width: 0, height: 0, x: 0, y: 0, scale: 1 }; }
+    function createBackgroundPanel() { return { visible: false, color: "#ffffff", exportEnabled: false }; }
+    function createDefaultCanvasPresets() { return DEFAULT_CANVAS_PRESETS.map((preset) => ({ ...preset })); }
+    function createLayerCategory(id, name, exclusive = false, transform = null) { return { id: id || uid("category"), name: String(name || t("unnamed")), exclusive: Boolean(exclusive), transform: normalizeTransform(transform || defaultTransform()) }; }
+    function createDefaultLayerPreset() { return { id: "layerPreset-character-default", name: t("defaultLayerPresetName"), useBackgroundImages: true, categories: DEFAULT_LAYER_CATEGORIES.map((layer) => createLayerCategory(layer.id, layer.name, layer.exclusive)) }; }
+    function createLayerPreset(name) { return { id: uid("layerPreset"), name: String(name || t("unnamed")), useBackgroundImages: false, categories: [] }; }
+    function normalizeLayerCategory(category, index = 0) { return createLayerCategory(category?.id || uid("category"), category?.name || I18N.ja[`layer_${category?.id}`] || `${t("categoryNameLabel")} ${index + 1}`, Boolean(category?.exclusive), category?.transform); }
+    function normalizeLayerPreset(preset) { const fallback = createDefaultLayerPreset(); return { id: preset?.id || uid("layerPreset"), name: String(preset?.name || fallback.name), useBackgroundImages: typeof preset?.useBackgroundImages === "boolean" ? preset.useBackgroundImages : (preset?.id === "layerPreset-character-default"), categories: safeArray(preset?.categories || preset?.layers).map(normalizeLayerCategory) }; }
+    function activeLayerPreset() { return (state.layerPresets || []).find((preset) => preset.id === state.settings.activeLayerPresetId) || state.layerPresets?.[0] || createDefaultLayerPreset(); }
+    function getLayerName(layer) { return layer?.name || I18N.ja[`layer_${layer?.id}`] || String(layer?.id || t("unnamed")); }
+    function ensureCharacterLayerKeys(character = activeCharacter()) { if (!character.layers || typeof character.layers !== "object") character.layers = {}; for (const preset of state.layerPresets || []) for (const layer of preset.categories || []) if (!Array.isArray(character.layers[layer.id])) character.layers[layer.id] = []; return character.layers; }
+    function ensureAllCharacterLayerKeys() { for (const character of state.characters || []) ensureCharacterLayerKeys(character); }
+    function createTextLayer() {
+      return {
+        id: uid("text"), name: "テキスト", text: "TEXT", visible: true, placement: "front",
+        x: 600, y: 600, scale: 1, rotation: 0,
+        align: "center", writingMode: "horizontal", verticalLatinRotate: true, verticalColumnGap: 24,
+        wrapWidth: 900, wrapHeight: 900, fontFamily: DEFAULT_FONT_STACK, fontSize: 86, color: "#ffffff", lineHeight: 1.25, letterSpacing: 0,
+        stroke: { enabled: true, color: "#111827", width: 8 },
+        shadow: { enabled: true, color: "#000000", blur: 12, offsetX: 0, offsetY: 6 },
+        inlineStyles: []
+      };
+    }
+    function createEffectLayer() {
+      return {
+        id: uid("effectLayer"), name: t("defaultEffectLayerName"), visible: true, type: "vignette", placement: "standing", stackIndex: 0,
+        color: "#000000", intensity: 0.35, radius: 0.58, shift: 6, blur: 6, toneMode: "grayscale", chromaticRedOpacity: 34, chromaticGreenOpacity: 33, chromaticBlueOpacity: 33, chromaticRedShift: -6, chromaticGreenShift: 0, chromaticBlueShift: 6
+      };
+    }
+    function createCustomFont(fileName = "Custom Font", dataUrl = "") {
+      const base = String(fileName || "Custom Font").replace(/\.[^.]+$/, "").replace(/[\"\\]/g, "");
+      return { id: uid("font"), name: base, family: `CustomFont_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`, dataUrl, fileName };
+    }
+    function createCharacter(name) {
+      const layers = {}; const diffLayers = {};
+      for (const layer of DEFAULT_LAYER_CATEGORIES) layers[layer.id] = [];
+      for (const layer of DIFF_LAYERS) diffLayers[layer.id] = [];
+      return { id: uid("character"), name, layers, diffLayers, presets: [], transform: defaultTransform(), layerAdjustments: { browsY: 0 } };
+    }
+    function createDefaultState() {
+      const firstLayerPreset = createDefaultLayerPreset();
+      const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
+      return {
+        version: 8,
+        activeCharacterId: firstChar.id,
+        activeTextLayerId: "",
+        activeEffectLayerId: "",
+        activeToolTarget: "standing",
+        characters: [firstChar],
+        backgroundLayers: [createBackgroundLayer(1), createBackgroundLayer(2)],
+        backgroundPanel: createBackgroundPanel(),
+        textLayers: [],
+        effectLayers: [],
+        layerPresets: [firstLayerPreset],
+        canvasPresets: createDefaultCanvasPresets(),
+        customFonts: [],
+        settings: { uiLanguage: getInitialLanguage(), leftMode: "parts", activeLayerPresetId: firstLayerPreset.id, previewBg: "transparent", exportMode: "original", exportHeight: 1200, toolMode: "move", previewView: "fit", previewZoom: 1, previewPanX: 0, previewPanY: 0, browsAboveHairFront: false, canvasWidth: 0, canvasHeight: 0, activeCanvasPresetId: "" }
+      };
+    }
+
+    function normalizeTransform(value) {
+      return { x: Number(value?.x || 0), y: Number(value?.y || 0), scale: clamp(value?.scale ?? 1, 0.05, 4), rotation: clamp(value?.rotation || 0, -180, 180) };
+    }
+    function normalizeLayerAdjustments(value) {
+      return { browsY: Math.round(clamp(value?.browsY ?? 0, -500, 500)) };
+    }
+    function normalizePartList(parts) {
+      if (!Array.isArray(parts)) return [];
+      return parts.map((part) => ({ id: part.id || uid("part"), name: part.name || t("unnamed"), dataUrl: part.dataUrl || part.dataURL || "", width: Number(part.width || part.w || 0), height: Number(part.height || part.h || 0), selected: Boolean(part.selected) })).filter((part) => part.dataUrl);
+    }
+    function normalizeInlineStyle(style) {
+      if (!style || typeof style !== "object") return null;
+      return { id: style.id || uid("inline"), targets: String(style.targets || ""), fontFamily: style.fontFamily || DEFAULT_FONT_STACK, color: style.color || "#ffffff", fontSize: Math.round(clamp(style.fontSize ?? 86, 10, 300)), strokeColor: style.strokeColor || "#111827", strokeWidth: Math.round(clamp(style.strokeWidth ?? 0, 0, 60)), shadowColor: style.shadowColor || "#000000", shadowBlur: Math.round(clamp(style.shadowBlur ?? 0, 0, 120)) };
+    }
+    function normalizeTextLayer(layer) {
+      const base = createTextLayer();
+      return {
+        ...base,
+        ...layer,
+        id: layer?.id || uid("text"), name: layer?.name || t("defaultTextLayerName"), text: String(layer?.text ?? t("defaultTextBody")), visible: layer?.visible !== false, placement: layer?.placement === "back" ? "back" : "front",
+        x: Number(layer?.x ?? base.x), y: Number(layer?.y ?? base.y), scale: clamp(layer?.scale ?? base.scale, 0.05, 4), rotation: clamp(layer?.rotation ?? base.rotation, -180, 180),
+        align: ["left", "center", "right"].includes(layer?.align) ? layer.align : "center",
+        writingMode: layer?.writingMode === "vertical" ? "vertical" : "horizontal",
+        verticalLatinRotate: layer?.verticalLatinRotate !== false,
+        verticalColumnGap: Math.round(clamp(layer?.verticalColumnGap ?? base.verticalColumnGap, 0, 300)),
+        wrapWidth: Math.round(clamp(layer?.wrapWidth ?? base.wrapWidth, 100, 4000)), wrapHeight: Math.round(clamp(layer?.wrapHeight ?? base.wrapHeight, 100, 4000)),
+        fontFamily: layer?.fontFamily || DEFAULT_FONT_STACK, fontSize: Math.round(clamp(layer?.fontSize ?? base.fontSize, 10, 300)), color: layer?.color || base.color, lineHeight: clamp(layer?.lineHeight ?? base.lineHeight, 0.5, 3), letterSpacing: Math.round(clamp(layer?.letterSpacing ?? base.letterSpacing, -100, 240)),
+        stroke: { enabled: layer?.stroke?.enabled !== false, color: layer?.stroke?.color || "#111827", width: Math.round(clamp(layer?.stroke?.width ?? 8, 0, 80)) },
+        shadow: { enabled: layer?.shadow?.enabled !== false, color: layer?.shadow?.color || "#000000", blur: Math.round(clamp(layer?.shadow?.blur ?? 12, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? 0, -200, 200)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? 6, -200, 200)) },
+        inlineStyles: safeArray(layer?.inlineStyles).map(normalizeInlineStyle).filter(Boolean)
+      };
+    }
+    function normalizeEffectLayer(layer) {
+      const base = createEffectLayer();
+      const placement = ["background", "backText", "standing", "frontText"].includes(layer?.placement) ? layer.placement : base.placement;
+      const type = ["vignette", "chromatic", "blur", "tone"].includes(layer?.type) ? layer.type : base.type;
+      const toneMode = ["grayscale", "sepia"].includes(layer?.toneMode) ? layer.toneMode : base.toneMode;
+      const normalized = {
+        ...base,
+        ...layer,
+        id: layer?.id || uid("effectLayer"),
+        name: String(layer?.name || t("defaultEffectLayerName")),
+        visible: layer?.visible !== false,
+        type,
+        placement,
+        color: layer?.color || base.color,
+        intensity: clamp(layer?.intensity ?? base.intensity, 0, 1),
+        radius: clamp(layer?.radius ?? base.radius, 0.05, 1),
+        shift: Math.round(clamp(layer?.shift ?? base.shift, 0, 60)),
+        blur: Math.round(clamp(layer?.blur ?? base.blur, 0, 60)),
+        toneMode,
+        chromaticRedOpacity: Math.round(clamp(layer?.chromaticRedOpacity ?? 34, 0, 100)),
+        chromaticGreenOpacity: Math.round(clamp(layer?.chromaticGreenOpacity ?? 33, 0, 100)),
+        chromaticBlueOpacity: Math.round(clamp(layer?.chromaticBlueOpacity ?? 33, 0, 100)),
+        chromaticRedShift: Math.round(clamp(layer?.chromaticRedShift ?? -6, -60, 60)),
+        chromaticGreenShift: Math.round(clamp(layer?.chromaticGreenShift ?? 0, -60, 60)),
+        chromaticBlueShift: Math.round(clamp(layer?.chromaticBlueShift ?? 6, -60, 60)),
+        stackIndex: Math.round(clamp(layer?.stackIndex ?? base.stackIndex ?? 0, 0, 999))
+      };
+      applyChromaticWeightNormalization(normalized);
+      return normalized;
+    }
+    function normalizeState(project) {
+      const normalized = project && typeof project === "object" ? project : createDefaultState();
+      const existingLanguage = normalized.settings?.uiLanguage || safeStorageGet(LANG_STORAGE_KEY) || getInitialLanguage();
+      if (!Array.isArray(normalized.characters) || normalized.characters.length === 0) normalized.characters = [createCharacter(t("newCharacter"))];
+      normalized.settings = { uiLanguage: I18N[existingLanguage] ? existingLanguage : getInitialLanguage(), leftMode: "parts", activeLayerPresetId: normalized.settings?.activeLayerPresetId || "layerPreset-character-default", previewBg: normalized.settings?.previewBg || "transparent", exportMode: normalized.settings?.exportMode || "original", exportHeight: Number(normalized.settings?.exportHeight ?? 1200), toolMode: ["pan", "move", "scale", "rotate"].includes(normalized.settings?.toolMode) ? normalized.settings.toolMode : "move", previewView: ["fit", "zoom"].includes(normalized.settings?.previewView) ? normalized.settings.previewView : "fit", previewZoom: clamp(normalized.settings?.previewZoom ?? 1, 0.1, 3), previewPanX: Number(normalized.settings?.previewPanX || 0), previewPanY: Number(normalized.settings?.previewPanY || 0), browsAboveHairFront: Boolean(normalized.settings?.browsAboveHairFront), canvasWidth: Math.round(clamp(normalized.settings?.canvasWidth ?? 0, 0, 8000)), canvasHeight: Math.round(clamp(normalized.settings?.canvasHeight ?? 0, 0, 8000)), activeCanvasPresetId: normalized.settings?.activeCanvasPresetId || "" };
+      normalized.canvasPresets = safeArray(normalized.canvasPresets).map((preset) => ({ id: preset.id || uid("canvasPreset"), name: preset.name || `${preset.width || 0}×${preset.height || 0}`, width: Math.round(clamp(preset.width ?? 0, 1, 8000)), height: Math.round(clamp(preset.height ?? 0, 1, 8000)) })).filter((preset) => preset.width > 0 && preset.height > 0);
+      if (!normalized.canvasPresets.length) normalized.canvasPresets = createDefaultCanvasPresets();
+      normalized.layerPresets = safeArray(normalized.layerPresets).map(normalizeLayerPreset);
+      if (!normalized.layerPresets.length) normalized.layerPresets = [createDefaultLayerPreset()];
+      if (!normalized.settings.activeLayerPresetId || !normalized.layerPresets.some((preset) => preset.id === normalized.settings.activeLayerPresetId)) normalized.settings.activeLayerPresetId = normalized.layerPresets[0].id;
+      for (const character of normalized.characters) {
+        if (!character.id) character.id = uid("character");
+        if (!character.name) character.name = t("unnamed");
+        character.transform = normalizeTransform(character.transform);
+        character.layerAdjustments = normalizeLayerAdjustments(character.layerAdjustments);
+        if (!character.layers || typeof character.layers !== "object") character.layers = {};
+        if (!character.diffLayers || typeof character.diffLayers !== "object") character.diffLayers = {};
+        if (!Array.isArray(character.presets)) character.presets = [];
+        for (const preset of normalized.layerPresets) for (const layer of preset.categories) character.layers[layer.id] = normalizePartList(character.layers[layer.id]);
+        for (const layer of DIFF_LAYERS) {
+          character.diffLayers[layer.id] = normalizePartList(character.diffLayers[layer.id]);
+          const selectedIndex = character.diffLayers[layer.id].findIndex((part) => part.selected);
+          if (selectedIndex >= 0) character.diffLayers[layer.id].forEach((part, index) => { part.selected = index === selectedIndex; });
+        }
+        character.presets = character.presets.map((preset) => ({ id: preset.id || uid("preset"), name: preset.name || t("unnamed"), selection: preset.selection && typeof preset.selection === "object" ? preset.selection : {} }));
+      }
+      if (!normalized.activeCharacterId || !normalized.characters.some((c) => c.id === normalized.activeCharacterId)) normalized.activeCharacterId = normalized.characters[0].id;
+      normalized.backgroundLayers = safeArray(normalized.backgroundLayers).slice(0, 2).map((bg, index) => ({ ...createBackgroundLayer(index + 1), ...bg, id: `bg${index + 1}`, nameKey: `bg${index + 1}`, visible: Boolean(bg?.visible), dataUrl: bg?.dataUrl || "", fileName: bg?.fileName || "", width: Number(bg?.width || 0), height: Number(bg?.height || 0), x: Number(bg?.x || 0), y: Number(bg?.y || 0), scale: clamp(bg?.scale ?? 1, 0.05, 4) }));
+      while (normalized.backgroundLayers.length < 2) normalized.backgroundLayers.push(createBackgroundLayer(normalized.backgroundLayers.length + 1));
+      normalized.backgroundPanel = { ...createBackgroundPanel(), ...(normalized.backgroundPanel && typeof normalized.backgroundPanel === "object" ? normalized.backgroundPanel : {}), visible: Boolean(normalized.backgroundPanel?.visible), color: normalized.backgroundPanel?.color || "#ffffff", exportEnabled: Boolean(normalized.backgroundPanel?.exportEnabled) };
+      normalized.textLayers = safeArray(normalized.textLayers).map(normalizeTextLayer);
+      if (!normalized.textLayers.length) normalized.textLayers = [];
+      if (!normalized.activeTextLayerId || !normalized.textLayers.some((layer) => layer.id === normalized.activeTextLayerId)) normalized.activeTextLayerId = normalized.textLayers[0]?.id || "";
+      normalized.effectLayers = safeArray(normalized.effectLayers).map(normalizeEffectLayer);
+      if (!normalized.activeEffectLayerId || !normalized.effectLayers.some((layer) => layer.id === normalized.activeEffectLayerId)) normalized.activeEffectLayerId = normalized.effectLayers[0]?.id || "";
+      normalized.customFonts = safeArray(normalized.customFonts).map((font) => ({ id: font.id || uid("font"), name: font.name || font.fileName || "Custom Font", family: font.family || `CustomFont_${uid("f")}`, dataUrl: font.dataUrl || "", fileName: font.fileName || font.name || "Custom Font" })).filter((font) => font.dataUrl);
+      normalized.activeToolTarget = normalized.activeToolTarget || "standing";
+      const validTextTarget = normalized.textLayers.some((layer) => `text:${layer.id}` === normalized.activeToolTarget);
+      const validLayerTarget = safeArray(normalized.layerPresets).some((preset) => safeArray(preset.categories).some((category) => `layer:${category.id}` === normalized.activeToolTarget));
+      if (normalized.activeToolTarget !== "standing" && !validTextTarget && !validLayerTarget) normalized.activeToolTarget = normalized.activeTextLayerId ? `text:${normalized.activeTextLayerId}` : "standing";
+      return normalized;
+    }
+
+    function activeCharacter() { return state.characters.find((character) => character.id === state.activeCharacterId) || state.characters[0]; }
+    function activeTextLayer() { return state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || null; }
+    function activeEffectLayer() {
+      if (!Array.isArray(state.effectLayers) || !state.effectLayers.length) return null;
+      let layer = state.effectLayers.find((item) => item.id === state.activeEffectLayerId) || null;
+      if (!layer) {
+        layer = state.effectLayers[0];
+        state.activeEffectLayerId = layer.id;
+      }
+      return layer;
+    }
+    function getActiveMode() { return "parts"; }
+    function getActiveLayers() { return activeLayerPreset().categories || []; }
+    function getLayerStore(character = activeCharacter()) { return character.layers; }
+    function activeTransformLayer() {
+      const match = String(state.activeToolTarget || "").match(/^layer:(.+)$/);
+      if (!match) return null;
+      const layer = getActiveLayers().find((item) => item.id === match[1]) || null;
+      if (layer && !layer.transform) layer.transform = defaultTransform();
+      return layer;
+    }
+    function selectedTransformTarget() {
+      if (state.activeToolTarget === "standing") return activeCharacter().transform;
+      const textMatch = String(state.activeToolTarget || "").match(/^text:(.+)$/);
+      if (textMatch) return state.textLayers.find((layer) => layer.id === textMatch[1]) || null;
+      const layer = activeTransformLayer();
+      if (layer) return layer.transform;
+      return activeCharacter().transform;
+    }
+
+    function fontOptions() {
+      return [{ label: t("defaultFont"), value: DEFAULT_FONT_STACK }, ...state.customFonts.map((font) => ({ label: font.name, value: `"${font.family}"` }))];
+    }
+    function populateFontSelect(select, value) {
+      select.innerHTML = "";
+      for (const optionInfo of fontOptions()) {
+        const option = document.createElement("option");
+        option.value = optionInfo.value;
+        option.textContent = optionInfo.label;
+        option.selected = optionInfo.value === value;
+        select.appendChild(option);
+      }
+      if (![...select.options].some((option) => option.value === value)) {
+        const option = document.createElement("option");
+        option.value = value || DEFAULT_FONT_STACK;
+        option.textContent = value || t("defaultFont");
+        option.selected = true;
+        select.appendChild(option);
+      }
+    }
+
+    async function registerCustomFonts() {
+      if (!("FontFace" in window)) return;
+      for (const font of state.customFonts) {
+        if (!font.dataUrl || registeredFonts.has(font.family)) continue;
+        try {
+          const face = new FontFace(font.family, `url(${font.dataUrl})`);
+          await face.load();
+          document.fonts.add(face);
+          registeredFonts.add(font.family);
+        } catch (error) {
+          console.warn("font load failed:", font.fileName, error);
+        }
+      }
+      if (document.fonts?.ready) await document.fonts.ready;
+    }
+
+    function setStatus(text, isDanger = false) {
+      const status = $("#status");
+      status.textContent = text;
+      status.classList.toggle("danger-text", isDanger);
+    }
+    function setStatusT(key, vars = {}, isDanger = false) { setStatus(t(key, vars), isDanger); }
+
+    function renderAll() {
+      ensureAllCharacterLayerKeys();
+      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
+    }
+    function renderLayerPresetControls() {
+      const select = $("#layerPresetSelect");
+      if (!select) return;
+      select.innerHTML = "";
+      for (const preset of state.layerPresets || []) {
+        const option = document.createElement("option");
+        option.value = preset.id;
+        option.textContent = preset.name;
+        option.selected = preset.id === state.settings.activeLayerPresetId;
+        select.appendChild(option);
+      }
+      const nameInput = $("#layerPresetNameInput");
+      if (nameInput && document.activeElement !== nameInput && !nameInput.dataset.keepValue) nameInput.value = nameInput.value || "";
+    }
+    function renderCharacterControls() {
+      const select = $("#characterSelect"); select.innerHTML = "";
+      for (const character of state.characters) {
+        const option = document.createElement("option"); option.value = character.id; option.textContent = character.name; option.selected = character.id === state.activeCharacterId; select.appendChild(option);
+      }
+      $("#characterNameInput").value = activeCharacter().name;
+    }
+    function renderCanvasSettingsControls() {
+      const select = $("#canvasPresetSelect");
+      if (!select) return;
+      select.innerHTML = "";
+      const imageOption = document.createElement("option");
+      imageOption.value = "";
+      imageOption.textContent = t("canvasPresetImageSize");
+      imageOption.selected = !state.settings.activeCanvasPresetId;
+      select.appendChild(imageOption);
+      for (const preset of state.canvasPresets || []) {
+        const option = document.createElement("option");
+        option.value = preset.id;
+        option.textContent = preset.name || `${preset.width}×${preset.height}`;
+        option.selected = preset.id === state.settings.activeCanvasPresetId;
+        select.appendChild(option);
+      }
+    }
+
+    function renderPresetControls() {
+      const toolbar = $("#presetToolbar"); if (toolbar) toolbar.classList.remove("hidden");
+      const character = activeCharacter(); const select = $("#presetSelect"); select.innerHTML = "";
+      const emptyOption = document.createElement("option"); emptyOption.value = ""; emptyOption.textContent = t("presetEmpty"); select.appendChild(emptyOption);
+      for (const preset of character.presets) { const option = document.createElement("option"); option.value = preset.id; option.textContent = preset.name; select.appendChild(option); }
+    }
+
+    function renderBackgroundControls() {
+      const root = $("#backgroundControls"); root.innerHTML = "";
+      const preset = activeLayerPreset();
+      if (preset?.useBackgroundImages) {
+        state.backgroundLayers.forEach((bg) => {
+          const box = document.createElement("div"); box.className = "background-box";
+          box.innerHTML = `
+            <div class="background-head">
+              <div class="background-title">${t(bg.nameKey)}</div>
+              <div class="background-file">${bg.fileName ? t("bgLoaded", { name: bg.fileName }) : t("bgNotLoaded")}</div>
+              <div class="button-row"><button class="small bg-upload">${t("bgRegister")}</button><button class="small danger bg-clear">${t("bgClear")}</button></div>
+            </div>
+            <input class="bg-file" type="file" accept="image/png,image/jpeg,image/webp" />
+            <div class="check-row"><label><input class="bg-visible" type="checkbox" ${bg.visible ? "checked" : ""}> ${t("bgVisible")}</label></div>
+          `;
+          const fileInput = box.querySelector(".bg-file");
+          box.querySelector(".bg-upload").addEventListener("click", () => fileInput.click());
+          box.querySelector(".bg-clear").addEventListener("click", () => { bg.dataUrl = ""; bg.fileName = ""; bg.width = 0; bg.height = 0; bg.visible = false; renderAll(); });
+          box.querySelector(".bg-visible").addEventListener("change", (event) => { bg.visible = event.target.checked; renderPreview(); });
+          fileInput.addEventListener("change", async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const dataUrl = await fileToDataUrl(file); const size = await getImageSize(dataUrl);
+            bg.dataUrl = dataUrl; bg.fileName = file.name; bg.width = size.width; bg.height = size.height; bg.visible = true;
+            fileInput.value = ""; renderAll(); setStatusT("bgAdded");
+          });
+          addRange(box, t("bgX"), bg.x, -2000, 2000, 1, "px", (value) => { bg.x = value; renderPreview(); });
+          addRange(box, t("bgY"), bg.y, -2000, 2000, 1, "px", (value) => { bg.y = value; renderPreview(); });
+          addRange(box, t("bgScale"), bg.scale, 0.05, 4, 0.01, "", (value) => { bg.scale = value; renderPreview(); }, 2);
+          root.appendChild(box);
+        });
+      } else {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = t("bgImageDisabledHint");
+        root.appendChild(hint);
+      }
+
+      const panel = state.backgroundPanel || (state.backgroundPanel = createBackgroundPanel());
+      const panelBox = document.createElement("div");
+      panelBox.className = "background-box";
+      panelBox.innerHTML = `
+        <div class="background-head">
+          <div class="background-title">${t("bgPanel")}</div>
+        </div>
+      `;
+      panelBox.appendChild(createCheckboxField(t("bgPanelVisible"), panel.visible, (checked) => { panel.visible = checked; renderPreview(); }));
+      panelBox.appendChild(createColorField(t("bgPanelColor"), panel.color, (value) => { panel.color = value; panel.visible = true; renderPreview(); }));
+      panelBox.appendChild(createCheckboxField(t("bgPanelExport"), panel.exportEnabled, (checked) => { panel.exportEnabled = checked; }));
+      root.appendChild(panelBox);
+    }
+
+    function renderTextLayerList() {
+      const root = $("#textLayerList"); root.innerHTML = "";
+      if (!state.textLayers.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("noTextLayer"); root.appendChild(empty); return; }
+      state.textLayers.forEach((layer) => {
+        const row = document.createElement("div"); row.className = `text-row${layer.id === state.activeTextLayerId ? " active" : ""}`;
+        const checkbox = document.createElement("input"); checkbox.type = "checkbox"; checkbox.checked = layer.visible; checkbox.title = t("textVisible");
+        const meta = document.createElement("div"); meta.className = "text-meta";
+        const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = layer.name; nameInput.placeholder = t("textName");
+        const note = document.createElement("div"); note.className = "text-note"; note.textContent = `${layer.placement === "back" ? t("textBack") : t("textFront")} / ${String(layer.text || "").replace(/\s+/g, " ").slice(0, 40)}`;
+        meta.append(nameInput, note);
+        const selectBtn = document.createElement("button"); selectBtn.className = "small secondary"; selectBtn.textContent = t("applyButton");
+        checkbox.addEventListener("change", () => { layer.visible = checkbox.checked; renderPreview(); });
+        nameInput.addEventListener("input", () => { layer.name = nameInput.value || t("defaultTextLayerName"); renderToolTargetOptions(); });
+        const selectLayer = () => { state.activeTextLayerId = layer.id; state.activeToolTarget = `text:${layer.id}`; renderAll(); };
+        row.addEventListener("click", (event) => { const tag = event.target.tagName.toLowerCase(); if (tag === "input" || tag === "button") return; selectLayer(); });
+        selectBtn.addEventListener("click", selectLayer);
+        row.append(checkbox, meta, selectBtn); root.appendChild(row);
+      });
+    }
+
+    function renderCustomFontList() {
+      const root = $("#customFontList"); root.innerHTML = "";
+      if (!state.customFonts.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("inlineStyleEmpty"); root.appendChild(empty); return; }
+      state.customFonts.forEach((font) => {
+        const row = document.createElement("div"); row.className = "font-row";
+        const input = document.createElement("input"); input.type = "text"; input.value = font.name;
+        const remove = document.createElement("button"); remove.className = "small danger"; remove.textContent = t("deleteButton");
+        input.addEventListener("input", () => { font.name = input.value || font.fileName || "Custom Font"; renderTextDetailEditor(); });
+        remove.addEventListener("click", () => { state.customFonts = state.customFonts.filter((item) => item.id !== font.id); renderAll(); });
+        row.append(input, remove); root.appendChild(row);
+      });
+    }
+
+    function renderTextDetailEditor() {
+      const root = $("#textDetailEditor"); root.innerHTML = "";
+      const layer = activeTextLayer();
+      if (!layer) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("noSelectedText"); root.appendChild(empty); return; }
+      const nameField = createField(t("textName"), "input", layer.name, (value) => { layer.name = value || t("defaultTextLayerName"); renderTextLayerList(); renderToolTargetOptions(); });
+      const textField = createField(t("textBody"), "textarea", layer.text, (value) => { layer.text = value; renderTextLayerList(); renderToolTargetOptions(); renderPreview(); });
+      textField.querySelector("textarea").placeholder = t("textBodyPlaceholder");
+      root.append(nameField, textField);
+
+      const basic = document.createElement("div"); basic.className = "grid-2";
+      basic.append(
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderTextLayerList(); renderPreview(); }),
+        createSelectField(t("textPlacement"), layer.placement, [{ value: "back", label: t("textBack") }, { value: "front", label: t("textFront") }], (value) => { layer.placement = value; renderTextLayerList(); renderPreview(); }),
+        createSelectField(t("textAlign"), layer.align, [{ value: "left", label: t("alignLeft") }, { value: "center", label: t("alignCenter") }, { value: "right", label: t("alignRight") }], (value) => { layer.align = value; renderPreview(); }),
+        createSelectField(t("writingMode"), layer.writingMode, [{ value: "horizontal", label: t("writingHorizontal") }, { value: "vertical", label: t("writingVertical") }], (value) => { layer.writingMode = value; renderPreview(); })
+      );
+      root.appendChild(basic);
+      root.appendChild(createCheckboxField(t("verticalLatinRotate"), layer.verticalLatinRotate, (checked) => { layer.verticalLatinRotate = checked; renderPreview(); }));
+
+      const fontSelect = createSelectField(t("font"), layer.fontFamily, [], (value) => { layer.fontFamily = value; renderPreview(); });
+      populateFontSelect(fontSelect.querySelector("select"), layer.fontFamily);
+      root.appendChild(fontSelect);
+
+      const colorGrid = document.createElement("div"); colorGrid.className = "grid-2";
+      colorGrid.append(createColorField(t("textColor"), layer.color, (value) => { layer.color = value; renderPreview(); }), createColorField(t("strokeColor"), layer.stroke.color, (value) => { layer.stroke.color = value; renderPreview(); }));
+      root.appendChild(colorGrid);
+
+      addRange(root, t("fontSize"), layer.fontSize, 10, 300, 1, "px", (value) => { layer.fontSize = Math.round(value); renderPreview(); });
+      addRange(root, t("wrapWidth"), layer.wrapWidth, 100, 4000, 1, "px", (value) => { layer.wrapWidth = Math.round(value); renderPreview(); });
+      addRange(root, t("wrapHeight"), layer.wrapHeight, 100, 4000, 1, "px", (value) => { layer.wrapHeight = Math.round(value); renderPreview(); });
+      addRange(root, t("lineHeight"), layer.lineHeight, 0.5, 3, 0.01, "", (value) => { layer.lineHeight = value; renderPreview(); }, 2);
+      addRange(root, t("letterSpacing"), layer.letterSpacing, -100, 240, 1, "px", (value) => { layer.letterSpacing = Math.round(value); renderPreview(); });
+      addRange(root, t("verticalColumnGap"), layer.verticalColumnGap, 0, 300, 1, "px", (value) => { layer.verticalColumnGap = Math.round(value); renderPreview(); });
+
+      root.appendChild(createCheckboxField(t("stroke"), layer.stroke.enabled, (checked) => { layer.stroke.enabled = checked; renderPreview(); }));
+      addRange(root, t("strokeWidth"), layer.stroke.width, 0, 80, 1, "px", (value) => { layer.stroke.width = Math.round(value); renderPreview(); });
+
+      root.appendChild(createCheckboxField(t("shadow"), layer.shadow.enabled, (checked) => { layer.shadow.enabled = checked; renderPreview(); }));
+      const shadowColors = document.createElement("div"); shadowColors.className = "grid-2";
+      shadowColors.append(createColorField(t("shadowColor"), layer.shadow.color, (value) => { layer.shadow.color = value; renderPreview(); }));
+      root.appendChild(shadowColors);
+      addRange(root, t("shadowBlur"), layer.shadow.blur, 0, 160, 1, "px", (value) => { layer.shadow.blur = Math.round(value); renderPreview(); });
+      addRange(root, t("shadowX"), layer.shadow.offsetX, -200, 200, 1, "px", (value) => { layer.shadow.offsetX = Math.round(value); renderPreview(); });
+      addRange(root, t("shadowY"), layer.shadow.offsetY, -200, 200, 1, "px", (value) => { layer.shadow.offsetY = Math.round(value); renderPreview(); });
+
+      const inlineBox = document.createElement("div"); inlineBox.className = "slider-grid";
+      const head = document.createElement("div"); head.className = "inline-style-head"; head.innerHTML = `<span>${t("inlineStyleTitle")}</span>`;
+      const addBtn = document.createElement("button"); addBtn.className = "small"; addBtn.textContent = t("addInlineStyle"); addBtn.addEventListener("click", () => { layer.inlineStyles.push(normalizeInlineStyle({ targets: "", fontFamily: layer.fontFamily, color: layer.color, fontSize: layer.fontSize, strokeColor: layer.stroke.color, strokeWidth: layer.stroke.width, shadowColor: layer.shadow.color, shadowBlur: layer.shadow.blur })); renderTextDetailEditor(); renderPreview(); });
+      head.appendChild(addBtn); inlineBox.appendChild(head);
+      const hint = document.createElement("div"); hint.className = "hint"; hint.textContent = t("inlineStyleHint"); inlineBox.appendChild(hint);
+      if (!layer.inlineStyles.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("inlineStyleEmpty"); inlineBox.appendChild(empty); }
+      layer.inlineStyles.forEach((style, index) => inlineBox.appendChild(renderInlineStyleItem(layer, style, index)));
+      root.appendChild(inlineBox);
+    }
+
+    function renderInlineStyleItem(layer, style, index) {
+      const item = document.createElement("div"); item.className = "inline-style-item";
+      const head = document.createElement("div"); head.className = "inline-style-head"; head.innerHTML = `<span>${t("inlineStyleItem", { number: index + 1 })}</span>`;
+      const del = document.createElement("button"); del.className = "small danger"; del.textContent = t("deleteButton"); del.addEventListener("click", () => { layer.inlineStyles = layer.inlineStyles.filter((entry) => entry.id !== style.id); renderTextDetailEditor(); renderPreview(); }); head.appendChild(del); item.appendChild(head);
+      item.appendChild(createField(t("inlineStyleTargets"), "input", style.targets, (value) => { style.targets = value; renderPreview(); }, t("inlineStyleTargetsPlaceholder")));
+      const fontSelect = createSelectField(t("inlineStyleFont"), style.fontFamily, [], (value) => { style.fontFamily = value; renderPreview(); }); populateFontSelect(fontSelect.querySelector("select"), style.fontFamily); item.appendChild(fontSelect);
+      const grid = document.createElement("div"); grid.className = "grid-2"; grid.append(createColorField(t("inlineStyleColor"), style.color, (value) => { style.color = value; renderPreview(); }), createColorField(t("inlineStyleStrokeColor"), style.strokeColor, (value) => { style.strokeColor = value; renderPreview(); }), createColorField(t("inlineStyleShadowColor"), style.shadowColor, (value) => { style.shadowColor = value; renderPreview(); })); item.appendChild(grid);
+      addRange(item, t("inlineStyleSize"), style.fontSize, 10, 300, 1, "px", (value) => { style.fontSize = Math.round(value); renderPreview(); });
+      addRange(item, t("inlineStyleStrokeWidth"), style.strokeWidth, 0, 80, 1, "px", (value) => { style.strokeWidth = Math.round(value); renderPreview(); });
+      addRange(item, t("inlineStyleShadowBlur"), style.shadowBlur, 0, 160, 1, "px", (value) => { style.shadowBlur = Math.round(value); renderPreview(); });
+      return item;
+    }
+
+    const EFFECT_STACK_ORDER = ["background", "backText", "standing", "frontText"];
+    function effectPlacementIndex(value) { const index = EFFECT_STACK_ORDER.indexOf(value); return index >= 0 ? index : 2; }
+    function effectTypeLabel(value) { return { vignette: t("effectTypeVignette"), chromatic: t("effectTypeChromatic"), blur: t("effectTypeBlur"), tone: t("effectTypeTone") }[value] || value; }
+    function effectPlacementLabel(value) { return { background: t("effectPlacementBg"), backText: t("effectPlacementBackText"), standing: t("effectPlacementStanding"), frontText: t("effectPlacementFrontText") }[value] || value; }
+    function getEffectStackMax() { return Math.max(0, getActiveLayers().length); }
+    function normalizeEffectStackIndex(layer) {
+      if (!layer) return 0;
+      const max = getEffectStackMax();
+      layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, max));
+      return layer.stackIndex;
+    }
+    function moveEffectLayerInList(effectId, direction) {
+      const list = state.effectLayers || [];
+      const index = list.findIndex((layer) => layer.id === effectId);
+      if (index < 0) return;
+      const nextIndex = index + direction;
+      if (nextIndex >= 0 && nextIndex < list.length) {
+        [list[index], list[nextIndex]] = [list[nextIndex], list[index]];
+      }
+      state.activeEffectLayerId = effectId;
+      renderAll();
+    }
+    function moveEffectLayerInStandingStack(effectId, direction) {
+      const layer = (state.effectLayers || []).find((item) => item.id === effectId);
+      if (!layer) return;
+      layer.placement = "standing";
+      layer.stackIndex = Math.round(clamp((layer.stackIndex ?? 0) + direction, 0, getEffectStackMax()));
+      state.activeEffectLayerId = effectId;
+      renderAll();
+    }
+    function moveEffectLayerStack(effectId, direction) {
+      const layer = (state.effectLayers || []).find((item) => item.id === effectId);
+      if (!layer) return;
+      if (layer.placement === "standing") {
+        moveEffectLayerInStandingStack(effectId, direction);
+        return;
+      }
+      const nextPlacementIndex = clamp(effectPlacementIndex(layer.placement) + direction, 0, EFFECT_STACK_ORDER.length - 1);
+      layer.placement = EFFECT_STACK_ORDER[nextPlacementIndex];
+      state.activeEffectLayerId = effectId;
+      renderAll();
+    }
+
+    function renderEffectLayerList() {
+      const root = $("#effectLayerList");
+      if (!root) return;
+      root.innerHTML = "";
+      if (!Array.isArray(state.effectLayers)) state.effectLayers = [];
+      if (state.effectLayers.length && !state.effectLayers.some((layer) => layer.id === state.activeEffectLayerId)) state.activeEffectLayerId = state.effectLayers[0].id;
+      if (!state.effectLayers.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noEffectLayer");
+        root.appendChild(empty);
+        return;
+      }
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = t("effectStackInfo");
+      root.appendChild(hint);
+
+      const outsideStanding = state.effectLayers.filter((layer) => layer.placement !== "standing");
+      if (!outsideStanding.length) return;
+
+      outsideStanding.forEach((layer, index) => {
+        const row = document.createElement("div");
+        row.className = `text-row${layer.id === state.activeEffectLayerId ? " active" : ""}`;
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = layer.visible;
+        check.addEventListener("click", (event) => event.stopPropagation());
+        check.addEventListener("change", () => { layer.visible = check.checked; state.activeEffectLayerId = layer.id; renderAll(); });
+        const meta = document.createElement("div");
+        meta.innerHTML = `<strong>${escapeHtml(layer.name || t("defaultEffectLayerName"))}</strong><div class="sub">${escapeHtml(effectTypeLabel(layer.type))} / ${escapeHtml(effectPlacementLabel(layer.placement))}</div>`;
+        row.addEventListener("click", () => { state.activeEffectLayerId = layer.id; renderAll(); });
+        const actions = document.createElement("div");
+        actions.className = "button-row";
+        const moveListUp = document.createElement("button");
+        moveListUp.type = "button";
+        moveListUp.className = "small secondary";
+        moveListUp.textContent = "↑";
+        moveListUp.disabled = index === 0;
+        moveListUp.addEventListener("click", (event) => { event.stopPropagation(); moveEffectLayerInList(layer.id, -1); });
+        const moveListDown = document.createElement("button");
+        moveListDown.type = "button";
+        moveListDown.className = "small secondary";
+        moveListDown.textContent = "↓";
+        moveListDown.disabled = index === outsideStanding.length - 1;
+        moveListDown.addEventListener("click", (event) => { event.stopPropagation(); moveEffectLayerInList(layer.id, 1); });
+        const del = document.createElement("button");
+        del.className = "small danger";
+        del.textContent = t("deleteButton");
+        del.addEventListener("click", (event) => {
+          event.stopPropagation();
+          state.effectLayers = state.effectLayers.filter((item) => item.id !== layer.id);
+          state.activeEffectLayerId = state.effectLayers[0]?.id || "";
+          renderAll();
+        });
+        actions.append(moveListUp, moveListDown, del);
+        row.append(check, meta, actions);
+        root.appendChild(row);
+      });
+    }
+
+    function renderEffectDetailEditor() {
+      const root = $("#effectDetailEditor");
+      if (!root) return;
+      root.innerHTML = "";
+      const layer = activeEffectLayer();
+      if (!layer) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noSelectedEffect");
+        root.appendChild(empty);
+        return;
+      }
+      const rerender = () => { renderEffectLayerList(); renderLayers(); renderEffectDetailEditor(); renderPreview(); };
+      root.appendChild(createField(t("effectName"), "input", layer.name, (value) => { layer.name = value || t("defaultEffectLayerName"); renderEffectLayerList(); renderLayers(); }));
+      const basic = document.createElement("div"); basic.className = "grid-2";
+      basic.append(
+        createCheckboxField(t("effectVisible"), layer.visible, (checked) => { layer.visible = checked; renderEffectLayerList(); renderLayers(); renderPreview(); }),
+        createSelectField(t("effectType"), layer.type, [
+          { value: "vignette", label: t("effectTypeVignette") },
+          { value: "chromatic", label: t("effectTypeChromatic") },
+          { value: "blur", label: t("effectTypeBlur") },
+          { value: "tone", label: t("effectTypeTone") }
+        ], (value) => { layer.type = value; rerender(); })
+      );
+      root.appendChild(basic);
+      if (layer.type === "vignette") {
+        root.appendChild(createColorField(t("effectColor"), layer.color, (value) => { layer.color = value; renderPreview(); }));
+        addRange(root, t("effectIntensity"), layer.intensity, 0, 1, 0.01, "", (value) => { layer.intensity = value; renderPreview(); }, 2);
+        addRange(root, t("effectRadius"), layer.radius, 0.05, 1, 0.01, "", (value) => { layer.radius = value; renderPreview(); }, 2);
+      } else if (layer.type === "chromatic") {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = t("effectRgbOpacityHint");
+        root.appendChild(hint);
+        addRange(root, t("effectRedOpacity"), layer.chromaticRedOpacity ?? 34, 0, 100, 1, "%", (value) => { setChromaticWeight(layer, "chromaticRedOpacity", value); renderEffectDetailEditor(); renderPreview(); });
+        addRange(root, t("effectGreenOpacity"), layer.chromaticGreenOpacity ?? 33, 0, 100, 1, "%", (value) => { setChromaticWeight(layer, "chromaticGreenOpacity", value); renderEffectDetailEditor(); renderPreview(); });
+        addRange(root, t("effectBlueOpacity"), layer.chromaticBlueOpacity ?? 33, 0, 100, 1, "%", (value) => { setChromaticWeight(layer, "chromaticBlueOpacity", value); renderEffectDetailEditor(); renderPreview(); });
+        addRange(root, t("effectRedShift"), layer.chromaticRedShift ?? -6, -60, 60, 1, "px", (value) => { layer.chromaticRedShift = Math.round(value); renderPreview(); });
+        addRange(root, t("effectGreenShift"), layer.chromaticGreenShift ?? 0, -60, 60, 1, "px", (value) => { layer.chromaticGreenShift = Math.round(value); renderPreview(); });
+        addRange(root, t("effectBlueShift"), layer.chromaticBlueShift ?? 6, -60, 60, 1, "px", (value) => { layer.chromaticBlueShift = Math.round(value); renderPreview(); });
+      } else if (layer.type === "blur") {
+        addRange(root, t("effectBlur"), layer.blur, 0, 60, 1, "px", (value) => { layer.blur = Math.round(value); renderPreview(); });
+      } else if (layer.type === "tone") {
+        const toneField = createSelectField(t("effectToneMode"), layer.toneMode, [
+          { value: "grayscale", label: t("effectToneGray") },
+          { value: "sepia", label: t("effectToneSepia") }
+        ], (value) => { layer.toneMode = value; renderPreview(); });
+        root.appendChild(toneField);
+        addRange(root, t("effectIntensity"), layer.intensity, 0, 1, 0.01, "", (value) => { layer.intensity = value; renderPreview(); }, 2);
+      }
+    }
+
+    function createField(labelText, type, value, onInput, placeholder = "") {
+      const field = document.createElement("div"); field.className = "field full";
+      const label = document.createElement("label"); label.textContent = labelText;
+      const input = document.createElement(type === "textarea" ? "textarea" : "input"); if (type !== "textarea") input.type = type || "text";
+      input.value = value ?? ""; if (placeholder) input.placeholder = placeholder;
+      input.addEventListener("input", () => onInput(input.value)); field.append(label, input); return field;
+    }
+    function createSelectField(labelText, value, options, onChange) {
+      const field = document.createElement("div"); field.className = "field";
+      const label = document.createElement("label"); label.textContent = labelText;
+      const select = document.createElement("select");
+      options.forEach((optionInfo) => { const option = document.createElement("option"); option.value = optionInfo.value; option.textContent = optionInfo.label; option.selected = optionInfo.value === value; select.appendChild(option); });
+      // レイヤーカード内のクリック選択処理に伝播すると、プルダウンを開いた瞬間に再描画されて閉じるため止める。
+      ["pointerdown", "mousedown", "click"].forEach((eventName) => {
+        select.addEventListener(eventName, (event) => event.stopPropagation());
+      });
+      select.addEventListener("change", (event) => { event.stopPropagation(); onChange(select.value); });
+      field.append(label, select); return field;
+    }
+    function createCheckboxField(labelText, checked, onChange) {
+      const wrap = document.createElement("div"); wrap.className = "check-row";
+      const label = document.createElement("label");
+      label.addEventListener("click", (event) => event.stopPropagation());
+      const input = document.createElement("input"); input.type = "checkbox"; input.checked = checked;
+      ["pointerdown", "mousedown", "click"].forEach((eventName) => {
+        input.addEventListener(eventName, (event) => event.stopPropagation());
+      });
+      input.addEventListener("change", (event) => { event.stopPropagation(); onChange(input.checked); }); label.append(input, document.createTextNode(` ${labelText}`)); wrap.appendChild(label); return wrap;
+    }
+    function createColorField(labelText, value, onInput) {
+      const field = document.createElement("div"); field.className = "field";
+      const label = document.createElement("label"); label.textContent = labelText;
+      const row = document.createElement("div"); row.className = "color-line";
+      const text = document.createElement("input"); text.type = "text"; text.value = value;
+      const color = document.createElement("input"); color.type = "color"; color.value = /^#[0-9a-f]{6}$/i.test(value) ? value : "#ffffff";
+      const apply = (val) => { text.value = val; color.value = /^#[0-9a-f]{6}$/i.test(val) ? val : color.value; onInput(val); };
+      text.addEventListener("input", () => onInput(text.value)); color.addEventListener("input", () => apply(color.value)); row.append(text, color); field.append(label, row); return field;
+    }
+    function addRange(root, labelText, value, min, max, step, suffix, onInput, digits = 0) {
+      const row = document.createElement("div"); row.className = "slider-row compact";
+      const label = document.createElement("label"); label.textContent = labelText;
+      const input = document.createElement("input"); input.type = "range"; input.min = min; input.max = max; input.step = step; input.value = value;
+      const output = document.createElement("div"); output.className = "value";
+      const format = (v) => `${Number(v).toFixed(digits)}${suffix}`;
+      output.textContent = format(value);
+      input.addEventListener("input", () => { const n = Number(input.value); output.textContent = format(n); onInput(n); syncTargetSliders(false); });
+      row.append(label, input, output); root.appendChild(row); return row;
+    }
+
+    function isExclusivePartsLayer(layerId) {
+      const layer = getActiveLayers().find((item) => item.id === layerId);
+      return Boolean(layer?.exclusive);
+    }
+
+    function setPartSelection(layerId, partId, selected) {
+      const store = getLayerStore(activeCharacter());
+      const parts = store[layerId] || [];
+      const exclusive = isExclusivePartsLayer(layerId);
+      for (const item of parts) {
+        if (item.id === partId) item.selected = selected;
+        else if (exclusive && selected) item.selected = false;
+      }
+    }
+    function enforceSingleSelectionForCategory(categoryId) {
+      for (const character of state.characters || []) {
+        const parts = character.layers?.[categoryId] || [];
+        let selectedFound = false;
+        for (const part of parts) {
+          if (!part.selected) continue;
+          if (!selectedFound) selectedFound = true;
+          else part.selected = false;
+        }
+      }
+    }
+    function setCategoryExclusive(categoryId, exclusive) {
+      const layer = getActiveLayers().find((item) => item.id === categoryId);
+      if (!layer) return;
+      layer.exclusive = Boolean(exclusive);
+      if (layer.exclusive) enforceSingleSelectionForCategory(categoryId);
+      renderLayers();
+      renderToolTargetOptions();
+      renderPreview();
+      setStatusT("categoryChanged");
+    }
+    function deleteCategoryFromActivePreset(categoryId) {
+      const preset = activeLayerPreset();
+      const category = (preset.categories || []).find((item) => item.id === categoryId);
+      if (!category) return;
+      if (!confirm(t("deleteCategoryConfirm"))) return;
+      preset.categories = (preset.categories || []).filter((item) => item.id !== categoryId);
+      for (const character of state.characters || []) {
+        if (character.layers) delete character.layers[categoryId];
+        for (const presetInfo of character.presets || []) {
+          if (presetInfo.selection && typeof presetInfo.selection === "object") delete presetInfo.selection[categoryId];
+        }
+      }
+      for (const layer of state.effectLayers || []) {
+        if (layer.placement === "standing") normalizeEffectStackIndex(layer);
+      }
+      if (state.activeToolTarget === `layer:${categoryId}`) state.activeToolTarget = "standing";
+      renderAll();
+      setStatusT("categoryDeleted");
+    }
+    function moveActiveCategory(index, direction) {
+      const preset = activeLayerPreset();
+      const categories = preset.categories || [];
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= categories.length) return;
+      [categories[index], categories[nextIndex]] = [categories[nextIndex], categories[index]];
+      for (const layer of state.effectLayers || []) if (layer.placement === "standing") normalizeEffectStackIndex(layer);
+      renderAll(); setStatusT("categoryMoved");
+    }
+    function addCategoryToActivePreset() {
+      const input = $("#categoryNameInput");
+      const name = input.value.trim();
+      if (!name) { setStatusT("enterCategoryName", {}, true); return; }
+      const preset = activeLayerPreset();
+      const exclusive = $("#newCategorySingle")?.checked;
+      const category = createLayerCategory(uid("category"), name, exclusive);
+      preset.categories.push(category);
+      ensureAllCharacterLayerKeys();
+      input.value = "";
+      renderAll(); setStatusT("categoryAdded");
+    }
+    function createEmptyLayerPresetFromInput() {
+      const input = $("#layerPresetNameInput");
+      const name = input.value.trim();
+      if (!name) { setStatusT("enterLayerPresetName", {}, true); return; }
+      const preset = createLayerPreset(name);
+      state.layerPresets.push(preset);
+      state.settings.activeLayerPresetId = preset.id;
+      ensureAllCharacterLayerKeys();
+      input.value = "";
+      renderAll(); setStatusT("layerPresetAdded");
+    }
+    function deleteActiveLayerPreset() {
+      if ((state.layerPresets || []).length <= 1) { setStatusT("cannotDeleteLastLayerPreset", {}, true); return; }
+      const id = state.settings.activeLayerPresetId;
+      state.layerPresets = state.layerPresets.filter((preset) => preset.id !== id);
+      state.settings.activeLayerPresetId = state.layerPresets[0].id;
+      renderAll(); setStatusT("layerPresetDeleted");
+    }
+
+    function renderBrowsYOffsetControl(container, character) {
+      const wrap = document.createElement("div");
+      wrap.className = "slider-grid";
+      wrap.style.marginBottom = "0.65rem";
+      const row = document.createElement("div");
+      row.className = "slider-row";
+      const label = document.createElement("label");
+      label.textContent = t("browsYOffset");
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = "-500";
+      input.max = "500";
+      input.step = "1";
+      input.value = character.layerAdjustments?.browsY || 0;
+      const output = document.createElement("div");
+      output.className = "value";
+      output.textContent = `${input.value}px`;
+      input.addEventListener("input", () => {
+        if (!character.layerAdjustments) character.layerAdjustments = { browsY: 0 };
+        character.layerAdjustments.browsY = Number(input.value || 0);
+        output.textContent = `${character.layerAdjustments.browsY}px`;
+        renderPreview();
+      });
+      row.append(label, input, output);
+      wrap.appendChild(row);
+      container.appendChild(wrap);
+    }
+
+    function renderEffectStackCard(layer, stackIndex, maxStackIndex) {
+      normalizeEffectStackIndex(layer);
+      const card = document.createElement("section");
+      card.className = `layer-card effect-layer-card${layer.id === state.activeEffectLayerId ? " active" : ""}`;
+      const head = document.createElement("div");
+      head.className = "layer-head";
+      const titleWrap = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "layer-name";
+      name.textContent = layer.name || t("defaultEffectLayerName");
+      const note = document.createElement("div");
+      note.className = "layer-note";
+      note.textContent = `${t("effectLayerStackNote")} / ${effectTypeLabel(layer.type)}`;
+      titleWrap.append(name, note);
+
+      const actionWrap = document.createElement("div");
+      actionWrap.className = "button-row";
+      const upBtn = document.createElement("button");
+      upBtn.type = "button";
+      upBtn.className = "small secondary";
+      upBtn.textContent = t("moveUpButton");
+      upBtn.disabled = stackIndex <= 0;
+      upBtn.addEventListener("click", (event) => { event.stopPropagation(); moveEffectLayerInStandingStack(layer.id, -1); });
+      const downBtn = document.createElement("button");
+      downBtn.type = "button";
+      downBtn.className = "small secondary";
+      downBtn.textContent = t("moveDownButton");
+      downBtn.disabled = stackIndex >= maxStackIndex;
+      downBtn.addEventListener("click", (event) => { event.stopPropagation(); moveEffectLayerInStandingStack(layer.id, 1); });
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "small danger";
+      delBtn.textContent = t("deleteButton");
+      delBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        state.effectLayers = state.effectLayers.filter((item) => item.id !== layer.id);
+        state.activeEffectLayerId = state.effectLayers[0]?.id || "";
+        renderAll();
+      });
+      actionWrap.append(upBtn, downBtn, delBtn);
+      head.append(titleWrap, actionWrap);
+
+      const body = document.createElement("div");
+      body.className = "effect-card-body";
+      const controls = document.createElement("div");
+      controls.className = "grid-2";
+      controls.append(
+        createCheckboxField(t("effectVisible"), layer.visible, (checked) => { layer.visible = checked; renderLayers(); renderEffectLayerList(); renderPreview(); }),
+        createSelectField(t("effectType"), layer.type, [
+          { value: "vignette", label: t("effectTypeVignette") },
+          { value: "chromatic", label: t("effectTypeChromatic") },
+          { value: "blur", label: t("effectTypeBlur") },
+          { value: "tone", label: t("effectTypeTone") }
+        ], (value) => { layer.type = value; renderLayers(); renderEffectDetailEditor(); renderPreview(); })
+      );
+      body.appendChild(controls);
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = t("effectStackInfo");
+      body.appendChild(hint);
+
+      card.addEventListener("click", () => {
+        state.activeEffectLayerId = layer.id;
+        renderEffectLayerList();
+        renderEffectDetailEditor();
+        renderLayers();
+        setStatusT("effectLayerSelected");
+      });
+      card.append(head, body);
+      return card;
+    }
+
+    function getStandingVisualEntries() {
+      const layers = getActiveLayers();
+      const maxStackIndex = layers.length;
+      const buckets = Array.from({ length: maxStackIndex + 1 }, () => []);
+      for (const effect of state.effectLayers || []) {
+        if (effect.placement !== "standing") continue;
+        const stackIndex = Math.round(clamp(effect.stackIndex ?? 0, 0, maxStackIndex));
+        effect.stackIndex = stackIndex;
+        buckets[stackIndex].push(effect);
+      }
+      const entries = [];
+      for (let index = 0; index <= maxStackIndex; index++) {
+        for (const effect of buckets[index]) entries.push({ kind: "effect", effect, stackIndex: index, maxStackIndex });
+        if (index < layers.length) entries.push({ kind: "category", layer: layers[index], layerIndex: index });
+      }
+      return entries;
+    }
+
+    function renderLayers() {
+      const root = $("#layersRoot"); root.innerHTML = "";
+      const character = activeCharacter(); const layers = getActiveLayers(); const store = getLayerStore(character);
+      const entries = getStandingVisualEntries();
+      if (!layers.length && !(state.effectLayers || []).some((layer) => layer.placement === "standing")) {
+        const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("emptyParts"); root.appendChild(empty); return;
+      }
+      entries.forEach((entry) => {
+        if (entry.kind === "effect") {
+          root.appendChild(renderEffectStackCard(entry.effect, entry.stackIndex, entry.maxStackIndex));
+          return;
+        }
+        const layer = entry.layer;
+        const layerIndex = entry.layerIndex;
+        if (!Array.isArray(store[layer.id])) store[layer.id] = [];
+        const card = document.createElement("section"); card.className = "layer-card";
+        const head = document.createElement("div"); head.className = "layer-head";
+        const titleWrap = document.createElement("div");
+        const name = document.createElement("div"); name.className = "layer-name"; name.textContent = getLayerName(layer);
+        const note = document.createElement("div"); note.className = "layer-note"; note.textContent = isExclusivePartsLayer(layer.id) ? t("noteExclusive") : t("noteParts");
+        titleWrap.append(name, note);
+        const actionWrap = document.createElement("div");
+        actionWrap.className = "button-row layer-header-actions";
+        const upBtn = document.createElement("button"); upBtn.type = "button"; upBtn.className = "small secondary"; upBtn.textContent = t("moveUpButton"); upBtn.disabled = layerIndex === 0;
+        upBtn.addEventListener("click", () => moveActiveCategory(layerIndex, -1));
+        const downBtn = document.createElement("button"); downBtn.type = "button"; downBtn.className = "small secondary"; downBtn.textContent = t("moveDownButton"); downBtn.disabled = layerIndex === layers.length - 1;
+        downBtn.addEventListener("click", () => moveActiveCategory(layerIndex, 1));
+        const uploadBtn = document.createElement("button"); uploadBtn.className = "small"; uploadBtn.textContent = t("registerImage");
+        const fileInput = document.createElement("input"); fileInput.type = "file"; fileInput.accept = "image/png,image/jpeg,image/webp"; fileInput.multiple = true;
+        uploadBtn.addEventListener("click", () => fileInput.click()); fileInput.addEventListener("change", async (event) => { await addImagesToLayer(layer.id, Array.from(event.target.files || [])); fileInput.value = ""; });
+        const deleteCategoryBtn = document.createElement("button");
+        deleteCategoryBtn.type = "button";
+        deleteCategoryBtn.className = "small danger";
+        deleteCategoryBtn.textContent = t("deleteButton");
+        deleteCategoryBtn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          deleteCategoryFromActivePreset(layer.id);
+        });
+        const typeField = document.createElement("div");
+        typeField.className = "field category-type-field";
+        const typeLabel = document.createElement("label");
+        typeLabel.textContent = t("categoryTypeSelect");
+        const typeSelect = document.createElement("select");
+        [
+          { value: "multi", label: t("categoryTypeMulti") },
+          { value: "single", label: t("categoryTypeSingle") }
+        ].forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.value;
+          option.textContent = item.label;
+          option.selected = item.value === (layer.exclusive ? "single" : "multi");
+          typeSelect.appendChild(option);
+        });
+        typeSelect.addEventListener("change", (event) => setCategoryExclusive(layer.id, event.target.value === "single"));
+        typeField.append(typeLabel, typeSelect);
+        actionWrap.append(upBtn, downBtn, uploadBtn, deleteCategoryBtn, typeField, fileInput);
+        head.append(titleWrap, actionWrap);
+        const list = document.createElement("div"); list.className = "part-list"; const parts = store[layer.id] || [];
+        if (layer.id === "brows") renderBrowsYOffsetControl(list, character);
+        if (!parts.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("emptyParts"); list.appendChild(empty); }
+        else {
+          for (const part of parts) {
+            const row = document.createElement("div"); row.className = `part-row${part.selected ? " active" : ""}`;
+            const img = document.createElement("img"); img.className = "thumb"; img.src = part.dataUrl; img.alt = part.name;
+            const meta = document.createElement("div"); meta.className = "part-meta"; const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = part.name; nameInput.placeholder = t("partNamePlaceholder"); nameInput.addEventListener("input", () => { part.name = nameInput.value.trim() || t("unnamed"); }); const size = document.createElement("div"); size.className = "part-size"; size.textContent = `${part.width || "-"} × ${part.height || "-"} px${part.selected ? ` / ${t("displaying")}` : ""}`; meta.append(nameInput, size);
+            const removeBtn = document.createElement("button"); removeBtn.className = "small danger"; removeBtn.textContent = t("deleteButton");
+            const checkbox = document.createElement("input"); checkbox.type = "checkbox"; checkbox.checked = part.selected; checkbox.title = t("applyDisplay");
+            const toggle = () => { setPartSelection(layer.id, part.id, !part.selected); if (!activeLayerPreset()?.useBackgroundImages) state.activeToolTarget = `layer:${layer.id}`; renderLayers(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); };
+            row.addEventListener("click", (event) => { const tag = event.target.tagName.toLowerCase(); if (tag === "input" || tag === "button" || tag === "select" || tag === "label") return; toggle(); });
+            checkbox.addEventListener("change", () => { setPartSelection(layer.id, part.id, checkbox.checked); if (!activeLayerPreset()?.useBackgroundImages) state.activeToolTarget = `layer:${layer.id}`; renderLayers(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); }); row.append(checkbox, img, meta, removeBtn);
+            removeBtn.addEventListener("click", () => { store[layer.id] = parts.filter((item) => item.id !== part.id); imageCache.delete(part.dataUrl); renderLayers(); renderPreview(); }); list.appendChild(row);
+          }
+        }
+        card.append(head, list); root.appendChild(card);
+      });
+    }
+
+    function getToolTextLayerLabel(layer) {
+      const layerName = String(layer?.name || t("defaultTextLayerName")).trim() || t("defaultTextLayerName");
+      const body = String(layer?.text || "").replace(/\s+/g, " ").trim() || "（空）";
+      return `${layerName}：${body}`;
+    }
+
+    function setToolTarget(target) {
+      if (target === "standing") {
+        state.activeToolTarget = "standing";
+      } else if (target === "layer" || String(target || "").startsWith("layer:")) {
+        const requestedId = String(target || "").replace(/^layer:/, "");
+        const layers = getActiveLayers();
+        const layer = layers.find((item) => item.id === requestedId) || layers[0];
+        if (layer && !activeLayerPreset()?.useBackgroundImages) {
+          if (!layer.transform) layer.transform = defaultTransform();
+          state.activeToolTarget = `layer:${layer.id}`;
+        } else {
+          state.activeToolTarget = "standing";
+        }
+      } else {
+        const layerId = target?.replace(/^text:/, "") || state.activeTextLayerId || state.textLayers[0]?.id || "";
+        const layer = state.textLayers.find((item) => item.id === layerId) || state.textLayers[0];
+        if (layer) {
+          state.activeTextLayerId = layer.id;
+          state.activeToolTarget = `text:${layer.id}`;
+        } else {
+          state.activeToolTarget = "standing";
+        }
+      }
+      renderToolTargetOptions();
+      renderTextLayerList();
+      renderTextDetailEditor();
+      syncTargetSliders();
+      renderPreview();
+    }
+
+    function renderToolTargetOptions() {
+      const root = $("#toolTargetChecks");
+      if (!root) return;
+
+      const currentTextLayer = state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || state.textLayers[0] || null;
+      const layers = getActiveLayers();
+      const layerTargetEnabled = !activeLayerPreset()?.useBackgroundImages && layers.length > 0;
+      const currentLayerId = String(state.activeToolTarget || "").replace(/^layer:/, "");
+      const currentLayer = layers.find((layer) => layer.id === currentLayerId) || layers[0] || null;
+
+      if (String(state.activeToolTarget || "").startsWith("text:")) {
+        const matchedLayer = currentTextLayer ? state.textLayers.find((layer) => `text:${layer.id}` === state.activeToolTarget) : null;
+        if (matchedLayer) state.activeTextLayerId = matchedLayer.id;
+        else state.activeToolTarget = currentTextLayer ? `text:${currentTextLayer.id}` : "standing";
+      } else if (String(state.activeToolTarget || "").startsWith("layer:")) {
+        if (!layerTargetEnabled || !currentLayer) state.activeToolTarget = "standing";
+      }
+
+      const isStanding = state.activeToolTarget === "standing";
+      const isText = String(state.activeToolTarget || "").startsWith("text:");
+      const isLayer = String(state.activeToolTarget || "").startsWith("layer:");
+      root.innerHTML = "";
+
+      const standingLabel = document.createElement("label");
+      standingLabel.className = `target-check${isStanding ? " active" : ""}`;
+      const standingCheck = document.createElement("input");
+      standingCheck.type = "checkbox";
+      standingCheck.checked = isStanding;
+      standingCheck.addEventListener("change", () => setToolTarget("standing"));
+      standingLabel.append(standingCheck, document.createTextNode(` ${t("standingTarget")}`));
+
+      const textLabel = document.createElement("label");
+      textLabel.className = `target-check${isText ? " active" : ""}`;
+      const textCheck = document.createElement("input");
+      textCheck.type = "checkbox";
+      textCheck.checked = isText;
+      textCheck.disabled = state.textLayers.length === 0;
+      textCheck.addEventListener("change", () => setToolTarget("text"));
+      textLabel.append(textCheck, document.createTextNode(` ${t("textTarget")}`));
+
+      const textSelect = document.createElement("select");
+      textSelect.className = "target-text-select";
+      textSelect.disabled = state.textLayers.length === 0;
+      for (const layer of state.textLayers) {
+        const option = document.createElement("option");
+        option.value = layer.id;
+        option.textContent = getToolTextLayerLabel(layer);
+        option.selected = layer.id === state.activeTextLayerId;
+        textSelect.appendChild(option);
+      }
+      textSelect.addEventListener("change", () => setToolTarget(`text:${textSelect.value}`));
+
+      root.append(standingLabel, textLabel, textSelect);
+
+      if (layerTargetEnabled) {
+        const layerLabel = document.createElement("label");
+        layerLabel.className = `target-check${isLayer ? " active" : ""}`;
+        const layerCheck = document.createElement("input");
+        layerCheck.type = "checkbox";
+        layerCheck.checked = isLayer;
+        layerCheck.addEventListener("change", () => setToolTarget("layer"));
+        layerLabel.append(layerCheck, document.createTextNode(` ${t("categoryTarget")}`));
+
+        const layerSelect = document.createElement("select");
+        layerSelect.className = "target-text-select";
+        for (const layer of layers) {
+          const option = document.createElement("option");
+          option.value = layer.id;
+          option.textContent = getLayerName(layer);
+          option.selected = layer.id === (activeTransformLayer()?.id || currentLayer?.id);
+          layerSelect.appendChild(option);
+        }
+        layerSelect.addEventListener("change", () => setToolTarget(`layer:${layerSelect.value}`));
+        root.append(layerLabel, layerSelect);
+      }
+    }
+    function syncCanvasSizeInputs() {
+      const size = getCanvasBaseSize();
+      const width = Math.max(1, Math.round(size.width));
+      const height = Math.max(1, Math.round(size.height));
+      const widthRange = $("#canvasWidthRange"); const heightRange = $("#canvasHeightRange");
+      const widthInput = $("#canvasWidthInput"); const heightInput = $("#canvasHeightInput");
+      if (widthRange) { widthRange.max = String(Math.max(8000, width)); widthRange.value = String(width); }
+      if (heightRange) { heightRange.max = String(Math.max(8000, height)); heightRange.value = String(height); }
+      if (widthInput) { widthInput.max = String(Math.max(8000, width)); widthInput.value = String(width); }
+      if (heightInput) { heightInput.max = String(Math.max(8000, height)); heightInput.value = String(height); }
+      const presetSelect = $("#canvasPresetSelect");
+      if (presetSelect) presetSelect.value = state.settings.activeCanvasPresetId || "";
+    }
+    function setCanvasSize(width, height, presetId = "") {
+      state.settings.canvasWidth = Math.round(clamp(width, 1, 8000));
+      state.settings.canvasHeight = Math.round(clamp(height, 1, 8000));
+      state.settings.activeCanvasPresetId = presetId;
+      state.settings.previewPanX = 0;
+      state.settings.previewPanY = 0;
+      syncCanvasSizeInputs();
+      renderPreview();
+    }
+    function updateCanvasDimension(axis, rawValue) {
+      const current = getCanvasBaseSize();
+      const value = Math.round(clamp(rawValue, 1, 8000));
+      setCanvasSize(axis === "width" ? value : current.width, axis === "height" ? value : current.height, "");
+    }
+    function applyCanvasPresetFromSelect() {
+      const presetId = $("#canvasPresetSelect").value;
+      if (!presetId) {
+        state.settings.canvasWidth = 0;
+        state.settings.canvasHeight = 0;
+        state.settings.activeCanvasPresetId = "";
+        state.settings.previewPanX = 0;
+        state.settings.previewPanY = 0;
+        syncCanvasSizeInputs();
+        renderPreview();
+        setStatusT("canvasPresetApplied");
+        return;
+      }
+      const preset = (state.canvasPresets || []).find((item) => item.id === presetId);
+      if (!preset) return;
+      setCanvasSize(preset.width, preset.height, preset.id);
+      setStatusT("canvasPresetApplied");
+    }
+
+    function syncSettingsControls() {
+      $("#languageSelect").value = currentLanguage();
+      const layerPresetSelect = $("#layerPresetSelect");
+      if (layerPresetSelect) layerPresetSelect.value = state.settings.activeLayerPresetId || "";
+      $("#previewBgSelect").value = state.settings.previewBg;
+      $("#exportOriginalSelect").value = state.settings.exportMode;
+      $("#exportHeightInput").value = state.settings.exportHeight;
+      syncCanvasSizeInputs();
+      const zoom = clamp(state.settings.previewZoom ?? 1, 0.1, 3);
+      const browsToggle = $("#browsAboveHairFrontToggle");
+      if (browsToggle) browsToggle.checked = Boolean(state.settings.browsAboveHairFront);
+      const zoomInput = $("#previewZoom");
+      if (zoomInput) zoomInput.value = zoom;
+      const zoomValue = $("#previewZoomValue");
+      if (zoomValue) zoomValue.textContent = `${Math.round(zoom * 100)}%`;
+      syncToolModeButtons();
+      updatePreviewView();
+    }
+    function syncToolModeButtons() {
+      const mode = state.settings.toolMode || "move";
+      document.querySelectorAll("[data-tool-mode]").forEach((button) => {
+        const active = button.dataset.toolMode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    function updatePreviewStageBg() {
+      const stage = $("#previewStage");
+      const canvas = $("#previewCanvas");
+      if (stage) stage.classList.remove("bg-transparent", "bg-white", "bg-mint");
+      if (!canvas) return;
+      canvas.classList.remove("bg-transparent", "bg-white", "bg-mint");
+      canvas.classList.add(`bg-${state.settings.previewBg}`);
+    }
+    function updatePreviewView() {
+      const canvas = $("#previewCanvas");
+      const zoom = clamp(state.settings.previewZoom ?? 1, 0.1, 3);
+      state.settings.previewZoom = zoom;
+      const zoomValue = $("#previewZoomValue");
+      if (zoomValue) zoomValue.textContent = `${Math.round(zoom * 100)}%`;
+      const zoomInput = $("#previewZoom");
+      if (zoomInput && Number(zoomInput.value) !== zoom) zoomInput.value = zoom;
+      if (!canvas) return;
+
+      canvas.style.maxWidth = "none";
+      canvas.style.maxHeight = "none";
+
+      if (state.settings.previewView === "fit") {
+        const stage = $("#previewStage");
+        const canvasWidth = Math.max(1, Number(canvas.width || 1));
+        const canvasHeight = Math.max(1, Number(canvas.height || 1));
+        const stageWidth = Math.max(1, Number(stage?.clientWidth || window.innerWidth || canvasWidth));
+        const stageHeight = Math.max(1, Number(stage?.clientHeight || window.innerHeight || canvasHeight));
+        const padding = 32;
+        const availableWidth = Math.max(1, stageWidth - padding);
+        const availableHeight = Math.max(1, stageHeight - padding);
+        const fitScale = Math.min(availableWidth / canvasWidth, availableHeight / canvasHeight);
+        canvas.style.width = `${Math.max(1, Math.floor(canvasWidth * fitScale))}px`;
+        canvas.style.height = `${Math.max(1, Math.floor(canvasHeight * fitScale))}px`;
+      } else {
+        canvas.style.width = `${Math.max(1, Math.round(canvas.width * zoom))}px`;
+        canvas.style.height = `${Math.max(1, Math.round(canvas.height * zoom))}px`;
+      }
+      canvas.style.transform = `translate(${Number(state.settings.previewPanX || 0)}px, ${Number(state.settings.previewPanY || 0)}px)`;
+    }
+    function syncTargetSliders(updateValues = true) {
+      const target = selectedTransformTarget(); const disabled = !target;
+      ["#targetX", "#targetY", "#targetScale", "#targetRotation"].forEach((selector) => { $(selector).disabled = disabled; });
+      if (!target || !updateValues) return;
+      $("#targetX").value = target.x || 0; $("#targetY").value = target.y || 0; $("#targetScale").value = target.scale || 1; $("#targetRotation").value = target.rotation || 0;
+      $("#targetXValue").textContent = `${Math.round(target.x || 0)}px`; $("#targetYValue").textContent = `${Math.round(target.y || 0)}px`; $("#targetScaleValue").textContent = Number(target.scale || 1).toFixed(2); $("#targetRotationValue").textContent = `${Math.round(target.rotation || 0)}°`;
+    }
+    function armSliderHistory() {
+      if (sliderHistoryArmed) return;
+      sliderHistoryArmed = true;
+      pushUndoSnapshot();
+    }
+    function disarmSliderHistory() { sliderHistoryArmed = false; }
+    function updateTargetFromSliders() {
+      const target = selectedTransformTarget(); if (!target) return;
+      armSliderHistory();
+      target.x = Number($("#targetX").value || 0); target.y = Number($("#targetY").value || 0); target.scale = Number($("#targetScale").value || 1); target.rotation = Number($("#targetRotation").value || 0);
+      syncTargetSliders(); renderPreview(); if (state.activeToolTarget?.startsWith("text:")) renderTextDetailTransformOnly();
+    }
+    function renderTextDetailTransformOnly() { /* The transform sliders are authoritative; full editor rerender is noisy while dragging. */ }
+
+    async function addImagesToLayer(layerId, files) {
+      if (!files.length) return;
+      const mode = getActiveMode(); const store = getLayerStore(activeCharacter()); if (!Array.isArray(store[layerId])) store[layerId] = []; let addedCount = 0;
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        const dataUrl = await fileToDataUrl(file); const size = await getImageSize(dataUrl); const shouldSelect = mode === "diff" && store[layerId].length === 0 && addedCount === 0;
+        store[layerId].push({ id: uid("part"), name: file.name.replace(/\.[^.]+$/, ""), dataUrl, width: size.width, height: size.height, selected: shouldSelect }); addedCount++;
+      }
+      renderLayers(); renderCanvasSettingsControls(); syncCanvasSizeInputs(); renderPreview(); setStatusT("addedImages", { count: addedCount });
+    }
+    function fileToDataUrl(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(file); }); }
+    function getImageSize(dataUrl) { return loadImage(dataUrl).then((img) => ({ width: img.naturalWidth, height: img.naturalHeight })); }
+    function loadImage(dataUrl) { if (imageCache.has(dataUrl)) return Promise.resolve(imageCache.get(dataUrl)); return new Promise((resolve, reject) => { const img = new Image(); img.onload = () => { imageCache.set(dataUrl, img); resolve(img); }; img.onerror = reject; img.src = dataUrl; }); }
+
+    function getNaturalContentSize(character = activeCharacter()) {
+      let width = 0, height = 0;
+      const layers = getActiveLayers(); const store = getLayerStore(character);
+      for (const layer of layers) {
+        for (const part of store[layer.id] || []) {
+          if (part.selected || width === 0 || height === 0) {
+            width = Math.max(width, Number(part.width || 0));
+            height = Math.max(height, Number(part.height || 0));
+          }
+        }
+      }
+      if (activeLayerPreset()?.useBackgroundImages) {
+        for (const bg of state.backgroundLayers) if (bg.dataUrl) { width = Math.max(width, Number(bg.width || 0)); height = Math.max(height, Number(bg.height || 0)); }
+      }
+      if (!width || !height) return { width: 1200, height: 1200 };
+      return { width, height };
+    }
+    function getCanvasBaseSize(character = activeCharacter()) {
+      const natural = getNaturalContentSize(character);
+      const customWidth = Math.round(Number(state.settings?.canvasWidth || 0));
+      const customHeight = Math.round(Number(state.settings?.canvasHeight || 0));
+      return { width: customWidth > 0 ? customWidth : natural.width, height: customHeight > 0 ? customHeight : natural.height };
+    }
+    async function renderPreview() {
+      const token = ++previewRenderToken;
+      await registerCustomFonts();
+      const character = activeCharacter(); const { width, height } = getCanvasBaseSize(character); const canvas = $("#previewCanvas"); canvas.width = width; canvas.height = height;
+      await drawComposite(canvas, width, height, character, { forExport: false }); if (token !== previewRenderToken) return; $("#previewInfo").textContent = `${width} × ${height}`; updatePreviewStageBg(); updatePreviewView();
+    }
+    async function drawComposite(canvas, width, height, character = activeCharacter(), options = {}) {
+      const ctx = canvas.getContext("2d", { alpha: true }); ctx.clearRect(0, 0, width, height);
+      drawBackgroundPanel(ctx, width, height, Boolean(options.forExport));
+      if (activeLayerPreset()?.useBackgroundImages) {
+        for (const bg of state.backgroundLayers) await drawBackground(ctx, bg, width, height);
+      }
+      applyEffectLayersForPlacement(canvas, "background");
+      for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "back")) drawTextLayer(ctx, layer);
+      applyEffectLayersForPlacement(canvas, "backText");
+      await drawStandingGroup(ctx, width, height, character);
+      for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "front")) drawTextLayer(ctx, layer);
+      applyEffectLayersForPlacement(canvas, "frontText");
+    }
+    function applyEffectLayersForPlacement(canvas, placement) {
+      for (const layer of state.effectLayers || []) {
+        if (!layer.visible || layer.placement !== placement) continue;
+        applySingleEffect(canvas, normalizeEffectLayer(layer));
+      }
+    }
+    function createOffscreenCopy(sourceCanvas) {
+      const copy = document.createElement("canvas");
+      copy.width = sourceCanvas.width;
+      copy.height = sourceCanvas.height;
+      copy.getContext("2d", { alpha: true }).drawImage(sourceCanvas, 0, 0);
+      return copy;
+    }
+    function hexToRgba(hex, alpha = 1) {
+      const clean = String(hex || "#000000").trim();
+      const normalized = /^#([0-9a-f]{3})$/i.test(clean)
+        ? `#${clean.slice(1).split("").map((ch) => ch + ch).join("")}`
+        : clean;
+      const match = normalized.match(/^#([0-9a-f]{6})$/i);
+      if (!match) return `rgba(0,0,0,${alpha})`;
+      const int = parseInt(match[1], 16);
+      const r = (int >> 16) & 255;
+      const g = (int >> 8) & 255;
+      const b = int & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    function clamp01(value) { return Math.max(0, Math.min(1, Number(value) || 0)); }
+    function distributeRounded(values, total) {
+      const floors = values.map((v) => Math.floor(v));
+      let remainder = total - floors.reduce((sum, v) => sum + v, 0);
+      const order = values.map((v, i) => ({ i, frac: v - floors[i] })).sort((a, b) => b.frac - a.frac);
+      for (let idx = 0; idx < order.length && remainder > 0; idx++, remainder--) floors[order[idx].i] += 1;
+      return floors;
+    }
+    function applyChromaticWeightNormalization(effect) {
+      if (!effect) return;
+      const keys = ["chromaticRedOpacity", "chromaticGreenOpacity", "chromaticBlueOpacity"];
+      const raw = keys.map((key) => Math.max(0, Number(effect[key]) || 0));
+      const total = raw.reduce((sum, value) => sum + value, 0);
+      let normalized;
+      if (total <= 0) normalized = [34, 33, 33];
+      else normalized = distributeRounded(raw.map((value) => (value / total) * 100), 100);
+      keys.forEach((key, index) => { effect[key] = normalized[index]; });
+    }
+    function setChromaticWeight(effect, changedKey, value) {
+      if (!effect) return;
+      const keys = ["chromaticRedOpacity", "chromaticGreenOpacity", "chromaticBlueOpacity"];
+      const target = Math.round(clamp(value, 0, 100));
+      const otherKeys = keys.filter((key) => key !== changedKey);
+      effect[changedKey] = target;
+      const remaining = 100 - target;
+      const otherRaw = otherKeys.map((key) => Math.max(0, Number(effect[key]) || 0));
+      const otherTotal = otherRaw.reduce((sum, current) => sum + current, 0);
+      let redistributed;
+      if (otherTotal <= 0) redistributed = distributeRounded(otherKeys.map(() => remaining / otherKeys.length), remaining);
+      else redistributed = distributeRounded(otherRaw.map((current) => (current / otherTotal) * remaining), remaining);
+      otherKeys.forEach((key, index) => { effect[key] = redistributed[index]; });
+      applyChromaticWeightNormalization(effect);
+    }
+    function createLineArtMask(sourceCanvas) {
+      const mask = document.createElement("canvas");
+      const w = sourceCanvas.width;
+      const h = sourceCanvas.height;
+      mask.width = w;
+      mask.height = h;
+      const srcCtx = sourceCanvas.getContext("2d", { alpha: true });
+      const maskCtx = mask.getContext("2d", { alpha: true });
+      if (!srcCtx || !maskCtx || !w || !h) return mask;
+      const src = srcCtx.getImageData(0, 0, w, h);
+      const data = src.data;
+      const out = maskCtx.createImageData(w, h);
+      const outData = out.data;
+
+      const alphaAt = (x, y) => {
+        x = Math.max(0, Math.min(w - 1, x));
+        y = Math.max(0, Math.min(h - 1, y));
+        const i = (y * w + x) * 4;
+        return data[i + 3] / 255;
+      };
+      const lumAt = (x, y) => {
+        x = Math.max(0, Math.min(w - 1, x));
+        y = Math.max(0, Math.min(h - 1, y));
+        const i = (y * w + x) * 4;
+        const a = data[i + 3] / 255;
+        if (a <= 0.01) return 255;
+        return (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+      };
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          const alpha = data[i + 3] / 255;
+          if (alpha <= 0.02) continue;
+
+          const lum = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+          const n1 = lumAt(x - 1, y);
+          const n2 = lumAt(x + 1, y);
+          const n3 = lumAt(x, y - 1);
+          const n4 = lumAt(x, y + 1);
+          const neighborAvg = (n1 + n2 + n3 + n4) / 4;
+
+          // 暗い線が周囲よりも暗い時だけ強く拾う。明るい面や淡い陰影は拾いにくくする。
+          const darkness = clamp01((168 - lum) / 68);
+          const localContrast = clamp01((neighborAvg - lum - 8) / 30);
+          const darkLineStrength = darkness * localContrast;
+
+          // 透過との境界にある輪郭線は少しだけ拾うが、白飛びを避けるため明部では極力抑える。
+          const alphaEdge = Math.max(
+            Math.abs(alpha - alphaAt(x - 1, y)),
+            Math.abs(alpha - alphaAt(x + 1, y)),
+            Math.abs(alpha - alphaAt(x, y - 1)),
+            Math.abs(alpha - alphaAt(x, y + 1))
+          );
+          const outlineStrength = clamp01((alphaEdge - 0.2) / 0.7) * clamp01((180 - lum) / 80) * 0.45;
+
+          const lineStrength = Math.max(darkLineStrength, outlineStrength);
+          const maskAlpha = Math.round(255 * alpha * clamp01((lineStrength - 0.08) / 0.92));
+          if (maskAlpha <= 0) continue;
+
+          outData[i] = 255;
+          outData[i + 1] = 255;
+          outData[i + 2] = 255;
+          outData[i + 3] = maskAlpha;
+        }
+      }
+      maskCtx.putImageData(out, 0, 0);
+      return mask;
+    }
+    function createTintedMask(maskCanvas, fillStyle) {
+      const tinted = document.createElement("canvas");
+      tinted.width = maskCanvas.width;
+      tinted.height = maskCanvas.height;
+      const tctx = tinted.getContext("2d", { alpha: true });
+      if (!tctx) return tinted;
+      tctx.drawImage(maskCanvas, 0, 0);
+      tctx.globalCompositeOperation = "source-atop";
+      tctx.fillStyle = fillStyle;
+      tctx.fillRect(0, 0, tinted.width, tinted.height);
+      tctx.globalCompositeOperation = "source-over";
+      return tinted;
+    }
+
+    function applySingleEffect(canvas, effect) {
+      if (!canvas || !effect) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      const ctx = canvas.getContext("2d", { alpha: true });
+      if (!ctx || !w || !h) return;
+      if (effect.type === "vignette") {
+        ctx.save();
+        const cx = w / 2;
+        const cy = h / 2;
+        const outer = Math.sqrt(w * w + h * h) / 2;
+        const innerStop = clamp(effect.radius, 0.05, 1);
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outer);
+        grad.addColorStop(0, hexToRgba(effect.color, 0));
+        grad.addColorStop(Math.max(0, innerStop * 0.55), hexToRgba(effect.color, 0));
+        grad.addColorStop(innerStop, hexToRgba(effect.color, Math.max(0, Math.min(1, effect.intensity * 0.6))));
+        grad.addColorStop(1, hexToRgba(effect.color, effect.intensity));
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+        return;
+      }
+      const source = createOffscreenCopy(canvas);
+      ctx.clearRect(0, 0, w, h);
+      if (effect.type === "blur") {
+        ctx.save();
+        ctx.filter = `blur(${Math.max(0, effect.blur)}px)`;
+        ctx.drawImage(source, 0, 0);
+        ctx.restore();
+        return;
+      }
+      if (effect.type === "tone") {
+        ctx.save();
+        const amount = Math.round(clamp(effect.intensity, 0, 1) * 100);
+        ctx.filter = effect.toneMode === "sepia" ? `sepia(${amount}%)` : `grayscale(${amount}%)`;
+        ctx.drawImage(source, 0, 0);
+        ctx.restore();
+        return;
+      }
+      if (effect.type === "chromatic") {
+        const sourceCtx = source.getContext("2d", { alpha: true });
+        if (!sourceCtx) {
+          ctx.drawImage(source, 0, 0);
+          return;
+        }
+        const src = sourceCtx.getImageData(0, 0, w, h);
+        const srcData = src.data;
+        const out = ctx.createImageData(w, h);
+        const outData = out.data;
+        const tempEffect = normalizeEffectLayer(effect);
+        const rWeight = (tempEffect.chromaticRedOpacity ?? 34) / (100 / 3);
+        const gWeight = (tempEffect.chromaticGreenOpacity ?? 33) / (100 / 3);
+        const bWeight = (tempEffect.chromaticBlueOpacity ?? 33) / (100 / 3);
+        const rShift = Math.round(tempEffect.chromaticRedShift ?? -6);
+        const gShift = Math.round(tempEffect.chromaticGreenShift ?? 0);
+        const bShift = Math.round(tempEffect.chromaticBlueShift ?? 6);
+        const sample = (x, y) => {
+          if (x < 0 || x >= w || y < 0 || y >= h) return null;
+          const i = (y * w + x) * 4;
+          return { r: srcData[i], g: srcData[i + 1], b: srcData[i + 2], a: srcData[i + 3] };
+        };
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const baseIndex = (y * w + x) * 4;
+            const rs = sample(x - rShift, y);
+            const gs = sample(x - gShift, y);
+            const bs = sample(x - bShift, y);
+            const r = Math.max(0, Math.min(255, Math.round((rs?.r || 0) * rWeight)));
+            const g = Math.max(0, Math.min(255, Math.round((gs?.g || 0) * gWeight)));
+            const b = Math.max(0, Math.min(255, Math.round((bs?.b || 0) * bWeight)));
+            const a = Math.max(rs?.a || 0, gs?.a || 0, bs?.a || 0);
+            outData[baseIndex] = r;
+            outData[baseIndex + 1] = g;
+            outData[baseIndex + 2] = b;
+            outData[baseIndex + 3] = a;
+          }
+        }
+        ctx.putImageData(out, 0, 0);
+        return;
+      }
+      ctx.drawImage(source, 0, 0);
+    }
+    function drawBackgroundPanel(ctx, width, height, forExport = false) {
+      const panel = state.backgroundPanel || createBackgroundPanel();
+      if (!panel.visible) return;
+      if (forExport && !panel.exportEnabled) return;
+      ctx.save();
+      ctx.fillStyle = panel.color || "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    }
+    async function drawBackground(ctx, bg, width, height) {
+      if (!bg.visible || !bg.dataUrl) return;
+      const img = await loadImage(bg.dataUrl); ctx.save(); ctx.translate(width / 2 + (bg.x || 0), height / 2 + (bg.y || 0)); ctx.scale(bg.scale || 1, bg.scale || 1); ctx.drawImage(img, -width / 2, -height / 2, width, height); ctx.restore();
+    }
+    function getStandingDrawLayers() {
+      const drawLayers = [...getActiveLayers()].reverse();
+      if (getActiveMode() === "parts" && state.settings?.browsAboveHairFront) {
+        const browsIndex = drawLayers.findIndex((layer) => layer.id === "brows");
+        const hairFrontIndex = drawLayers.findIndex((layer) => layer.id === "hairFront");
+        if (browsIndex >= 0 && hairFrontIndex >= 0) {
+          const [browsLayer] = drawLayers.splice(browsIndex, 1);
+          const nextHairFrontIndex = drawLayers.findIndex((layer) => layer.id === "hairFront");
+          drawLayers.splice(nextHairFrontIndex + 1, 0, browsLayer);
+        }
+      }
+      return drawLayers;
+    }
+
+    async function drawStandingLayer(ctx, width, height, character, layer, contentWidth, contentHeight) {
+      const store = getLayerStore(character);
+      const parts = (store[layer.id] || []).filter((part) => part.selected);
+      if (!parts.length) return false;
+      const groupTr = character.transform || defaultTransform();
+      const tr = layer.transform || defaultTransform();
+      const layerY = layer.id === "brows" ? Number(character.layerAdjustments?.browsY || 0) : 0;
+      let hasAny = false;
+      for (const part of parts) {
+        const img = await loadImage(part.dataUrl);
+        ctx.save();
+        ctx.translate(width / 2 + Number(groupTr.x || 0), height / 2 + Number(groupTr.y || 0));
+        ctx.rotate(Number(groupTr.rotation || 0) * Math.PI / 180);
+        ctx.scale(Number(groupTr.scale || 1), Number(groupTr.scale || 1));
+        if (!activeLayerPreset()?.useBackgroundImages) {
+          ctx.translate(Number(tr.x || 0), Number(tr.y || 0));
+          ctx.rotate(Number(tr.rotation || 0) * Math.PI / 180);
+          ctx.scale(Number(tr.scale || 1), Number(tr.scale || 1));
+        }
+        ctx.drawImage(img, -contentWidth / 2, -contentHeight / 2 + layerY, contentWidth, contentHeight);
+        ctx.restore();
+        hasAny = true;
+      }
+      return hasAny;
+    }
+
+    async function drawStandingGroup(ctx, width, height, character = activeCharacter()) {
+      const contentSize = getNaturalContentSize(character);
+      const contentWidth = contentSize.width;
+      const contentHeight = contentSize.height;
+      const canvas = ctx.canvas;
+      const entries = getStandingVisualEntries().slice().reverse();
+      for (const entry of entries) {
+        if (entry.kind === "effect") {
+          if (entry.effect.visible) applySingleEffect(canvas, normalizeEffectLayer(entry.effect));
+        } else if (entry.kind === "category") {
+          await drawStandingLayer(ctx, width, height, character, entry.layer, contentWidth, contentHeight);
+        }
+      }
+    }
+
+    function splitChars(value) {
+      value = String(value || "");
+      if (window.Intl?.Segmenter) { const locale = currentLanguage() === "ko" ? "ko" : (currentLanguage() === "en" ? "en" : "ja"); const segmenter = new Intl.Segmenter(locale, { granularity: "grapheme" }); return Array.from(segmenter.segment(value), (item) => item.segment); }
+      return Array.from(value);
+    }
+    function splitInlineTargets(value) { return String(value || "").split(/[,、，]/).map((item) => item.trim()).filter(Boolean); }
+    function fontStringForSettings(settings) { return `700 ${Math.max(1, settings.fontSize || 86)}px ${settings.fontFamily || DEFAULT_FONT_STACK}`; }
+    function mergeInlineSettings(settings, inlineStyle) {
+      if (!inlineStyle) return settings;
+      return { ...settings, fontFamily: inlineStyle.fontFamily || settings.fontFamily, color: inlineStyle.color || settings.color, fontSize: Math.round(clamp(inlineStyle.fontSize ?? settings.fontSize ?? 86, 10, 300)), stroke: { ...(settings.stroke || {}), enabled: Number(inlineStyle.strokeWidth ?? settings.stroke?.width ?? 0) > 0, color: inlineStyle.strokeColor || settings.stroke?.color || "#111827", width: Math.round(clamp(inlineStyle.strokeWidth ?? settings.stroke?.width ?? 0, 0, 80)) }, shadow: { ...(settings.shadow || {}), enabled: Number(inlineStyle.shadowBlur ?? settings.shadow?.blur ?? 0) > 0, color: inlineStyle.shadowColor || settings.shadow?.color || "#000000", blur: Math.round(clamp(inlineStyle.shadowBlur ?? settings.shadow?.blur ?? 0, 0, 160)), offsetX: settings.shadow?.offsetX || 0, offsetY: settings.shadow?.offsetY || 0 }, verticalLatinRotate: settings.verticalLatinRotate };
+    }
+    function inlineStyleMapForText(text, settings) {
+      const chars = splitChars(text); const map = Array(chars.length).fill(null); const inlineStyles = safeArray(settings?.inlineStyles).map(normalizeInlineStyle).filter(Boolean);
+      if (!chars.length || !inlineStyles.length) return map;
+      inlineStyles.forEach((style) => { splitInlineTargets(style.targets).forEach((target) => { const targetChars = splitChars(target); if (!targetChars.length || targetChars.length > chars.length) return; for (let i = 0; i <= chars.length - targetChars.length; i++) { let matched = true; for (let j = 0; j < targetChars.length; j++) if (chars[i + j] !== targetChars[j]) { matched = false; break; } if (matched) for (let j = 0; j < targetChars.length; j++) map[i + j] = style; } }); });
+      return map;
+    }
+    function measureTextWidth(context, text, letterSpacing = 0, settings = null) {
+      const chars = splitChars(text); if (!chars.length) return 0; const previousFont = context.font; let width = 0; const inlineMap = inlineStyleMapForText(text, settings);
+      chars.forEach((char, index) => { const charSettings = settings ? mergeInlineSettings(settings, inlineMap[index]) : settings; if (charSettings) context.font = fontStringForSettings(charSettings); width += context.measureText(char).width; if (index < chars.length - 1) width += Number(letterSpacing || 0); }); context.font = previousFont; return width;
+    }
+    function wrapTextLines(context, text, maxWidth, letterSpacing = 0, settings = null) {
+      const sourceLines = String(text || "").split(/\n/); const lines = [];
+      sourceLines.forEach((sourceLine) => { const chars = splitChars(sourceLine); let line = ""; chars.forEach((char) => { const testLine = line + char; if (line && measureTextWidth(context, testLine, letterSpacing, settings) > maxWidth) { lines.push(line); line = char; } else { line = testLine; } }); lines.push(line); });
+      return lines.length ? lines : [""];
+    }
+    function hasVisibleShadow(settings) { const shadow = settings?.shadow || {}; return Boolean(shadow.enabled) && (Number(shadow.blur || 0) > 0 || Number(shadow.offsetX || 0) !== 0 || Number(shadow.offsetY || 0) !== 0); }
+    function clearTextShadow(context) { context.shadowColor = "transparent"; context.shadowBlur = 0; context.shadowOffsetX = 0; context.shadowOffsetY = 0; }
+    function paintChar(context, char, x, y, settings, layer) {
+      context.font = fontStringForSettings(settings); context.lineJoin = "round"; context.miterLimit = 2;
+      if (layer === "shadow") { if (!hasVisibleShadow(settings)) return; const shadow = settings.shadow || {}; context.shadowColor = shadow.color || "#000000"; context.shadowBlur = Number(shadow.blur || 0); context.shadowOffsetX = Number(shadow.offsetX || 0); context.shadowOffsetY = Number(shadow.offsetY || 0); context.fillStyle = shadow.color || "#000000"; context.fillText(char, x, y); return; }
+      clearTextShadow(context);
+      if (layer === "stroke") { if (settings.stroke?.enabled && Number(settings.stroke.width) > 0) { context.strokeStyle = settings.stroke.color || "#111827"; context.lineWidth = Number(settings.stroke.width) || 0; context.strokeText(char, x, y); } return; }
+      context.fillStyle = settings.color || "#ffffff"; context.fillText(char, x, y);
+    }
+    function drawStyledTextLine(context, text, x, y, settings, letterSpacing, layer) {
+      const chars = splitChars(text); const inlineMap = inlineStyleMapForText(text, settings); let cursorX = x;
+      chars.forEach((char, index) => { const charSettings = mergeInlineSettings(settings, inlineMap[index]); context.font = fontStringForSettings(charSettings); const charWidth = context.measureText(char).width; paintChar(context, char, cursorX, y, charSettings, layer); cursorX += charWidth + Number(letterSpacing || 0); });
+    }
+    function drawStyledText(context, text, x, y, settings, letterSpacing = 0) { ["shadow", "stroke", "fill"].forEach((layer) => drawStyledTextLine(context, text, x, y, settings, letterSpacing, layer)); }
+    function isVerticalLatinGlyph(char) { return /^[A-Za-z0-9Ａ-Ｚａ-ｚ０-９]$/.test(String(char || "")); }
+    function paintCenteredGlyph(context, char, settings, layer) {
+      context.save(); context.textAlign = "center"; context.textBaseline = "middle"; paintChar(context, char, 0, 0, settings, layer); context.restore();
+    }
+    function buildVerticalEntries(context, text, settings, letterSpacing) {
+      const maxHeight = Math.max(100, Number(settings.wrapHeight) || 900); const columnGap = Math.round(clamp(settings.verticalColumnGap ?? Math.round((settings.fontSize || 86) * 0.35), 0, 300)); const inlineMap = inlineStyleMapForText(text, settings); const chars = splitChars(text); const columns = []; let current = null;
+      const newColumn = () => { current = { glyphs: [], height: 0, width: 0, x: 0 }; columns.push(current); }; newColumn();
+      chars.forEach((char, sourceIndex) => { if (char === "\r") return; if (char === "\n") { if (current.glyphs.length) newColumn(); return; } const charSettings = mergeInlineSettings(settings, inlineMap[sourceIndex]); const fontSize = Math.max(1, Number(charSettings.fontSize || settings.fontSize || 86)); const lineHeight = Math.max(0.5, Number(charSettings.lineHeight || settings.lineHeight || 1.25)); const step = Math.max(fontSize * 0.25, fontSize * lineHeight + Number(letterSpacing || 0)); const columnWidth = fontSize; if (current.glyphs.length && current.height + step > maxHeight) newColumn(); current.glyphs.push({ char, settings: charSettings, localY: current.height + step / 2, width: columnWidth, rotateLatin: Boolean(charSettings.verticalLatinRotate !== false && isVerticalLatinGlyph(char)) }); current.height += step; current.width = Math.max(current.width, columnWidth); });
+      const nonEmpty = columns.filter((column) => column.glyphs.length); if (!nonEmpty.length) return [];
+      let offset = 0; nonEmpty.forEach((column, index) => { if (index === 0) column.x = 0; else { const previous = nonEmpty[index - 1]; offset += previous.width / 2 + columnGap + column.width / 2; column.x = -offset; } });
+      const minX = Math.min(...nonEmpty.map((column) => column.x - column.width / 2)); const maxX = Math.max(...nonEmpty.map((column) => column.x + column.width / 2)); let shiftX = 0; if (settings.align === "center") shiftX = -(minX + maxX) / 2; if (settings.align === "left") shiftX = -minX; if (settings.align === "right") shiftX = -maxX;
+      const entries = []; nonEmpty.forEach((column) => { column.glyphs.forEach((entry) => { entries.push({ ...entry, x: column.x + shiftX, y: entry.localY - column.height / 2 }); }); }); return entries;
+    }
+    function drawTextLayer(context, layer) {
+      if (!layer.visible || !layer.text) return;
+      const settings = normalizeTextLayer(layer); context.save(); context.translate(settings.x || 0, settings.y || 0); context.rotate((settings.rotation || 0) * Math.PI / 180); context.scale(settings.scale || 1, settings.scale || 1); context.globalAlpha = 1; context.textBaseline = "alphabetic"; context.font = fontStringForSettings(settings);
+      const letterSpacing = settings.letterSpacing || 0;
+      if (settings.writingMode === "vertical") {
+        const entries = buildVerticalEntries(context, settings.text, settings, letterSpacing);
+        ["shadow", "stroke", "fill"].forEach((layerName) => { entries.forEach((entry) => { context.save(); context.translate(entry.x, entry.y); if (entry.rotateLatin) context.rotate(Math.PI / 2); paintCenteredGlyph(context, entry.char, entry.settings, layerName); context.restore(); }); });
+      } else {
+        const maxWidth = Math.max(100, settings.wrapWidth || 900); const lines = wrapTextLines(context, settings.text, maxWidth, letterSpacing, settings); const lineHeight = Math.max(1, (settings.fontSize || 86) * (settings.lineHeight || 1.25)); const totalHeight = lineHeight * Math.max(1, lines.length); const startY = -totalHeight / 2 + lineHeight * 0.85;
+        lines.forEach((line, lineIndex) => { const yLine = startY + lineIndex * lineHeight; const lineWidth = measureTextWidth(context, line, letterSpacing, settings); let xLine = 0; if (settings.align === "center") xLine -= lineWidth / 2; if (settings.align === "right") xLine -= lineWidth; drawStyledText(context, line, xLine, yLine, settings, letterSpacing); });
+      }
+      context.restore();
+    }
+
+    function createSelectionSnapshot(character = activeCharacter()) { const selection = {}; for (const layer of getActiveLayers()) selection[layer.id] = (character.layers[layer.id] || []).filter((part) => part.selected).map((part) => part.id); return selection; }
+    function applySelectionSnapshot(selection, character = activeCharacter()) { for (const layer of getActiveLayers()) { const selectedIds = new Set(Array.isArray(selection?.[layer.id]) ? selection[layer.id] : []); for (const part of (character.layers[layer.id] || [])) part.selected = selectedIds.has(part.id); } }
+    async function exportPng() {
+      await registerCustomFonts();
+      const character = activeCharacter(); const base = getCanvasBaseSize(character); const baseCanvas = document.createElement("canvas"); baseCanvas.width = base.width; baseCanvas.height = base.height; await drawComposite(baseCanvas, base.width, base.height, character, { forExport: true });
+      let outWidth = base.width, outHeight = base.height, outputCanvas = baseCanvas;
+      if (state.settings.exportMode === "height") { const desiredHeight = Math.max(1, Math.floor(Number(state.settings.exportHeight || base.height))); const ratio = desiredHeight / base.height; outHeight = desiredHeight; outWidth = Math.max(1, Math.round(base.width * ratio)); outputCanvas = document.createElement("canvas"); outputCanvas.width = outWidth; outputCanvas.height = outHeight; outputCanvas.getContext("2d", { alpha: true }).drawImage(baseCanvas, 0, 0, outWidth, outHeight); }
+      const link = document.createElement("a"); const safeName = sanitizeFileName(activeCharacter().name || "character"); link.download = `${safeName}_${formatDateForFile()}_${outWidth}x${outHeight}.png`; link.href = outputCanvas.toDataURL("image/png"); link.click(); setStatusT("pngExported", { width: outWidth, height: outHeight });
+    }
+    function sanitizeFileName(name) { return String(name).replace(/[\\/:*?"<>|]/g, "_").replace(/\s+/g, "_").slice(0, 80) || "character"; }
+    function formatDateForFile() { const d = new Date(); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, "0"); const day = String(d.getDate()).padStart(2, "0"); const h = String(d.getHours()).padStart(2, "0"); const min = String(d.getMinutes()).padStart(2, "0"); return `${y}${m}${day}_${h}${min}`; }
+    function downloadJson() { const json = JSON.stringify(state, null, 2); const blob = new Blob([json], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.download = `stand_diff_project_${formatDateForFile()}.json`; link.href = url; link.click(); URL.revokeObjectURL(url); setStatusT("jsonSaved"); }
+    async function importJsonFile(file) { try { const text = await file.text(); const project = JSON.parse(text); state = normalizeState(project); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("jsonLoaded"); } catch (error) { console.error(error); setStatusT("jsonLoadFailed", {}, true); } }
+    function openDb() { return new Promise((resolve, reject) => { const request = indexedDB.open(DB_NAME, DB_VERSION); request.onupgradeneeded = () => { const db = request.result; if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: "key" }); }; request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); }); }
+    async function saveToCache() { const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readwrite"); tx.objectStore(STORE_NAME).put({ key: CACHE_KEY, updatedAt: new Date().toISOString(), project: state }); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => { db.close(); reject(tx.error); }; }); }
+    async function loadFromCache() { const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readonly"); const request = tx.objectStore(STORE_NAME).get(CACHE_KEY); request.onsuccess = () => { db.close(); resolve(request.result?.project || null); }; request.onerror = () => { db.close(); reject(request.error); }; }); }
+    async function clearCache() { const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readwrite"); tx.objectStore(STORE_NAME).delete(CACHE_KEY); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => { db.close(); reject(tx.error); }; }); }
+
+    function bindEvents() {
+      const exportModal = $("#exportModal");
+      const openExportSettingsBtn = $("#openExportSettingsBtn");
+      const closeExportModalBtn = $("#closeExportModalBtn");
+      const openExportModal = () => {
+        exportModal.classList.add("show");
+        exportModal.setAttribute("aria-hidden", "false");
+      };
+      const closeExportModal = () => {
+        exportModal.classList.remove("show");
+        exportModal.setAttribute("aria-hidden", "true");
+      };
+      openExportSettingsBtn.addEventListener("click", openExportModal);
+      closeExportModalBtn.addEventListener("click", closeExportModal);
+      exportModal.addEventListener("click", (event) => { if (event.target === exportModal) closeExportModal(); });
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape" && exportModal.classList.contains("show")) closeExportModal(); });
+      $("#languageSelect").addEventListener("change", (event) => { state.settings.uiLanguage = event.target.value; safeStorageSet(LANG_STORAGE_KEY, state.settings.uiLanguage); renderAll(); setStatusT("languageChanged"); });
+      $("#layerPresetSelect").addEventListener("change", (event) => { state.settings.activeLayerPresetId = event.target.value; ensureAllCharacterLayerKeys(); renderAll(); setStatusT("layerPresetChanged"); });
+      $("#addLayerPresetBtn").addEventListener("click", createEmptyLayerPresetFromInput);
+      $("#deleteLayerPresetBtn").addEventListener("click", deleteActiveLayerPreset);
+      $("#addCategoryBtn").addEventListener("click", addCategoryToActivePreset);
+      $("#characterSelect").addEventListener("change", (event) => { state.activeCharacterId = event.target.value; state.activeToolTarget = "standing"; renderAll(); });
+      $("#addCharacterBtn").addEventListener("click", () => { const name = $("#characterNameInput").value.trim(); if (!name) { setStatusT("enterCharacterName", {}, true); return; } const character = createCharacter(name); state.characters.push(character); ensureCharacterLayerKeys(character); state.activeCharacterId = character.id; state.activeToolTarget = "standing"; renderAll(); setStatusT("characterAdded"); });
+      $("#renameCharacterBtn").addEventListener("click", () => { const name = $("#characterNameInput").value.trim(); if (!name) { setStatusT("enterCharacterName", {}, true); return; } activeCharacter().name = name; renderCharacterControls(); setStatusT("characterRenamed"); });
+      $("#deleteCharacterBtn").addEventListener("click", () => { if (state.characters.length <= 1) { setStatusT("cannotDeleteLastCharacter", {}, true); return; } if (!confirm(t("deleteCharacterConfirm"))) return; const id = state.activeCharacterId; state.characters = state.characters.filter((character) => character.id !== id); state.activeCharacterId = state.characters[0].id; state.activeToolTarget = "standing"; imageCache.clear(); renderAll(); setStatusT("characterDeleted"); });
+      ["#canvasWidthRange", "#canvasWidthInput"].forEach((selector) => $(selector).addEventListener("input", (event) => updateCanvasDimension("width", event.target.value)));
+      ["#canvasHeightRange", "#canvasHeightInput"].forEach((selector) => $(selector).addEventListener("input", (event) => updateCanvasDimension("height", event.target.value)));
+      $("#canvasPresetSelect").addEventListener("change", applyCanvasPresetFromSelect);
+      $("#saveCanvasPresetBtn").addEventListener("click", () => {
+        const name = $("#canvasPresetNameInput").value.trim();
+        if (!name) { setStatusT("enterPresetName", {}, true); return; }
+        const size = getCanvasBaseSize();
+        const preset = { id: uid("canvasPreset"), name, width: Math.round(size.width), height: Math.round(size.height) };
+        state.canvasPresets.push(preset);
+        state.settings.activeCanvasPresetId = preset.id;
+        $("#canvasPresetNameInput").value = "";
+        renderCanvasSettingsControls();
+        syncCanvasSizeInputs();
+        setStatusT("canvasPresetSaved");
+      });
+      $("#deleteCanvasPresetBtn").addEventListener("click", () => {
+        const presetId = $("#canvasPresetSelect").value;
+        if (!presetId) { setStatusT("selectCanvasPresetDelete", {}, true); return; }
+        state.canvasPresets = (state.canvasPresets || []).filter((preset) => preset.id !== presetId);
+        if (state.settings.activeCanvasPresetId === presetId) state.settings.activeCanvasPresetId = "";
+        renderCanvasSettingsControls();
+        syncCanvasSizeInputs();
+        setStatusT("canvasPresetDeleted");
+      });
+      $("#savePresetBtn").addEventListener("click", () => { const name = $("#presetNameInput").value.trim(); if (!name) { setStatusT("enterPresetName", {}, true); return; } const character = activeCharacter(); character.presets.push({ id: uid("preset"), name, selection: createSelectionSnapshot(character) }); $("#presetNameInput").value = ""; renderPresetControls(); setStatusT("presetSaved"); });
+      $("#applyPresetBtn").addEventListener("click", applySelectedPreset); $("#presetSelect").addEventListener("change", applySelectedPreset);
+      $("#deletePresetBtn").addEventListener("click", () => { const character = activeCharacter(); const presetId = $("#presetSelect").value; if (!presetId) { setStatusT("selectPresetDelete", {}, true); return; } character.presets = character.presets.filter((preset) => preset.id !== presetId); renderPresetControls(); setStatusT("presetDeleted"); });
+      $("#addTextLayerBtn").addEventListener("click", () => { const layer = createTextLayer(); const { width, height } = getCanvasBaseSize(); layer.x = width / 2; layer.y = height / 2; state.textLayers.push(layer); state.activeTextLayerId = layer.id; state.activeToolTarget = `text:${layer.id}`; renderAll(); });
+      $("#duplicateTextLayerBtn").addEventListener("click", () => { const layer = activeTextLayer(); if (!layer) return; const copy = normalizeTextLayer(clone(layer)); copy.id = uid("text"); copy.name = `${layer.name} copy`; copy.x += 24; copy.y += 24; state.textLayers.push(copy); state.activeTextLayerId = copy.id; state.activeToolTarget = `text:${copy.id}`; renderAll(); });
+      $("#deleteTextLayerBtn").addEventListener("click", () => { const layer = activeTextLayer(); if (!layer) return; state.textLayers = state.textLayers.filter((item) => item.id !== layer.id); state.activeTextLayerId = state.textLayers[0]?.id || ""; state.activeToolTarget = state.activeTextLayerId ? `text:${state.activeTextLayerId}` : "standing"; renderAll(); });
+      $("#addEffectLayerBtn").addEventListener("click", () => {
+        if (!Array.isArray(state.effectLayers)) state.effectLayers = [];
+        const layer = createEffectLayer();
+        layer.name = `${t("defaultEffectLayerName")} ${state.effectLayers.length + 1}`;
+        state.effectLayers.push(layer);
+        state.activeEffectLayerId = layer.id;
+        renderAll();
+        setStatusT("effectAdded");
+      });
+      $("#duplicateEffectLayerBtn").addEventListener("click", () => {
+        const layer = activeEffectLayer();
+        if (!layer) return;
+        const copy = normalizeEffectLayer(clone(layer));
+        copy.id = uid("effectLayer");
+        copy.name = `${layer.name} copy`;
+        state.effectLayers.push(copy);
+        state.activeEffectLayerId = copy.id;
+        renderAll();
+      });
+      $("#deleteEffectLayerBtn").addEventListener("click", () => {
+        const layer = activeEffectLayer();
+        if (!layer) return;
+        state.effectLayers = state.effectLayers.filter((item) => item.id !== layer.id);
+        state.activeEffectLayerId = state.effectLayers[0]?.id || "";
+        renderAll();
+      });
+      $("#addFontBtn").addEventListener("click", () => $("#fontFileInput").click());
+      $("#fontFileInput").addEventListener("change", async (event) => { const files = Array.from(event.target.files || []); for (const file of files) { const dataUrl = await fileToDataUrl(file); state.customFonts.push(createCustomFont(file.name, dataUrl)); } event.target.value = ""; registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("fontAdded"); });
+      $("#previewBgSelect").addEventListener("change", (event) => { state.settings.previewBg = event.target.value; updatePreviewStageBg(); });
+      $("#browsAboveHairFrontToggle").addEventListener("change", (event) => {
+        state.settings.browsAboveHairFront = event.target.checked;
+        renderPreview();
+      });
+      document.querySelectorAll("[data-tool-mode]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.settings.toolMode = button.dataset.toolMode || "move";
+          syncToolModeButtons();
+        });
+      });
+      $("#undoBtn").addEventListener("click", () => { undoAction().catch(console.error); });
+      $("#redoBtn").addEventListener("click", () => { redoAction().catch(console.error); });
+      document.addEventListener("keydown", (event) => {
+        const key = String(event.key || "").toLowerCase();
+        const modifier = event.ctrlKey || event.metaKey;
+        if (!modifier || key !== "z") return;
+        event.preventDefault();
+        if (event.shiftKey) redoAction().catch(console.error);
+        else undoAction().catch(console.error);
+      });
+      $("#previewFitBtn").addEventListener("click", () => { pushUndoSnapshot(); state.settings.previewView = "fit"; state.settings.previewPanX = 0; state.settings.previewPanY = 0; updatePreviewView(); });
+      $("#previewOriginalBtn").addEventListener("click", () => { pushUndoSnapshot(); state.settings.previewView = "zoom"; state.settings.previewZoom = 1; state.settings.previewPanX = 0; state.settings.previewPanY = 0; updatePreviewView(); });
+      $("#previewZoom").addEventListener("input", (event) => { if (!sliderHistoryArmed) armSliderHistory(); state.settings.previewView = "zoom"; state.settings.previewZoom = Number(event.target.value || 1); updatePreviewView(); });
+      ["#targetX", "#targetY", "#targetScale", "#targetRotation"].forEach((selector) => {
+        const input = $(selector);
+        input.addEventListener("pointerdown", armSliderHistory);
+        input.addEventListener("focus", armSliderHistory);
+        input.addEventListener("keydown", (event) => {
+          if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End"].includes(event.key)) armSliderHistory();
+        });
+        input.addEventListener("input", updateTargetFromSliders);
+        input.addEventListener("change", disarmSliderHistory);
+        input.addEventListener("blur", disarmSliderHistory);
+      });
+      $("#exportOriginalSelect").addEventListener("change", (event) => { state.settings.exportMode = event.target.value; });
+      $("#exportHeightInput").addEventListener("input", (event) => { state.settings.exportHeight = Number(event.target.value || 1200); });
+      $("#exportPngBtn").addEventListener("click", () => { exportPng().catch((error) => { console.error(error); setStatusT("pngExportFailed", {}, true); }); });
+      const categoryMulti = $("#newCategoryMulti");
+      const categorySingle = $("#newCategorySingle");
+      const syncCategoryTypeChecks = (mode) => {
+        if (!categoryMulti || !categorySingle) return;
+        if (mode === "single") {
+          categorySingle.checked = true;
+          categoryMulti.checked = false;
+        } else {
+          categoryMulti.checked = true;
+          categorySingle.checked = false;
+        }
+      };
+      categoryMulti?.addEventListener("change", () => syncCategoryTypeChecks(categoryMulti.checked ? "multi" : "single"));
+      categorySingle?.addEventListener("change", () => syncCategoryTypeChecks(categorySingle.checked ? "single" : "multi"));
+      syncCategoryTypeChecks("multi");
+      $("#downloadJsonBtn").addEventListener("click", downloadJson); $("#importJsonBtn").addEventListener("click", () => $("#jsonFileInput").click());
+      $("#jsonFileInput").addEventListener("change", async (event) => { const file = event.target.files?.[0]; if (file) await importJsonFile(file); event.target.value = ""; });
+      $("#saveCacheBtn").addEventListener("click", async () => { try { await saveToCache(); setStatusT("cacheSaved"); } catch (error) { console.error(error); setStatusT("cacheSaveFailed", {}, true); } });
+      $("#loadCacheBtn").addEventListener("click", async () => { try { const cached = await loadFromCache(); if (!cached) { setStatusT("cacheMissing", {}, true); return; } state = normalizeState(cached); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("cacheLoaded"); } catch (error) { console.error(error); setStatusT("cacheLoadFailed", {}, true); } });
+      $("#clearCacheBtn").addEventListener("click", async () => { if (!confirm(t("cacheDeleteConfirm"))) return; try { await clearCache(); setStatusT("cacheDeleted"); } catch (error) { console.error(error); setStatusT("cacheDeleteFailed", {}, true); } });
+      bindPreviewPointerEvents();
+    }
+
+    function previewPointerPoint(event) {
+      const canvas = $("#previewCanvas");
+      const rect = canvas.getBoundingClientRect();
+      const widthRatio = canvas.width / Math.max(1, rect.width);
+      const heightRatio = canvas.height / Math.max(1, rect.height);
+      return {
+        x: (event.clientX - rect.left) * widthRatio,
+        y: (event.clientY - rect.top) * heightRatio,
+        ratio: (widthRatio + heightRatio) / 2
+      };
+    }
+
+    function transformTargetCenter(target) {
+      const canvas = $("#previewCanvas");
+      if (state.activeToolTarget === "standing" || String(state.activeToolTarget || "").startsWith("layer:")) {
+        return { x: canvas.width / 2 + Number(target?.x || 0), y: canvas.height / 2 + Number(target?.y || 0) };
+      }
+      return { x: Number(target?.x || 0), y: Number(target?.y || 0) };
+    }
+
+    function endPreviewPointerDrag(canvas, pointerId = null) {
+      if (pointerId !== null && pointerState?.pointerId !== pointerId) return;
+      pointerState = null;
+      canvas.classList.remove("dragging");
+    }
+
+    function bindPreviewPointerEvents() {
+      const canvas = $("#previewCanvas");
+
+      canvas.addEventListener("pointerdown", (event) => {
+        const mode = state.settings.toolMode || "move";
+        if (mode === "pan") {
+          event.preventDefault();
+          pushUndoSnapshot();
+          pointerState = {
+            pointerId: event.pointerId,
+            mode: "pan",
+            startClientX: event.clientX,
+            startClientY: event.clientY,
+            startPanX: Number(state.settings.previewPanX || 0),
+            startPanY: Number(state.settings.previewPanY || 0)
+          };
+          canvas.setPointerCapture(event.pointerId);
+          canvas.classList.add("dragging");
+          return;
+        }
+
+        const target = selectedTransformTarget();
+        if (!target) return;
+        event.preventDefault();
+        pushUndoSnapshot();
+        const startPoint = previewPointerPoint(event);
+        const center = transformTargetCenter(target);
+        pointerState = {
+          pointerId: event.pointerId,
+          mode,
+          startPoint,
+          center,
+          startDistance: Math.max(1, Math.hypot(startPoint.x - center.x, startPoint.y - center.y)),
+          x: Number(target.x || 0),
+          y: Number(target.y || 0),
+          scale: Number(target.scale || 1),
+          rotation: Number(target.rotation || 0)
+        };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add("dragging");
+      });
+
+      canvas.addEventListener("pointermove", (event) => {
+        if (!pointerState || pointerState.pointerId !== event.pointerId) return;
+        event.preventDefault();
+
+        if (pointerState.mode === "pan") {
+          state.settings.previewPanX = Math.round(pointerState.startPanX + (event.clientX - pointerState.startClientX));
+          state.settings.previewPanY = Math.round(pointerState.startPanY + (event.clientY - pointerState.startClientY));
+          updatePreviewView();
+          return;
+        }
+
+        const target = selectedTransformTarget();
+        if (!target) return;
+
+        const point = previewPointerPoint(event);
+        const dx = point.x - pointerState.startPoint.x;
+        const dy = point.y - pointerState.startPoint.y;
+        const mode = state.settings.toolMode || "move";
+
+        if (mode === "move") {
+          target.x = Math.round(pointerState.x + dx);
+          target.y = Math.round(pointerState.y + dy);
+        } else if (mode === "scale") {
+          const distance = Math.max(1, Math.hypot(point.x - pointerState.center.x, point.y - pointerState.center.y));
+          const distanceScale = distance / pointerState.startDistance;
+          target.scale = clamp(pointerState.scale * distanceScale, 0.05, 4);
+        } else if (mode === "rotate") {
+          const startAngle = Math.atan2(pointerState.startPoint.y - pointerState.center.y, pointerState.startPoint.x - pointerState.center.x);
+          const currentAngle = Math.atan2(point.y - pointerState.center.y, point.x - pointerState.center.x);
+          const deltaDeg = (currentAngle - startAngle) * 180 / Math.PI;
+          target.rotation = clamp(pointerState.rotation + deltaDeg, -180, 180);
+        }
+
+        syncTargetSliders();
+        renderPreview();
+      });
+
+      canvas.addEventListener("pointerup", (event) => endPreviewPointerDrag(canvas, event.pointerId));
+      canvas.addEventListener("pointercancel", (event) => endPreviewPointerDrag(canvas, event.pointerId));
+      canvas.addEventListener("lostpointercapture", () => endPreviewPointerDrag(canvas));
+      canvas.addEventListener("wheel", (event) => { const target = selectedTransformTarget(); if (!target) return; event.preventDefault(); pushUndoSnapshot(); if (event.shiftKey) target.rotation = clamp((target.rotation || 0) + (event.deltaY > 0 ? 2 : -2), -180, 180); else target.scale = clamp((target.scale || 1) + (event.deltaY > 0 ? -0.03 : 0.03), 0.05, 4); syncTargetSliders(); renderPreview(); }, { passive: false });
+    }
+
+    function applySelectedPreset() { const character = activeCharacter(); const presetId = $("#presetSelect").value; if (!presetId) return; const preset = character.presets.find((item) => item.id === presetId); if (!preset) return; applySelectionSnapshot(preset.selection, character); renderLayers(); renderPreview(); setStatusT("presetApplied", { name: preset.name }); }
+    async function tryAutoLoadCache() { try { const cached = await loadFromCache(); if (cached) { const currentLang = state.settings.uiLanguage; state = normalizeState(cached); state.settings.uiLanguage = currentLang; imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("cacheAutoLoaded"); } } catch (error) { console.warn("cache auto load skipped:", error); } }
+
+    state = normalizeState(createDefaultState());
+    bindEvents();
+    registerCustomFonts().then(() => { renderAll(); tryAutoLoadCache(); });
+  </script>
+</body>
+</html>
