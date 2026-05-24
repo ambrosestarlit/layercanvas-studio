@@ -494,6 +494,18 @@
     .modal-title { font-weight: 800; font-size: 1.08rem; }
     .modal-body { display: grid; gap: 0.8rem; padding: 1rem 1.1rem 1.1rem; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.55rem; align-items: center; margin-top: 0.25rem; }
+    .manual-card { width: min(880px, 100%); }
+    .manual-content { display: grid; gap: 1rem; color: var(--text); line-height: 1.7; }
+    .manual-content h3 { margin: 0 0 0.35rem; font-size: 1rem; color: var(--mint-deep); }
+    .manual-content p { margin: 0; }
+    .manual-content ul { margin: 0.25rem 0 0; padding-left: 1.25rem; }
+    .manual-content li { margin: 0.18rem 0; }
+    .manual-section {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.82);
+      padding: 0.85rem 0.95rem;
+    }
 
     .status { color: var(--muted); font-size: 0.82rem; min-height: 1.2em; }
     .hint { color: var(--muted); font-size: 0.78rem; line-height: 1.5; }
@@ -504,6 +516,66 @@
       .preview-toolbar { grid-template-columns: 1fr; }
       .preview-bg-field,
       .preview-tool-field { grid-column: 1; }
+    }
+
+
+    /* Small screens: allow the center preview panel itself to scroll so the bottom zoom controls stay reachable. */
+    @media (max-height: 820px), (max-width: 1180px) {
+      .center {
+        overflow: auto;
+        scrollbar-gutter: stable;
+        overscroll-behavior: contain;
+      }
+
+      .center .header,
+      .center .preview-toolbar {
+        flex: 0 0 auto;
+      }
+
+      .center .preview-wrap {
+        flex: 0 0 auto;
+        min-height: 0;
+      }
+
+      .preview-stage {
+        flex: 0 0 auto;
+        height: clamp(220px, 42vh, 420px);
+        min-height: 220px;
+      }
+
+      .preview-view-controls {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        box-shadow: 0 -8px 20px rgba(60, 100, 90, 0.08);
+        backdrop-filter: blur(10px);
+      }
+    }
+
+    @media (max-height: 700px) {
+      .app-header {
+        margin: 0.6rem 0.8rem 0;
+        padding: 0.65rem 0.85rem;
+      }
+
+      .app {
+        padding: 0.6rem;
+        gap: 0.6rem;
+      }
+
+      .center .header {
+        padding: 0.75rem 0.95rem;
+      }
+
+      .preview-wrap {
+        padding: 0.75rem;
+        gap: 0.65rem;
+      }
+
+      .preview-stage {
+        height: clamp(190px, 38vh, 340px);
+        min-height: 190px;
+      }
     }
 
     @media (max-width: 1060px) {
@@ -525,6 +597,7 @@
         <div class="subtitle" data-i18n="appSubtitle">レイヤー画像・テキスト・背景を重ねて、差分画像やサムネイルをPNGで書き出します。</div>
       </div>
       <div class="app-header-actions">
+        <button id="openHelpBtn" class="small secondary" data-i18n="helpButton">取扱説明</button>
         <button id="openExportSettingsBtn" class="small" data-i18n="exportSettingsButton">書き出し</button>
         <button id="addFontBtn" class="small secondary" data-i18n="registerFont">フォント登録</button>
         <button id="downloadJsonBtn" class="small secondary" data-i18n="jsonSaveButton">JSON保存</button>
@@ -812,6 +885,59 @@
     </main>
   </div>
 
+  <div id="helpModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card manual-card" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+      <div class="modal-head">
+        <div id="helpModalTitle" class="modal-title" data-i18n="helpTitle">取扱説明</div>
+        <button id="closeHelpModalBtn" type="button" class="small secondary" data-i18n="closeButton">閉じる</button>
+      </div>
+      <div class="modal-body manual-content">
+        <section class="manual-section">
+          <h3 data-i18n="helpSectionBasicTitle">基本の流れ</h3>
+          <ul>
+            <li data-i18n="helpBasic1">左側の「基本設定」でキャンバスサイズを決めます。画像を読み込む前でも常に変更できます。</li>
+            <li data-i18n="helpBasic2">カテゴリごとに「画像登録」からPNGなどを追加し、チェックしたパーツがプレビューに重なります。</li>
+            <li data-i18n="helpBasic3">単独レイヤーは1つだけ表示、組み合わせレイヤーは複数同時表示できます。カテゴリ上部のプルダウンで後から変更できます。</li>
+            <li data-i18n="helpBasic4">プレビュー上部の操作対象を選び、移動・サイズ・回転をドラッグまたは右側スライダーで調整します。</li>
+          </ul>
+        </section>
+        <section class="manual-section">
+          <h3 data-i18n="helpSectionLayersTitle">レイヤー・カテゴリ</h3>
+          <ul>
+            <li data-i18n="helpLayers1">カテゴリパネルの ↑ / ↓ で表示順を変更できます。下にあるものほど奥側、上にあるものほど手前側の扱いです。</li>
+            <li data-i18n="helpLayers2">カテゴリ削除を押すと、そのカテゴリと登録画像を削除できます。</li>
+            <li data-i18n="helpLayers3">眉毛を髪の毛(手前)より前に出したい場合は、左側の専用チェックを使います。</li>
+          </ul>
+        </section>
+        <section class="manual-section">
+          <h3 data-i18n="helpSectionTextTitle">テキスト・図形</h3>
+          <ul>
+            <li data-i18n="helpText1">テキストレイヤーは文字、フォント、色、縁取り、影、縦書き/横書きなどを個別に設定できます。</li>
+            <li data-i18n="helpText2">図形レイヤーは○ / □ / △を選び、ベタ塗りまたはアウトラインのみで描画できます。</li>
+            <li data-i18n="helpText3">図形は横幅・縦幅・比率維持・色・透明度・縁取り・影・角丸を調整できます。</li>
+            <li data-i18n="helpText4">テキストと図形は「立ち絵の背面 / 前面」を選べます。</li>
+          </ul>
+        </section>
+        <section class="manual-section">
+          <h3 data-i18n="helpSectionEffectsTitle">エフェクト</h3>
+          <ul>
+            <li data-i18n="helpEffects1">エフェクトカードはカテゴリ一覧内で上下移動できます。</li>
+            <li data-i18n="helpEffects2">エフェクトは、そのカードより下にあるレイヤーだけに反映されます。</li>
+            <li data-i18n="helpEffects3">色収差はRGB分離方式です。R / G / B の透明度合計が100%になるよう自動調整されます。</li>
+          </ul>
+        </section>
+        <section class="manual-section">
+          <h3 data-i18n="helpSectionSaveTitle">保存・読込・書き出し</h3>
+          <ul>
+            <li data-i18n="helpSave1">JSON保存でプロジェクトをファイルとして保存できます。別ブラウザや別端末で続きから作業する場合に便利です。</li>
+            <li data-i18n="helpSave2">キャッシュ保存はブラウザ内保存です。キャッシュ削除や環境変更で消える可能性があるため、重要な作業はJSON保存がおすすめです。</li>
+            <li data-i18n="helpSave3">「書き出し」からPNGを書き出せます。原寸または縦幅指定が選べます。</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+
   <div id="exportModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
       <div class="modal-head">
@@ -918,6 +1044,85 @@
       effectLayerSelected: "효과 레이어를 선택했습니다."
     });
 
+
+    Object.assign(I18N.ja, {
+      helpButton: "取扱説明",
+      helpTitle: "取扱説明",
+      helpSectionBasicTitle: "基本の流れ",
+      helpBasic1: "左側の「基本設定」でキャンバスサイズを決めます。画像を読み込む前でも常に変更できます。",
+      helpBasic2: "カテゴリごとに「画像登録」からPNGなどを追加し、チェックしたパーツがプレビューに重なります。",
+      helpBasic3: "単独レイヤーは1つだけ表示、組み合わせレイヤーは複数同時表示できます。カテゴリ上部のプルダウンで後から変更できます。",
+      helpBasic4: "プレビュー上部の操作対象を選び、移動・サイズ・回転をドラッグまたは右側スライダーで調整します。",
+      helpSectionLayersTitle: "レイヤー・カテゴリ",
+      helpLayers1: "カテゴリパネルの ↑ / ↓ で表示順を変更できます。下にあるものほど奥側、上にあるものほど手前側の扱いです。",
+      helpLayers2: "カテゴリ削除を押すと、そのカテゴリと登録画像を削除できます。",
+      helpLayers3: "眉毛を髪の毛(手前)より前に出したい場合は、左側の専用チェックを使います。",
+      helpSectionTextTitle: "テキスト・図形",
+      helpText1: "テキストレイヤーは文字、フォント、色、縁取り、影、縦書き/横書きなどを個別に設定できます。",
+      helpText2: "図形レイヤーは○ / □ / △を選び、ベタ塗りまたはアウトラインのみで描画できます。",
+      helpText3: "図形は横幅・縦幅・比率維持・色・透明度・縁取り・影・角丸を調整できます。",
+      helpText4: "テキストと図形は「立ち絵の背面 / 前面」を選べます。",
+      helpSectionEffectsTitle: "エフェクト",
+      helpEffects1: "エフェクトカードはカテゴリ一覧内で上下移動できます。",
+      helpEffects2: "エフェクトは、そのカードより下にあるレイヤーだけに反映されます。",
+      helpEffects3: "色収差はRGB分離方式です。R / G / B の透明度合計が100%になるよう自動調整されます。",
+      helpSectionSaveTitle: "保存・読込・書き出し",
+      helpSave1: "JSON保存でプロジェクトをファイルとして保存できます。別ブラウザや別端末で続きから作業する場合に便利です。",
+      helpSave2: "キャッシュ保存はブラウザ内保存です。キャッシュ削除や環境変更で消える可能性があるため、重要な作業はJSON保存がおすすめです。",
+      helpSave3: "「書き出し」からPNGを書き出せます。原寸または縦幅指定が選べます。"
+    });
+    Object.assign(I18N.en, {
+      helpButton: "Help",
+      helpTitle: "Help / Manual",
+      helpSectionBasicTitle: "Basic workflow",
+      helpBasic1: "Set the canvas size in Basic Settings on the left. You can change it anytime, even before loading images.",
+      helpBasic2: "Add PNGs or other images from Add Image in each category. Checked parts are layered in the preview.",
+      helpBasic3: "Single layers show only one item. Combinable layers can show multiple items. You can change this later from the dropdown at the top of each category.",
+      helpBasic4: "Choose a target above the preview, then adjust Move / Scale / Rotate by dragging or using the sliders on the right.",
+      helpSectionLayersTitle: "Layers and categories",
+      helpLayers1: "Use ↑ / ↓ on category panels to change the visual order. Lower items are drawn farther back; upper items are drawn closer to the front.",
+      helpLayers2: "Category Delete removes that category and its registered images.",
+      helpLayers3: "Use the dedicated checkbox on the left if you want brows to appear above front hair.",
+      helpSectionTextTitle: "Text and shapes",
+      helpText1: "Text layers can set text, font, color, stroke, shadow, and horizontal/vertical writing individually.",
+      helpText2: "Shape layers support circle, square, and triangle, with fill or outline-only drawing.",
+      helpText3: "Shapes support width, height, aspect-ratio lock, color, opacity, stroke, shadow, and corner radius.",
+      helpText4: "Text and shapes can be placed behind or in front of the standing image.",
+      helpSectionEffectsTitle: "Effects",
+      helpEffects1: "Effect cards can be moved up and down inside the category list.",
+      helpEffects2: "Each effect applies only to layers below its card.",
+      helpEffects3: "Chromatic aberration uses RGB splitting. R / G / B opacity is automatically balanced to total 100%.",
+      helpSectionSaveTitle: "Save, load, and export",
+      helpSave1: "Save JSON exports the project as a file. Use it to continue on another browser or device.",
+      helpSave2: "Cache Save stores the project in the browser. It may disappear if the cache is cleared, so JSON Save is recommended for important work.",
+      helpSave3: "Use Export to write a PNG. You can choose original size or a custom height."
+    });
+    Object.assign(I18N.ko, {
+      helpButton: "사용 설명",
+      helpTitle: "사용 설명",
+      helpSectionBasicTitle: "기본 흐름",
+      helpBasic1: "왼쪽 기본 설정에서 캔버스 크기를 정합니다. 이미지를 불러오기 전에도 항상 변경할 수 있습니다.",
+      helpBasic2: "각 카테고리의 이미지 등록에서 PNG 등을 추가하고, 체크한 파츠가 미리보기에 겹쳐집니다.",
+      helpBasic3: "단독 레이어는 1개만 표시되고, 조합 레이어는 여러 개를 동시에 표시할 수 있습니다. 각 카테고리 상단 드롭다운에서 나중에 변경할 수 있습니다.",
+      helpBasic4: "미리보기 위의 조작 대상을 선택한 뒤 이동 / 크기 / 회전을 드래그하거나 오른쪽 슬라이더로 조정합니다.",
+      helpSectionLayersTitle: "레이어와 카테고리",
+      helpLayers1: "카테고리 패널의 ↑ / ↓로 표시 순서를 변경할 수 있습니다. 아래에 있을수록 뒤쪽, 위에 있을수록 앞쪽에 그려집니다.",
+      helpLayers2: "카테고리 삭제를 누르면 해당 카테고리와 등록 이미지가 삭제됩니다.",
+      helpLayers3: "눈썹을 앞머리보다 위에 표시하려면 왼쪽의 전용 체크박스를 사용합니다.",
+      helpSectionTextTitle: "텍스트와 도형",
+      helpText1: "텍스트 레이어는 문자, 폰트, 색상, 외곽선, 그림자, 가로/세로쓰기 등을 개별 설정할 수 있습니다.",
+      helpText2: "도형 레이어는 원 / 사각형 / 삼각형을 선택하고, 채우기 또는 외곽선만으로 그릴 수 있습니다.",
+      helpText3: "도형은 가로, 세로, 비율 유지, 색상, 투명도, 외곽선, 그림자, 모서리 둥글기를 조정할 수 있습니다.",
+      helpText4: "텍스트와 도형은 스탠딩 이미지의 뒤 / 앞 배치를 선택할 수 있습니다.",
+      helpSectionEffectsTitle: "효과",
+      helpEffects1: "효과 카드는 카테고리 목록 안에서 위아래로 이동할 수 있습니다.",
+      helpEffects2: "효과는 해당 카드보다 아래에 있는 레이어에만 적용됩니다.",
+      helpEffects3: "색수차는 RGB 분리 방식입니다. R / G / B 투명도 합계가 100%가 되도록 자동 조정됩니다.",
+      helpSectionSaveTitle: "저장・불러오기・내보내기",
+      helpSave1: "JSON 저장으로 프로젝트를 파일로 저장할 수 있습니다. 다른 브라우저나 기기에서 이어서 작업할 때 편리합니다.",
+      helpSave2: "캐시 저장은 브라우저 내부 저장입니다. 캐시 삭제나 환경 변경으로 사라질 수 있으므로 중요한 작업은 JSON 저장을 권장합니다.",
+      helpSave3: "내보내기에서 PNG를 저장할 수 있습니다. 원본 크기 또는 세로 지정 중 선택할 수 있습니다."
+    });
 
     const DEFAULT_LAYER_CATEGORIES = [
       { id: "armFront", name: "腕(手前)", exclusive: false }, { id: "itemFront", name: "アイテム(手前)", exclusive: false }, { id: "hairFront", name: "髪の毛(手前)", exclusive: false }, { id: "eyes", name: "目元", exclusive: true }, { id: "brows", name: "眉毛", exclusive: true }, { id: "mouth", name: "口", exclusive: true }, { id: "effect", name: "表情効果", exclusive: false }, { id: "armBack", name: "腕(奥)", exclusive: false }, { id: "itemMiddle", name: "アイテム(中)", exclusive: false }, { id: "base", name: "ベース", exclusive: false }, { id: "itemBack", name: "アイテム(奥)", exclusive: false }, { id: "hairBack", name: "髪の毛(奥)", exclusive: false }
@@ -3036,20 +3241,36 @@
 
     function bindEvents() {
       const exportModal = $("#exportModal");
+      const helpModal = $("#helpModal");
       const openExportSettingsBtn = $("#openExportSettingsBtn");
       const closeExportModalBtn = $("#closeExportModalBtn");
-      const openExportModal = () => {
-        exportModal.classList.add("show");
-        exportModal.setAttribute("aria-hidden", "false");
+      const openHelpBtn = $("#openHelpBtn");
+      const closeHelpModalBtn = $("#closeHelpModalBtn");
+      const openModal = (modal) => {
+        if (!modal) return;
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
       };
-      const closeExportModal = () => {
-        exportModal.classList.remove("show");
-        exportModal.setAttribute("aria-hidden", "true");
+      const closeModal = (modal) => {
+        if (!modal) return;
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
       };
+      const openExportModal = () => openModal(exportModal);
+      const closeExportModal = () => closeModal(exportModal);
+      const openHelpModal = () => openModal(helpModal);
+      const closeHelpModal = () => closeModal(helpModal);
+      openHelpBtn.addEventListener("click", openHelpModal);
+      closeHelpModalBtn.addEventListener("click", closeHelpModal);
+      helpModal.addEventListener("click", (event) => { if (event.target === helpModal) closeHelpModal(); });
       openExportSettingsBtn.addEventListener("click", openExportModal);
       closeExportModalBtn.addEventListener("click", closeExportModal);
       exportModal.addEventListener("click", (event) => { if (event.target === exportModal) closeExportModal(); });
-      document.addEventListener("keydown", (event) => { if (event.key === "Escape" && exportModal.classList.contains("show")) closeExportModal(); });
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        if (helpModal.classList.contains("show")) closeHelpModal();
+        if (exportModal.classList.contains("show")) closeExportModal();
+      });
       $("#languageSelect").addEventListener("change", (event) => { state.settings.uiLanguage = event.target.value; safeStorageSet(LANG_STORAGE_KEY, state.settings.uiLanguage); renderAll(); setStatusT("languageChanged"); });
       $("#layerPresetSelect").addEventListener("change", (event) => { state.settings.activeLayerPresetId = event.target.value; ensureAllCharacterLayerKeys(); renderAll(); setStatusT("layerPresetChanged"); });
       $("#addLayerPresetBtn").addEventListener("click", createEmptyLayerPresetFromInput);
