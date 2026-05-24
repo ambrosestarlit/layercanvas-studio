@@ -747,6 +747,23 @@
         </details>
 
         <details class="control-section" open>
+          <summary data-i18n="shapeSection">ベクター図形レイヤー</summary>
+          <div class="section-body">
+            <div class="button-row">
+              <button id="addShapeLayerBtn" data-i18n="addShapeLayer">図形追加</button>
+              <button id="duplicateShapeLayerBtn" class="secondary" data-i18n="duplicateButton">複製</button>
+              <button id="deleteShapeLayerBtn" class="danger" data-i18n="deleteButton">削除</button>
+            </div>
+            <div id="shapeLayerList" class="part-list"></div>
+          </div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="shapeDetailSection">選択中図形詳細</summary>
+          <div id="shapeDetailEditor" class="section-body"></div>
+        </details>
+
+        <details class="control-section" open>
           <summary data-i18n="effectSection">エフェクトレイヤー</summary>
           <div class="section-body">
             <div class="button-row">
@@ -842,7 +859,7 @@
         inlineStyleTitle: "文字部分指定", inlineStyleHint: "指定した文字列だけフォント・色・サイズ・フチ・影を変更できます。複数指定はコンマで区切ってください。", inlineStyleEmpty: "指定はまだありません。", inlineStyleItem: "指定 {number}", inlineStyleTargets: "指定したい文字列", inlineStyleTargetsPlaceholder: "例：赤い, 海", inlineStyleFont: "指定フォント", inlineStyleColor: "色", inlineStyleSize: "サイズ", inlineStyleStrokeColor: "フチ色", inlineStyleStrokeWidth: "フチ太さ", inlineStyleShadowColor: "影色", inlineStyleShadowBlur: "影ぼかし", addInlineStyle: "+ 追加",
         layer_armFront: "腕(手前)", layer_itemFront: "アイテム(手前)", layer_hairFront: "髪の毛(手前)", layer_eyes: "目元", layer_brows: "眉毛", layer_mouth: "口", layer_effect: "表情効果", layer_armBack: "腕(奥)", layer_itemMiddle: "アイテム(中)", layer_base: "ベース", layer_itemBack: "アイテム(奥)", layer_hairBack: "髪の毛(奥)", layer_diffBase: "ベース",
         noteParts: "複数チェックで同カテゴリ内の重ね合わせが可能", noteExclusive: "1種類選択すると、同カテゴリ内の前の選択は自動で解除されます。", noteDiff: "完成済み差分をクリックで切り替え。複数選択はできません。", registerImage: "画像登録", emptyParts: "まだ画像が登録されていません。", emptyDiff: "完成済み差分画像を登録してください。", partNamePlaceholder: "パーツ名", unnamed: "名称未設定", newCharacter: "新規キャラクター", presetEmpty: "プリセットを選択", displaying: "表示中", applyDisplay: "表示適用",
-        noTextLayer: "テキストレイヤーがありません。", noSelectedText: "編集するテキストレイヤーを選択してください。", noEffectLayer: "エフェクトレイヤーがありません。", noSelectedEffect: "編集するエフェクトレイヤーを選択してください。", defaultTextLayerName: "テキスト", defaultTextBody: "TEXT", defaultEffectLayerName: "エフェクト", defaultFont: "default", effectOrderHint: "エフェクトはリスト内の↑↓と「上へ／下へ」で移動できます。各エフェクトは、その位置より下に描画済みのレイヤーにだけ反映されます。", effectMoveUp: "上へ", effectMoveDown: "下へ",
+        noTextLayer: "テキストレイヤーがありません。", noSelectedText: "編集するテキストレイヤーを選択してください。", noEffectLayer: "エフェクトレイヤーがありません。", noSelectedEffect: "編集するエフェクトレイヤーを選択してください。", defaultTextLayerName: "テキスト", defaultTextBody: "TEXT", shapeSection: "ベクター図形レイヤー", shapeDetailSection: "選択中図形詳細", addShapeLayer: "図形追加", defaultShapeLayerName: "図形", noShapeLayer: "図形レイヤーがありません。", noSelectedShape: "編集する図形レイヤーを選択してください。", shapeTarget: "図形", shapeName: "レイヤー名", shapeType: "図形種類", shapeCircle: "○ 円", shapeSquare: "□ 四角", shapeTriangle: "△ 三角", shapeDrawMode: "描画方式", shapeFill: "ベタ塗り", shapeOutline: "アウトラインのみ", shapePlacement: "表示位置", shapeColor: "図形色", shapeOpacity: "透明度", shapeWidth: "横幅", shapeHeight: "縦幅", shapeKeepRatio: "比率維持", shapeLineWidth: "線の太さ", shapeCornerRadius: "角丸", shapeLayerAdded: "図形レイヤーを追加しました。", defaultEffectLayerName: "エフェクト", defaultFont: "default", effectOrderHint: "エフェクトはリスト内の↑↓と「上へ／下へ」で移動できます。各エフェクトは、その位置より下に描画済みのレイヤーにだけ反映されます。", effectMoveUp: "上へ", effectMoveDown: "下へ",
         languageChanged: "表示言語を変更しました。", addedImages: "{count}件の画像を登録しました。", fontAdded: "フォントを登録しました。", bgAdded: "背景画像を登録しました。", pngExported: "PNGを書き出しました。{width} × {height}px", pngExportFailed: "PNG書き出しに失敗しました。", jsonSaved: "JSONを保存しました。", jsonLoaded: "JSONを読み込みました。", jsonLoadFailed: "JSONの読み込みに失敗しました。", cacheSaved: "ブラウザキャッシュに保存しました。", cacheSaveFailed: "キャッシュ保存に失敗しました。", cacheMissing: "保存済みキャッシュがありません。", cacheLoaded: "キャッシュから読み込みました。", cacheLoadFailed: "キャッシュ読込に失敗しました。", cacheDeleteConfirm: "ブラウザに保存したキャッシュを削除しますか？", cacheDeleted: "キャッシュを削除しました。", cacheDeleteFailed: "キャッシュ削除に失敗しました。", cacheAutoLoaded: "保存済みキャッシュを自動読込しました。", enterCharacterName: "キャラクター名を入力してください。", characterAdded: "キャラクターを追加しました。", characterRenamed: "キャラクター名を変更しました。", cannotDeleteLastCharacter: "最後のキャラクターは削除できません。", deleteCharacterConfirm: "現在のキャラクターを削除しますか？", characterDeleted: "キャラクターを削除しました。", enterPresetName: "プリセット名を入力してください。", presetSaved: "プリセットを保存しました。", selectPresetDelete: "削除するプリセットを選択してください。", presetDeleted: "プリセットを削除しました。", presetApplied: "プリセット「{name}」を適用しました。", enterLayerPresetName: "レイヤー構成プリセット名を入力してください。", layerPresetAdded: "レイヤー構成プリセットを作成しました。", cannotDeleteLastLayerPreset: "最後のレイヤー構成プリセットは削除できません。", layerPresetDeleted: "レイヤー構成プリセットを削除しました。", layerPresetChanged: "レイヤー構成プリセットを切り替えました。", enterCategoryName: "カテゴリ名を入力してください。", categoryAdded: "カテゴリを追加しました。", categoryMoved: "カテゴリの並び順を変更しました。", effectMoveUp: "上へ", effectMoveDown: "下へ", effectListUp: "リスト上へ", effectListDown: "リスト下へ", effectAdded: "エフェクトレイヤーを追加しました。"
       },
       en: {},
@@ -850,6 +867,7 @@
     };
 
     I18N.en = { ...I18N.ja,
+      shapeSection: "Vector Shape Layers", shapeDetailSection: "Selected Shape Details", addShapeLayer: "Add Shape", defaultShapeLayerName: "Shape", noShapeLayer: "No shape layers yet.", noSelectedShape: "Select a shape layer to edit.", shapeTarget: "Shape", shapeName: "Layer name", shapeType: "Shape type", shapeCircle: "○ Circle", shapeSquare: "□ Rectangle", shapeTriangle: "△ Triangle", shapeDrawMode: "Draw mode", shapeFill: "Fill", shapeOutline: "Outline only", shapePlacement: "Position", shapeColor: "Shape color", shapeOpacity: "Opacity", shapeWidth: "Width", shapeHeight: "Height", shapeKeepRatio: "Keep aspect ratio", shapeLineWidth: "Line width", shapeCornerRadius: "Corner roundness", shapeLayerAdded: "Shape layer added.",
       appTitle: "LayerCanvas Studio", appSubtitle: "Create character variants, illustration variations, and thumbnails by layering images, text, and backgrounds, then export as PNG.", layerPresetLabel: "Layer Structure Preset", layerPresetNameLabel: "Preset name", layerPresetNamePlaceholder: "Example: Image Variant Set", newCreateButton: "New", defaultLayerPresetName: "Character Variant Set", categorySection: "Category Management", categoryNameLabel: "Category name", categoryNamePlaceholder: "Example: Front Hair", addLayerButton: "Add Layer", categoryTypeMulti: "Combinable layer", categoryTypeSingle: "Single layer", categoryTarget: "Category", categoryTypeHint: "Choose the category type before adding to control whether multiple items can be combined or only one can be active.", categoryOrderHint: "Use ↑ / ↓ on category panels to reorder; drawing order follows the same structure.", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "This preset uses only the background panel. Background image layers are disabled.", characterLabel: "Character", characterNameLabel: "Character name", characterNamePlaceholder: "Character name", addButton: "Add", renameButton: "Rename", deleteButton: "Delete", presetLabel: "Preset", presetNameLabel: "Preset name", presetNamePlaceholder: "Example: Normal smile / Shy / Angry", savePresetButton: "Save current combination", applyButton: "Apply",
       basicSettings: "Basic Settings", canvasHeightLabel: "Height", canvasWidthLabel: "Width", canvasSizePresetLabel: "Canvas Size Preset", canvasPresetNameLabel: "Preset name", canvasPresetNamePlaceholder: "Example: Thumbnail / DLsite", canvasPresetRegister: "Save preset", canvasPresetImageSize: "Image size", canvasPresetSaved: "Canvas size preset saved.", selectCanvasPresetDelete: "Select a canvas size preset to delete.", canvasPresetDeleted: "Canvas size preset deleted.", canvasPresetApplied: "Canvas size applied.",
       previewTitle: "Preview / Export", previewSubtitle: "Move, rotate, and scale the whole standing image or text layers on the preview. Backgrounds use their own sliders.", previewBgLabel: "Preview background", bgTransparent: "Transparency check", bgWhite: "White", bgMint: "Muted mint", exportHeightLabel: "Export height (px)", sizeLabel: "Size", sizeOriginal: "Original", sizeHeight: "Custom height", exportPngButton: "Export PNG", exportSettingsButton: "Export", exportSettingsTitle: "Export Settings", closeButton: "Close", jsonSaveButton: "Save JSON", jsonLoadButton: "Load JSON", cacheSaveButton: "Save cache", cacheLoadButton: "Load cache", cacheDeleteButton: "Delete cache",
@@ -861,6 +879,7 @@
     };
 
     I18N.ko = { ...I18N.ja,
+      shapeSection: "벡터 도형 레이어", shapeDetailSection: "선택한 도형 상세", addShapeLayer: "도형 추가", defaultShapeLayerName: "도형", noShapeLayer: "도형 레이어가 없습니다.", noSelectedShape: "편집할 도형 레이어를 선택해 주세요.", shapeTarget: "도형", shapeName: "레이어 이름", shapeType: "도형 종류", shapeCircle: "○ 원", shapeSquare: "□ 사각형", shapeTriangle: "△ 삼각형", shapeDrawMode: "그리기 방식", shapeFill: "채우기", shapeOutline: "외곽선만", shapePlacement: "표시 위치", shapeColor: "도형 색", shapeOpacity: "투명도", shapeWidth: "가로", shapeHeight: "세로", shapeKeepRatio: "비율 유지", shapeLineWidth: "선 두께", shapeCornerRadius: "모서리 둥글기", shapeLayerAdded: "도형 레이어를 추가했습니다.",
       appTitle: "LayerCanvas Studio", appSubtitle: "이미지, 텍스트, 배경을 레이어로 겹쳐 캐릭터 차분, 일러스트 차분, 썸네일을 만들고 PNG로 내보냅니다.", layerPresetLabel: "레이어 구성 프리셋", layerPresetNameLabel: "프리셋 이름", layerPresetNamePlaceholder: "예: 이미지 차분 세트", newCreateButton: "새로 만들기", defaultLayerPresetName: "캐릭터 차분 세트", categorySection: "카테고리 관리", categoryNameLabel: "카테고리명", categoryNamePlaceholder: "예: 앞머리", addLayerButton: "레이어 추가", categoryTypeMulti: "조합 레이어", categoryTypeSingle: "단독 레이어", categoryTarget: "카테고리", categoryTypeHint: "추가 전에 카테고리 종류를 선택하면, 여러 항목 조합 가능 여부와 1개만 활성화할지를 정할 수 있습니다.", categoryOrderHint: "카테고리 패널의 ↑ / ↓로 순서를 바꾸면 그리기 순서도 함께 변경됩니다.", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "이 프리셋에서는 배경 이미지 레이어를 사용하지 않고 배경 패널만 사용할 수 있습니다.", characterLabel: "캐릭터", characterNameLabel: "캐릭터 이름", characterNamePlaceholder: "캐릭터 이름", addButton: "추가", renameButton: "이름 변경", deleteButton: "삭제", presetLabel: "프리셋", presetNameLabel: "프리셋 이름", presetNamePlaceholder: "예: 기본 미소 / 부끄러움 / 화남", savePresetButton: "현재 조합 저장", applyButton: "적용",
       basicSettings: "기본 설정", canvasHeightLabel: "세로", canvasWidthLabel: "가로", canvasSizePresetLabel: "캔버스 크기 프리셋", canvasPresetNameLabel: "프리셋 이름", canvasPresetNamePlaceholder: "예: 썸네일 / DLsite", canvasPresetRegister: "프리셋 등록", canvasPresetImageSize: "이미지 크기", canvasPresetSaved: "캔버스 크기 프리셋을 등록했습니다.", selectCanvasPresetDelete: "삭제할 캔버스 크기 프리셋을 선택해 주세요.", canvasPresetDeleted: "캔버스 크기 프리셋을 삭제했습니다.", canvasPresetApplied: "캔버스 크기를 적용했습니다.",
       previewTitle: "미리보기 / 내보내기", previewSubtitle: "미리보기에서 스탠딩 이미지 전체 또는 텍스트를 이동, 회전, 크기 조절할 수 있습니다. 배경은 전용 슬라이더로 조정합니다.", previewBgLabel: "미리보기 배경", bgTransparent: "투명 확인", bgWhite: "흰색", bgMint: "차분한 민트", exportHeightLabel: "내보내기 세로(px)", sizeLabel: "크기", sizeOriginal: "원본", sizeHeight: "세로 지정", exportPngButton: "PNG 내보내기", exportSettingsButton: "내보내기", exportSettingsTitle: "내보내기 설정", closeButton: "닫기", jsonSaveButton: "JSON 저장", jsonLoadButton: "JSON 불러오기", cacheSaveButton: "캐시 저장", cacheLoadButton: "캐시 불러오기", cacheDeleteButton: "캐시 삭제",
@@ -929,6 +948,9 @@
     const imageCache = new Map();
     const registeredFonts = new Set();
     let previewRenderToken = 0;
+    let previewFrameRequest = 0;
+    let previewRenderRunning = false;
+    let targetSliderFrameRequest = 0;
     let pointerState = null;
     let state;
     const undoStack = [];
@@ -1054,6 +1076,17 @@
         inlineStyles: []
       };
     }
+    function createShapeLayer() {
+      return {
+        id: uid("shape"), name: t("defaultShapeLayerName"), visible: true, placement: "front",
+        x: 600, y: 600, scale: 1, rotation: 0,
+        shapeType: "circle", drawMode: "fill", color: "#ffffff", opacity: 1,
+        width: 320, height: 320, lockRatio: false, aspectRatio: 1,
+        lineWidth: 8, cornerRadius: 0,
+        stroke: { enabled: false, color: "#111827", width: 8 },
+        shadow: { enabled: false, color: "#000000", blur: 12, offsetX: 0, offsetY: 6 }
+      };
+    }
     function createEffectLayer() {
       return {
         id: uid("effectLayer"), name: t("defaultEffectLayerName"), visible: true, type: "vignette", placement: "standing", stackIndex: 0,
@@ -1074,15 +1107,17 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 8,
+        version: 10,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
+        activeShapeLayerId: "",
         activeEffectLayerId: "",
         activeToolTarget: "standing",
         characters: [firstChar],
         backgroundLayers: [createBackgroundLayer(1), createBackgroundLayer(2)],
         backgroundPanel: createBackgroundPanel(),
         textLayers: [],
+        shapeLayers: [],
         effectLayers: [],
         layerPresets: [firstLayerPreset],
         canvasPresets: createDefaultCanvasPresets(),
@@ -1121,6 +1156,36 @@
         stroke: { enabled: layer?.stroke?.enabled !== false, color: layer?.stroke?.color || "#111827", width: Math.round(clamp(layer?.stroke?.width ?? 8, 0, 80)) },
         shadow: { enabled: layer?.shadow?.enabled !== false, color: layer?.shadow?.color || "#000000", blur: Math.round(clamp(layer?.shadow?.blur ?? 12, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? 0, -200, 200)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? 6, -200, 200)) },
         inlineStyles: safeArray(layer?.inlineStyles).map(normalizeInlineStyle).filter(Boolean)
+      };
+    }
+    function normalizeShapeLayer(layer) {
+      const base = createShapeLayer();
+      const width = Math.round(clamp(layer?.width ?? base.width, 1, 5000));
+      const height = Math.round(clamp(layer?.height ?? base.height, 1, 5000));
+      const aspectRatio = Number(layer?.aspectRatio || (width / Math.max(1, height)) || 1);
+      return {
+        ...base,
+        ...layer,
+        id: layer?.id || uid("shape"),
+        name: String(layer?.name || t("defaultShapeLayerName")),
+        visible: layer?.visible !== false,
+        placement: layer?.placement === "back" ? "back" : "front",
+        x: Number(layer?.x ?? base.x),
+        y: Number(layer?.y ?? base.y),
+        scale: clamp(layer?.scale ?? base.scale, 0.05, 4),
+        rotation: clamp(layer?.rotation ?? base.rotation, -180, 180),
+        shapeType: ["circle", "square", "triangle"].includes(layer?.shapeType) ? layer.shapeType : base.shapeType,
+        drawMode: layer?.drawMode === "outline" ? "outline" : "fill",
+        color: layer?.color || base.color,
+        opacity: clamp(layer?.opacity ?? base.opacity, 0, 1),
+        width,
+        height,
+        lockRatio: Boolean(layer?.lockRatio),
+        aspectRatio: clamp(aspectRatio, 0.01, 100),
+        lineWidth: Math.round(clamp(layer?.lineWidth ?? base.lineWidth, 1, 120)),
+        cornerRadius: Math.round(clamp(layer?.cornerRadius ?? base.cornerRadius, 0, 500)),
+        stroke: { enabled: Boolean(layer?.stroke?.enabled), color: layer?.stroke?.color || base.stroke.color, width: Math.round(clamp(layer?.stroke?.width ?? base.stroke.width, 0, 160)) },
+        shadow: { enabled: Boolean(layer?.shadow?.enabled), color: layer?.shadow?.color || base.shadow.color, blur: Math.round(clamp(layer?.shadow?.blur ?? base.shadow.blur, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? base.shadow.offsetX, -240, 240)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? base.shadow.offsetY, -240, 240)) }
       };
     }
     function normalizeEffectLayer(layer) {
@@ -1186,18 +1251,23 @@
       normalized.textLayers = safeArray(normalized.textLayers).map(normalizeTextLayer);
       if (!normalized.textLayers.length) normalized.textLayers = [];
       if (!normalized.activeTextLayerId || !normalized.textLayers.some((layer) => layer.id === normalized.activeTextLayerId)) normalized.activeTextLayerId = normalized.textLayers[0]?.id || "";
+      normalized.shapeLayers = safeArray(normalized.shapeLayers).map(normalizeShapeLayer);
+      if (!normalized.shapeLayers.length) normalized.shapeLayers = [];
+      if (!normalized.activeShapeLayerId || !normalized.shapeLayers.some((layer) => layer.id === normalized.activeShapeLayerId)) normalized.activeShapeLayerId = normalized.shapeLayers[0]?.id || "";
       normalized.effectLayers = safeArray(normalized.effectLayers).map(normalizeEffectLayer);
       if (!normalized.activeEffectLayerId || !normalized.effectLayers.some((layer) => layer.id === normalized.activeEffectLayerId)) normalized.activeEffectLayerId = normalized.effectLayers[0]?.id || "";
       normalized.customFonts = safeArray(normalized.customFonts).map((font) => ({ id: font.id || uid("font"), name: font.name || font.fileName || "Custom Font", family: font.family || `CustomFont_${uid("f")}`, dataUrl: font.dataUrl || "", fileName: font.fileName || font.name || "Custom Font" })).filter((font) => font.dataUrl);
       normalized.activeToolTarget = normalized.activeToolTarget || "standing";
       const validTextTarget = normalized.textLayers.some((layer) => `text:${layer.id}` === normalized.activeToolTarget);
+      const validShapeTarget = normalized.shapeLayers.some((layer) => `shape:${layer.id}` === normalized.activeToolTarget);
       const validLayerTarget = safeArray(normalized.layerPresets).some((preset) => safeArray(preset.categories).some((category) => `layer:${category.id}` === normalized.activeToolTarget));
-      if (normalized.activeToolTarget !== "standing" && !validTextTarget && !validLayerTarget) normalized.activeToolTarget = normalized.activeTextLayerId ? `text:${normalized.activeTextLayerId}` : "standing";
+      if (normalized.activeToolTarget !== "standing" && !validTextTarget && !validShapeTarget && !validLayerTarget) normalized.activeToolTarget = normalized.activeTextLayerId ? `text:${normalized.activeTextLayerId}` : (normalized.activeShapeLayerId ? `shape:${normalized.activeShapeLayerId}` : "standing");
       return normalized;
     }
 
     function activeCharacter() { return state.characters.find((character) => character.id === state.activeCharacterId) || state.characters[0]; }
     function activeTextLayer() { return state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || null; }
+    function activeShapeLayer() { return state.shapeLayers.find((layer) => layer.id === state.activeShapeLayerId) || null; }
     function activeEffectLayer() {
       if (!Array.isArray(state.effectLayers) || !state.effectLayers.length) return null;
       let layer = state.effectLayers.find((item) => item.id === state.activeEffectLayerId) || null;
@@ -1221,6 +1291,8 @@
       if (state.activeToolTarget === "standing") return activeCharacter().transform;
       const textMatch = String(state.activeToolTarget || "").match(/^text:(.+)$/);
       if (textMatch) return state.textLayers.find((layer) => layer.id === textMatch[1]) || null;
+      const shapeMatch = String(state.activeToolTarget || "").match(/^shape:(.+)$/);
+      if (shapeMatch) return state.shapeLayers.find((layer) => layer.id === shapeMatch[1]) || null;
       const layer = activeTransformLayer();
       if (layer) return layer.transform;
       return activeCharacter().transform;
@@ -1272,7 +1344,7 @@
 
     function renderAll() {
       ensureAllCharacterLayerKeys();
-      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
+      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderShapeLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderShapeDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
     }
     function renderLayerPresetControls() {
       const select = $("#layerPresetSelect");
@@ -1390,6 +1462,134 @@
         selectBtn.addEventListener("click", selectLayer);
         row.append(checkbox, meta, selectBtn); root.appendChild(row);
       });
+    }
+
+    function shapeTypeLabel(value) {
+      return { circle: t("shapeCircle"), square: t("shapeSquare"), triangle: t("shapeTriangle") }[value] || value;
+    }
+    function getToolShapeLayerLabel(layer) {
+      const layerName = String(layer?.name || t("defaultShapeLayerName")).trim() || t("defaultShapeLayerName");
+      return `${layerName}：${shapeTypeLabel(layer?.shapeType || "circle")}`;
+    }
+    function renderShapeLayerList() {
+      const root = $("#shapeLayerList");
+      if (!root) return;
+      root.innerHTML = "";
+      if (!Array.isArray(state.shapeLayers) || !state.shapeLayers.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noShapeLayer");
+        root.appendChild(empty);
+        return;
+      }
+      state.shapeLayers.forEach((layer) => {
+        const row = document.createElement("div");
+        row.className = `text-row${layer.id === state.activeShapeLayerId ? " active" : ""}`;
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = layer.visible;
+        checkbox.title = t("textVisible");
+        const meta = document.createElement("div");
+        meta.className = "text-meta";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = layer.name;
+        nameInput.placeholder = t("shapeName");
+        const note = document.createElement("div");
+        note.className = "text-note";
+        note.textContent = `${layer.placement === "back" ? t("textBack") : t("textFront")} / ${shapeTypeLabel(layer.shapeType)} / ${Math.round(layer.width || 0)}×${Math.round(layer.height || 0)}`;
+        meta.append(nameInput, note);
+        const selectBtn = document.createElement("button");
+        selectBtn.className = "small secondary";
+        selectBtn.textContent = t("applyButton");
+        checkbox.addEventListener("change", () => { layer.visible = checkbox.checked; renderPreview(); });
+        nameInput.addEventListener("input", () => { layer.name = nameInput.value || t("defaultShapeLayerName"); renderToolTargetOptions(); });
+        const selectLayer = () => {
+          state.activeShapeLayerId = layer.id;
+          state.activeToolTarget = `shape:${layer.id}`;
+          renderAll();
+        };
+        row.addEventListener("click", (event) => { const tag = event.target.tagName.toLowerCase(); if (tag === "input" || tag === "button") return; selectLayer(); });
+        selectBtn.addEventListener("click", selectLayer);
+        row.append(checkbox, meta, selectBtn);
+        root.appendChild(row);
+      });
+    }
+
+    function renderShapeDetailEditor() {
+      const root = $("#shapeDetailEditor");
+      if (!root) return;
+      root.innerHTML = "";
+      const layer = activeShapeLayer();
+      if (!layer) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noSelectedShape");
+        root.appendChild(empty);
+        return;
+      }
+      const rerender = () => { renderShapeLayerList(); renderShapeDetailEditor(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); };
+      const scheduleShapeListUpdate = () => {
+        if (targetSliderFrameRequest) return;
+        targetSliderFrameRequest = requestAnimationFrame(() => {
+          targetSliderFrameRequest = 0;
+          renderShapeLayerList();
+        });
+      };
+      const commitShapeSize = () => { renderShapeDetailEditor(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); };
+      const applyRatioFromSize = () => { layer.aspectRatio = Math.max(0.01, Number(layer.width || 1) / Math.max(1, Number(layer.height || 1))); };
+      const setShapeWidth = (value) => {
+        layer.width = Math.round(clamp(value, 1, 5000));
+        if (layer.lockRatio) layer.height = Math.round(clamp(layer.width / Math.max(0.01, Number(layer.aspectRatio || 1)), 1, 5000));
+        else applyRatioFromSize();
+        scheduleShapeListUpdate();
+        renderPreview();
+      };
+      const setShapeHeight = (value) => {
+        layer.height = Math.round(clamp(value, 1, 5000));
+        if (layer.lockRatio) layer.width = Math.round(clamp(layer.height * Math.max(0.01, Number(layer.aspectRatio || 1)), 1, 5000));
+        else applyRatioFromSize();
+        scheduleShapeListUpdate();
+        renderPreview();
+      };
+
+      root.appendChild(createField(t("shapeName"), "input", layer.name, (value) => { layer.name = value || t("defaultShapeLayerName"); renderShapeLayerList(); renderToolTargetOptions(); }));
+      const basic = document.createElement("div");
+      basic.className = "grid-2";
+      basic.append(
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderShapeLayerList(); renderPreview(); }),
+        createSelectField(t("shapePlacement"), layer.placement, [
+          { value: "back", label: t("textBack") },
+          { value: "front", label: t("textFront") }
+        ], (value) => { layer.placement = value; rerender(); }),
+        createSelectField(t("shapeType"), layer.shapeType, [
+          { value: "circle", label: t("shapeCircle") },
+          { value: "square", label: t("shapeSquare") },
+          { value: "triangle", label: t("shapeTriangle") }
+        ], (value) => { layer.shapeType = value; rerender(); }),
+        createSelectField(t("shapeDrawMode"), layer.drawMode, [
+          { value: "fill", label: t("shapeFill") },
+          { value: "outline", label: t("shapeOutline") }
+        ], (value) => { layer.drawMode = value; rerender(); })
+      );
+      root.appendChild(basic);
+      root.appendChild(createColorField(t("shapeColor"), layer.color, (value) => { layer.color = value; renderPreview(); }));
+      addRange(root, t("shapeOpacity"), layer.opacity ?? 1, 0, 1, 0.01, "", (value) => { layer.opacity = value; renderPreview(); }, 2);
+      addRange(root, t("shapeWidth"), layer.width, 1, 5000, 1, "px", setShapeWidth, 0, commitShapeSize);
+      addRange(root, t("shapeHeight"), layer.height, 1, 5000, 1, "px", setShapeHeight, 0, commitShapeSize);
+      root.appendChild(createCheckboxField(t("shapeKeepRatio"), Boolean(layer.lockRatio), (checked) => { layer.lockRatio = checked; if (checked) applyRatioFromSize(); rerender(); }));
+      addRange(root, t("shapeLineWidth"), layer.lineWidth ?? 8, 1, 120, 1, "px", (value) => { layer.lineWidth = Math.round(value); renderPreview(); });
+      if (layer.shapeType === "square" || layer.shapeType === "triangle") {
+        addRange(root, t("shapeCornerRadius"), layer.cornerRadius ?? 0, 0, 500, 1, "px", (value) => { layer.cornerRadius = Math.round(value); renderPreview(); });
+      }
+      root.appendChild(createCheckboxField(t("stroke"), Boolean(layer.stroke?.enabled), (checked) => { layer.stroke.enabled = checked; renderPreview(); }));
+      root.appendChild(createColorField(t("strokeColor"), layer.stroke?.color || "#111827", (value) => { layer.stroke.color = value; renderPreview(); }));
+      addRange(root, t("strokeWidth"), layer.stroke?.width ?? 8, 0, 160, 1, "px", (value) => { layer.stroke.width = Math.round(value); renderPreview(); });
+      root.appendChild(createCheckboxField(t("shadow"), Boolean(layer.shadow?.enabled), (checked) => { layer.shadow.enabled = checked; renderPreview(); }));
+      root.appendChild(createColorField(t("shadowColor"), layer.shadow?.color || "#000000", (value) => { layer.shadow.color = value; renderPreview(); }));
+      addRange(root, t("shadowBlur"), layer.shadow?.blur ?? 12, 0, 160, 1, "px", (value) => { layer.shadow.blur = Math.round(value); renderPreview(); });
+      addRange(root, t("shadowX"), layer.shadow?.offsetX ?? 0, -240, 240, 1, "px", (value) => { layer.shadow.offsetX = Math.round(value); renderPreview(); });
+      addRange(root, t("shadowY"), layer.shadow?.offsetY ?? 6, -240, 240, 1, "px", (value) => { layer.shadow.offsetY = Math.round(value); renderPreview(); });
     }
 
     function renderCustomFontList() {
@@ -1667,14 +1867,15 @@
       const apply = (val) => { text.value = val; color.value = /^#[0-9a-f]{6}$/i.test(val) ? val : color.value; onInput(val); };
       text.addEventListener("input", () => onInput(text.value)); color.addEventListener("input", () => apply(color.value)); row.append(text, color); field.append(label, row); return field;
     }
-    function addRange(root, labelText, value, min, max, step, suffix, onInput, digits = 0) {
+    function addRange(root, labelText, value, min, max, step, suffix, onInput, digits = 0, onCommit = null) {
       const row = document.createElement("div"); row.className = "slider-row compact";
       const label = document.createElement("label"); label.textContent = labelText;
       const input = document.createElement("input"); input.type = "range"; input.min = min; input.max = max; input.step = step; input.value = value;
       const output = document.createElement("div"); output.className = "value";
       const format = (v) => `${Number(v).toFixed(digits)}${suffix}`;
       output.textContent = format(value);
-      input.addEventListener("input", () => { const n = Number(input.value); output.textContent = format(n); onInput(n); syncTargetSliders(false); });
+      input.addEventListener("input", () => { const n = Number(input.value); output.textContent = format(n); onInput(n); });
+      input.addEventListener("change", () => { if (typeof onCommit === "function") onCommit(Number(input.value)); });
       row.append(label, input, output); root.appendChild(row); return row;
     }
 
@@ -1976,6 +2177,15 @@
     function setToolTarget(target) {
       if (target === "standing") {
         state.activeToolTarget = "standing";
+      } else if (target === "shape" || String(target || "").startsWith("shape:")) {
+        const layerId = target === "shape" ? (state.activeShapeLayerId || state.shapeLayers[0]?.id || "") : String(target || "").replace(/^shape:/, "");
+        const layer = state.shapeLayers.find((item) => item.id === layerId) || state.shapeLayers[0];
+        if (layer) {
+          state.activeShapeLayerId = layer.id;
+          state.activeToolTarget = `shape:${layer.id}`;
+        } else {
+          state.activeToolTarget = "standing";
+        }
       } else if (target === "layer" || String(target || "").startsWith("layer:")) {
         const requestedId = String(target || "").replace(/^layer:/, "");
         const layers = getActiveLayers();
@@ -1998,7 +2208,9 @@
       }
       renderToolTargetOptions();
       renderTextLayerList();
+      renderShapeLayerList();
       renderTextDetailEditor();
+      renderShapeDetailEditor();
       syncTargetSliders();
       renderPreview();
     }
@@ -2008,6 +2220,7 @@
       if (!root) return;
 
       const currentTextLayer = state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || state.textLayers[0] || null;
+      const currentShapeLayer = state.shapeLayers.find((layer) => layer.id === state.activeShapeLayerId) || state.shapeLayers[0] || null;
       const layers = getActiveLayers();
       const layerTargetEnabled = !activeLayerPreset()?.useBackgroundImages && layers.length > 0;
       const currentLayerId = String(state.activeToolTarget || "").replace(/^layer:/, "");
@@ -2017,12 +2230,17 @@
         const matchedLayer = currentTextLayer ? state.textLayers.find((layer) => `text:${layer.id}` === state.activeToolTarget) : null;
         if (matchedLayer) state.activeTextLayerId = matchedLayer.id;
         else state.activeToolTarget = currentTextLayer ? `text:${currentTextLayer.id}` : "standing";
+      } else if (String(state.activeToolTarget || "").startsWith("shape:")) {
+        const matchedLayer = currentShapeLayer ? state.shapeLayers.find((layer) => `shape:${layer.id}` === state.activeToolTarget) : null;
+        if (matchedLayer) state.activeShapeLayerId = matchedLayer.id;
+        else state.activeToolTarget = currentShapeLayer ? `shape:${currentShapeLayer.id}` : "standing";
       } else if (String(state.activeToolTarget || "").startsWith("layer:")) {
         if (!layerTargetEnabled || !currentLayer) state.activeToolTarget = "standing";
       }
 
       const isStanding = state.activeToolTarget === "standing";
       const isText = String(state.activeToolTarget || "").startsWith("text:");
+      const isShape = String(state.activeToolTarget || "").startsWith("shape:");
       const isLayer = String(state.activeToolTarget || "").startsWith("layer:");
       root.innerHTML = "";
 
@@ -2055,7 +2273,28 @@
       }
       textSelect.addEventListener("change", () => setToolTarget(`text:${textSelect.value}`));
 
-      root.append(standingLabel, textLabel, textSelect);
+      const shapeLabel = document.createElement("label");
+      shapeLabel.className = `target-check${isShape ? " active" : ""}`;
+      const shapeCheck = document.createElement("input");
+      shapeCheck.type = "checkbox";
+      shapeCheck.checked = isShape;
+      shapeCheck.disabled = state.shapeLayers.length === 0;
+      shapeCheck.addEventListener("change", () => setToolTarget("shape"));
+      shapeLabel.append(shapeCheck, document.createTextNode(` ${t("shapeTarget")}`));
+
+      const shapeSelect = document.createElement("select");
+      shapeSelect.className = "target-text-select";
+      shapeSelect.disabled = state.shapeLayers.length === 0;
+      for (const layer of state.shapeLayers) {
+        const option = document.createElement("option");
+        option.value = layer.id;
+        option.textContent = getToolShapeLayerLabel(layer);
+        option.selected = layer.id === state.activeShapeLayerId;
+        shapeSelect.appendChild(option);
+      }
+      shapeSelect.addEventListener("change", () => setToolTarget(`shape:${shapeSelect.value}`));
+
+      root.append(standingLabel, textLabel, textSelect, shapeLabel, shapeSelect);
 
       if (layerTargetEnabled) {
         const layerLabel = document.createElement("label");
@@ -2193,10 +2432,25 @@
     }
     function syncTargetSliders(updateValues = true) {
       const target = selectedTransformTarget(); const disabled = !target;
-      ["#targetX", "#targetY", "#targetScale", "#targetRotation"].forEach((selector) => { $(selector).disabled = disabled; });
+      ["#targetX", "#targetY", "#targetScale", "#targetRotation"].forEach((selector) => { const element = $(selector); if (element) element.disabled = disabled; });
       if (!target || !updateValues) return;
-      $("#targetX").value = target.x || 0; $("#targetY").value = target.y || 0; $("#targetScale").value = target.scale || 1; $("#targetRotation").value = target.rotation || 0;
-      $("#targetXValue").textContent = `${Math.round(target.x || 0)}px`; $("#targetYValue").textContent = `${Math.round(target.y || 0)}px`; $("#targetScaleValue").textContent = Number(target.scale || 1).toFixed(2); $("#targetRotationValue").textContent = `${Math.round(target.rotation || 0)}°`;
+      const targetX = $("#targetX"); const targetY = $("#targetY"); const targetScale = $("#targetScale"); const targetRotation = $("#targetRotation");
+      const targetXValue = $("#targetXValue"); const targetYValue = $("#targetYValue"); const targetScaleValue = $("#targetScaleValue"); const targetRotationValue = $("#targetRotationValue");
+      if (targetX) targetX.value = target.x || 0;
+      if (targetY) targetY.value = target.y || 0;
+      if (targetScale) targetScale.value = target.scale || 1;
+      if (targetRotation) targetRotation.value = target.rotation || 0;
+      if (targetXValue) targetXValue.textContent = `${Math.round(target.x || 0)}px`;
+      if (targetYValue) targetYValue.textContent = `${Math.round(target.y || 0)}px`;
+      if (targetScaleValue) targetScaleValue.textContent = Number(target.scale || 1).toFixed(2);
+      if (targetRotationValue) targetRotationValue.textContent = `${Math.round(target.rotation || 0)}°`;
+    }
+    function scheduleSyncTargetSliders(updateValues = true) {
+      if (targetSliderFrameRequest) return;
+      targetSliderFrameRequest = requestAnimationFrame(() => {
+        targetSliderFrameRequest = 0;
+        syncTargetSliders(updateValues);
+      });
     }
     function armSliderHistory() {
       if (sliderHistoryArmed) return;
@@ -2208,7 +2462,7 @@
       const target = selectedTransformTarget(); if (!target) return;
       armSliderHistory();
       target.x = Number($("#targetX").value || 0); target.y = Number($("#targetY").value || 0); target.scale = Number($("#targetScale").value || 1); target.rotation = Number($("#targetRotation").value || 0);
-      syncTargetSliders(); renderPreview(); if (state.activeToolTarget?.startsWith("text:")) renderTextDetailTransformOnly();
+      syncTargetSliders(); renderPreview(); if (state.activeToolTarget?.startsWith("text:")) renderTextDetailTransformOnly(); if (state.activeToolTarget?.startsWith("shape:")) renderShapeLayerList();
     }
     function renderTextDetailTransformOnly() { /* The transform sliders are authoritative; full editor rerender is noisy while dragging. */ }
 
@@ -2249,11 +2503,37 @@
       const customHeight = Math.round(Number(state.settings?.canvasHeight || 0));
       return { width: customWidth > 0 ? customWidth : natural.width, height: customHeight > 0 ? customHeight : natural.height };
     }
-    async function renderPreview() {
-      const token = ++previewRenderToken;
-      await registerCustomFonts();
-      const character = activeCharacter(); const { width, height } = getCanvasBaseSize(character); const canvas = $("#previewCanvas"); canvas.width = width; canvas.height = height;
-      await drawComposite(canvas, width, height, character, { forExport: false }); if (token !== previewRenderToken) return; $("#previewInfo").textContent = `${width} × ${height}`; updatePreviewStageBg(); updatePreviewView();
+    function renderPreview() {
+      previewRenderToken += 1;
+      if (previewFrameRequest) return;
+      previewFrameRequest = requestAnimationFrame(() => {
+        previewFrameRequest = 0;
+        performPreviewRender(previewRenderToken);
+      });
+    }
+    async function performPreviewRender(token) {
+      if (previewRenderRunning) {
+        renderPreview();
+        return;
+      }
+      previewRenderRunning = true;
+      try {
+        const character = activeCharacter();
+        const { width, height } = getCanvasBaseSize(character);
+        const canvas = $("#previewCanvas");
+        if (!canvas) return;
+        if (canvas.width !== width) canvas.width = width;
+        if (canvas.height !== height) canvas.height = height;
+        await drawComposite(canvas, width, height, character, { forExport: false });
+        if (token !== previewRenderToken) return;
+        const previewInfo = $("#previewInfo");
+        if (previewInfo) previewInfo.textContent = `${width} × ${height}`;
+        updatePreviewStageBg();
+        updatePreviewView();
+      } finally {
+        previewRenderRunning = false;
+        if (token !== previewRenderToken && !previewFrameRequest) renderPreview();
+      }
     }
     async function drawComposite(canvas, width, height, character = activeCharacter(), options = {}) {
       const ctx = canvas.getContext("2d", { alpha: true }); ctx.clearRect(0, 0, width, height);
@@ -2262,9 +2542,11 @@
         for (const bg of state.backgroundLayers) await drawBackground(ctx, bg, width, height);
       }
       applyEffectLayersForPlacement(canvas, "background");
+      for (const layer of state.shapeLayers.filter((item) => item.visible && item.placement === "back")) drawShapeLayer(ctx, layer);
       for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "back")) drawTextLayer(ctx, layer);
       applyEffectLayersForPlacement(canvas, "backText");
       await drawStandingGroup(ctx, width, height, character);
+      for (const layer of state.shapeLayers.filter((item) => item.visible && item.placement === "front")) drawShapeLayer(ctx, layer);
       for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "front")) drawTextLayer(ctx, layer);
       applyEffectLayersForPlacement(canvas, "frontText");
     }
@@ -2613,6 +2895,113 @@
       const minX = Math.min(...nonEmpty.map((column) => column.x - column.width / 2)); const maxX = Math.max(...nonEmpty.map((column) => column.x + column.width / 2)); let shiftX = 0; if (settings.align === "center") shiftX = -(minX + maxX) / 2; if (settings.align === "left") shiftX = -minX; if (settings.align === "right") shiftX = -maxX;
       const entries = []; nonEmpty.forEach((column) => { column.glyphs.forEach((entry) => { entries.push({ ...entry, x: column.x + shiftX, y: entry.localY - column.height / 2 }); }); }); return entries;
     }
+    function roundedRectPath(context, x, y, w, h, r) {
+      const radius = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2));
+      context.moveTo(x + radius, y);
+      context.lineTo(x + w - radius, y);
+      context.quadraticCurveTo(x + w, y, x + w, y + radius);
+      context.lineTo(x + w, y + h - radius);
+      context.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+      context.lineTo(x + radius, y + h);
+      context.quadraticCurveTo(x, y + h, x, y + h - radius);
+      context.lineTo(x, y + radius);
+      context.quadraticCurveTo(x, y, x + radius, y);
+    }
+    function roundedPolygonPath(context, points, radius) {
+      if (!points.length) return;
+      const r = Math.max(0, Number(radius) || 0);
+      if (r <= 0) {
+        context.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) context.lineTo(points[i].x, points[i].y);
+        context.closePath();
+        return;
+      }
+      const len = points.length;
+      for (let i = 0; i < len; i++) {
+        const prev = points[(i - 1 + len) % len];
+        const curr = points[i];
+        const next = points[(i + 1) % len];
+        const v1 = { x: prev.x - curr.x, y: prev.y - curr.y };
+        const v2 = { x: next.x - curr.x, y: next.y - curr.y };
+        const d1 = Math.max(1, Math.hypot(v1.x, v1.y));
+        const d2 = Math.max(1, Math.hypot(v2.x, v2.y));
+        const rr = Math.min(r, d1 / 2, d2 / 2);
+        const p1 = { x: curr.x + (v1.x / d1) * rr, y: curr.y + (v1.y / d1) * rr };
+        const p2 = { x: curr.x + (v2.x / d2) * rr, y: curr.y + (v2.y / d2) * rr };
+        if (i === 0) context.moveTo(p1.x, p1.y);
+        else context.lineTo(p1.x, p1.y);
+        context.quadraticCurveTo(curr.x, curr.y, p2.x, p2.y);
+      }
+      context.closePath();
+    }
+    function shapePath(context, settings) {
+      const w = Math.max(1, Number(settings.width || 1));
+      const h = Math.max(1, Number(settings.height || 1));
+      const x = -w / 2;
+      const y = -h / 2;
+      context.beginPath();
+      if (settings.shapeType === "circle") {
+        context.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2);
+      } else if (settings.shapeType === "triangle") {
+        const r = Math.min(Number(settings.cornerRadius || 0), Math.min(w, h) / 3);
+        roundedPolygonPath(context, [
+          { x: 0, y: -h / 2 },
+          { x: w / 2, y: h / 2 },
+          { x: -w / 2, y: h / 2 }
+        ], r);
+      } else {
+        roundedRectPath(context, x, y, w, h, Number(settings.cornerRadius || 0));
+        context.closePath();
+      }
+    }
+    function drawShapeLayer(context, layer) {
+      if (!layer?.visible) return;
+      const settings = normalizeShapeLayer(layer);
+      context.save();
+      context.translate(settings.x || 0, settings.y || 0);
+      context.rotate((settings.rotation || 0) * Math.PI / 180);
+      context.scale(settings.scale || 1, settings.scale || 1);
+      context.globalAlpha = clamp(settings.opacity ?? 1, 0, 1);
+      if (settings.shadow?.enabled) {
+        context.shadowColor = settings.shadow.color || "#000000";
+        context.shadowBlur = Number(settings.shadow.blur || 0);
+        context.shadowOffsetX = Number(settings.shadow.offsetX || 0);
+        context.shadowOffsetY = Number(settings.shadow.offsetY || 0);
+      }
+
+      if (settings.drawMode === "outline") {
+        if (settings.stroke?.enabled && Number(settings.stroke.width || 0) > 0) {
+          shapePath(context, settings);
+          context.strokeStyle = settings.stroke.color || "#111827";
+          context.lineWidth = Math.max(1, Number(settings.lineWidth || 1) + Number(settings.stroke.width || 0) * 2);
+          context.lineJoin = "round";
+          context.lineCap = "round";
+          context.stroke();
+          context.shadowColor = "transparent";
+        }
+        shapePath(context, settings);
+        context.strokeStyle = settings.color || "#ffffff";
+        context.lineWidth = Math.max(1, Number(settings.lineWidth || 1));
+        context.lineJoin = "round";
+        context.lineCap = "round";
+        context.stroke();
+      } else {
+        shapePath(context, settings);
+        context.fillStyle = settings.color || "#ffffff";
+        context.fill();
+        if (settings.stroke?.enabled && Number(settings.stroke.width || 0) > 0) {
+          context.shadowColor = "transparent";
+          shapePath(context, settings);
+          context.strokeStyle = settings.stroke.color || "#111827";
+          context.lineWidth = Math.max(0, Number(settings.stroke.width || 0));
+          context.lineJoin = "round";
+          context.lineCap = "round";
+          context.stroke();
+        }
+      }
+      context.restore();
+    }
+
     function drawTextLayer(context, layer) {
       if (!layer.visible || !layer.text) return;
       const settings = normalizeTextLayer(layer); context.save(); context.translate(settings.x || 0, settings.y || 0); context.rotate((settings.rotation || 0) * Math.PI / 180); context.scale(settings.scale || 1, settings.scale || 1); context.globalAlpha = 1; context.textBaseline = "alphabetic"; context.font = fontStringForSettings(settings);
@@ -2700,6 +3089,9 @@
       $("#addTextLayerBtn").addEventListener("click", () => { const layer = createTextLayer(); const { width, height } = getCanvasBaseSize(); layer.x = width / 2; layer.y = height / 2; state.textLayers.push(layer); state.activeTextLayerId = layer.id; state.activeToolTarget = `text:${layer.id}`; renderAll(); });
       $("#duplicateTextLayerBtn").addEventListener("click", () => { const layer = activeTextLayer(); if (!layer) return; const copy = normalizeTextLayer(clone(layer)); copy.id = uid("text"); copy.name = `${layer.name} copy`; copy.x += 24; copy.y += 24; state.textLayers.push(copy); state.activeTextLayerId = copy.id; state.activeToolTarget = `text:${copy.id}`; renderAll(); });
       $("#deleteTextLayerBtn").addEventListener("click", () => { const layer = activeTextLayer(); if (!layer) return; state.textLayers = state.textLayers.filter((item) => item.id !== layer.id); state.activeTextLayerId = state.textLayers[0]?.id || ""; state.activeToolTarget = state.activeTextLayerId ? `text:${state.activeTextLayerId}` : "standing"; renderAll(); });
+      $("#addShapeLayerBtn").addEventListener("click", () => { const layer = createShapeLayer(); const { width, height } = getCanvasBaseSize(); layer.x = width / 2; layer.y = height / 2; state.shapeLayers.push(layer); state.activeShapeLayerId = layer.id; state.activeToolTarget = `shape:${layer.id}`; renderAll(); setStatusT("shapeLayerAdded"); });
+      $("#duplicateShapeLayerBtn").addEventListener("click", () => { const layer = activeShapeLayer(); if (!layer) return; const copy = normalizeShapeLayer(clone(layer)); copy.id = uid("shape"); copy.name = `${layer.name} copy`; copy.x += 24; copy.y += 24; state.shapeLayers.push(copy); state.activeShapeLayerId = copy.id; state.activeToolTarget = `shape:${copy.id}`; renderAll(); });
+      $("#deleteShapeLayerBtn").addEventListener("click", () => { const layer = activeShapeLayer(); if (!layer) return; state.shapeLayers = state.shapeLayers.filter((item) => item.id !== layer.id); state.activeShapeLayerId = state.shapeLayers[0]?.id || ""; state.activeToolTarget = state.activeShapeLayerId ? `shape:${state.activeShapeLayerId}` : "standing"; renderAll(); });
       $("#addEffectLayerBtn").addEventListener("click", () => {
         if (!Array.isArray(state.effectLayers)) state.effectLayers = [];
         const layer = createEffectLayer();
@@ -2890,7 +3282,7 @@
           target.rotation = clamp(pointerState.rotation + deltaDeg, -180, 180);
         }
 
-        syncTargetSliders();
+        scheduleSyncTargetSliders();
         renderPreview();
       });
 
