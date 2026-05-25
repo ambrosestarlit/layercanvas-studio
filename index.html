@@ -222,15 +222,30 @@
 
     .layer-head {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.75rem 0.85rem;
+      gap: 0.45rem;
+      padding: 0.65rem 0.75rem;
       background: linear-gradient(90deg, rgba(216, 238, 232, 0.85), rgba(255, 255, 255, 0.8));
       border-bottom: 1px solid var(--line);
+      flex-wrap: wrap;
+      overflow-x: auto;
     }
 
-    .layer-name { font-weight: 700; }
+    .layer-title-inline {
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 10rem;
+      order: 2;
+    }
+
+    .layer-name {
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
     .layer-note { color: var(--muted); font-size: 0.78rem; margin-top: 0.1rem; line-height: 1.4; }
 
     .layer-control-row {
@@ -247,16 +262,49 @@
     }
 
     .layer-header-actions {
-      justify-content: flex-end;
-      align-items: end;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: max-content;
+      order: 3;
+    }
+
+    .layer-header-actions .small,
+    .layer-header-actions button,
+    .layer-header-actions select {
+      flex: 0 0 auto;
     }
 
     .category-type-field {
-      min-width: 150px;
-      max-width: 210px;
+      min-width: auto;
+      max-width: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0;
+      flex-wrap: wrap;
     }
 
-    .category-type-field select { width: 100%; }
+    .layer-body-controls {
+      padding: 0.65rem 0.65rem 0 0.65rem;
+    }
+
+    .layer-body-controls .category-type-field {
+      justify-content: flex-start;
+    }
+
+    .category-type-field label {
+      margin: 0;
+      white-space: nowrap;
+      font-size: 0.82rem;
+    }
+
+    .category-type-field select {
+      width: auto;
+      min-width: 8.5rem;
+    }
 
     .effect-layer-card {
       border-color: rgba(146, 201, 186, 0.9);
@@ -423,7 +471,8 @@
 
     .slider-row.canvas-size { grid-template-columns: 82px 1fr 106px; }
     .slider-row.canvas-size input[type="number"] { width: 100%; text-align: right; font-variant-numeric: tabular-nums; }
-    .slider-row.compact { grid-template-columns: 82px 1fr 70px; }
+    .slider-row.compact { grid-template-columns: 82px minmax(0, 1fr) 94px; }
+    .slider-row.compact input.value { width: 100%; min-width: 0; text-align: right; padding: 0.45rem 0.35rem; font-variant-numeric: tabular-nums; }
     input[type="range"] { width: 100%; accent-color: var(--mint-deep); }
     .value { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.85rem; }
 
@@ -837,6 +886,23 @@
         </details>
 
         <details class="control-section" open>
+          <summary data-i18n="frameSection">枠レイヤー</summary>
+          <div class="section-body">
+            <div class="button-row">
+              <button id="addFrameLayerBtn" data-i18n="addFrameLayer">枠追加</button>
+              <button id="duplicateFrameLayerBtn" class="secondary" data-i18n="duplicateButton">複製</button>
+              <button id="deleteFrameLayerBtn" class="danger" data-i18n="deleteButton">削除</button>
+            </div>
+            <div id="frameLayerList" class="part-list"></div>
+          </div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="frameDetailSection">選択中枠詳細</summary>
+          <div id="frameDetailEditor" class="section-body"></div>
+        </details>
+
+        <details class="control-section" open>
           <summary data-i18n="effectSection">エフェクトレイヤー</summary>
           <div class="section-body">
             <div class="button-row">
@@ -910,12 +976,16 @@
           </ul>
         </section>
         <section class="manual-section">
-          <h3 data-i18n="helpSectionTextTitle">テキスト・図形</h3>
+          <h3 data-i18n="helpSectionTextTitle">テキスト・図形・枠</h3>
           <ul>
             <li data-i18n="helpText1">テキストレイヤーは文字、フォント、色、縁取り、影、縦書き/横書きなどを個別に設定できます。</li>
+            <li data-i18n="helpTextGradient">テキストはチェックボックスで通常色 / グラデーションを切り替え、2色目・角度・幅を調整できます。</li>
             <li data-i18n="helpText2">図形レイヤーは○ / □ / △を選び、ベタ塗りまたはアウトラインのみで描画できます。</li>
             <li data-i18n="helpText3">図形は横幅・縦幅・比率維持・色・透明度・縁取り・影・角丸を調整できます。</li>
-            <li data-i18n="helpText4">テキストと図形は「立ち絵の背面 / 前面」を選べます。</li>
+            <li data-i18n="helpFrame1">枠レイヤーは通常枠とクラシカル枠を切り替えできます。通常枠は4方向 / 上下のみ / 左右のみを選べます。</li>
+            <li data-i18n="helpFrame2">クラシカル枠はクラシカルA / B / Cから選び、4角素材の色・透明度・縁取り・ドロップシャドウを調整できます。</li>
+            <li data-i18n="helpFrame3">クラシカル枠の左右間隔 / 上下間隔はキャンバス中心基準で対称に動きます。枠サイズの上限は選択中デザインの原寸です。</li>
+            <li data-i18n="helpText4">テキスト・図形・枠は「立ち絵の背面 / 前面」を選べます。</li>
           </ul>
         </section>
         <section class="manual-section">
@@ -984,7 +1054,7 @@
         textName: "レイヤー名", textBody: "テキスト", textBodyPlaceholder: "表示する文字を入力", textVisible: "表示", textPlacement: "表示位置", textBack: "立ち絵の背面", textFront: "立ち絵の前面", textAlign: "文字揃え", alignLeft: "左", alignCenter: "中央", alignRight: "右", writingMode: "文字方向", writingHorizontal: "横書き", writingVertical: "縦書き", verticalLatinRotate: "英数字を横倒しにする", verticalColumnGap: "縦書き列間", wrapWidth: "折り返し幅", wrapHeight: "折り返し高さ", font: "フォント", fontSize: "フォントサイズ", textColor: "文字色", lineHeight: "行間", letterSpacing: "字間", stroke: "縁取り", strokeColor: "フチ色", strokeWidth: "フチ太さ", shadow: "ドロップシャドウ", shadowColor: "影色", shadowBlur: "影ぼかし", shadowX: "影X", shadowY: "影Y", effectName: "レイヤー名", effectType: "エフェクト種類", effectPlacement: "適用位置", effectVisible: "表示", effectTypeVignette: "ビネット", effectTypeChromatic: "色収差", effectTypeBlur: "ぼかし", effectTypeTone: "グレー / セピア", effectPlacementBg: "背景の上", effectPlacementBackText: "背面テキストの上", effectPlacementStanding: "立ち絵の上", effectPlacementFrontText: "前面テキストの上", effectColor: "色", effectIntensity: "強さ", effectRadius: "広がり", effectShift: "ずらし量", effectBlur: "ぼかし量", effectToneMode: "色調", effectToneGray: "グレー", effectToneSepia: "セピア", effectRgbOpacityHint: "R / G / B の配分は自動で合計100%になるよう調整されます。", effectRedOpacity: "R透明度", effectGreenOpacity: "G透明度", effectBlueOpacity: "B透明度", effectRedShift: "Rずらし", effectGreenShift: "Gずらし", effectBlueShift: "Bずらし",
         inlineStyleTitle: "文字部分指定", inlineStyleHint: "指定した文字列だけフォント・色・サイズ・フチ・影を変更できます。複数指定はコンマで区切ってください。", inlineStyleEmpty: "指定はまだありません。", inlineStyleItem: "指定 {number}", inlineStyleTargets: "指定したい文字列", inlineStyleTargetsPlaceholder: "例：赤い, 海", inlineStyleFont: "指定フォント", inlineStyleColor: "色", inlineStyleSize: "サイズ", inlineStyleStrokeColor: "フチ色", inlineStyleStrokeWidth: "フチ太さ", inlineStyleShadowColor: "影色", inlineStyleShadowBlur: "影ぼかし", addInlineStyle: "+ 追加",
         layer_armFront: "腕(手前)", layer_itemFront: "アイテム(手前)", layer_hairFront: "髪の毛(手前)", layer_eyes: "目元", layer_brows: "眉毛", layer_mouth: "口", layer_effect: "表情効果", layer_armBack: "腕(奥)", layer_itemMiddle: "アイテム(中)", layer_base: "ベース", layer_itemBack: "アイテム(奥)", layer_hairBack: "髪の毛(奥)", layer_diffBase: "ベース",
-        noteParts: "複数チェックで同カテゴリ内の重ね合わせが可能", noteExclusive: "1種類選択すると、同カテゴリ内の前の選択は自動で解除されます。", noteDiff: "完成済み差分をクリックで切り替え。複数選択はできません。", registerImage: "画像登録", emptyParts: "まだ画像が登録されていません。", emptyDiff: "完成済み差分画像を登録してください。", partNamePlaceholder: "パーツ名", unnamed: "名称未設定", newCharacter: "新規キャラクター", presetEmpty: "プリセットを選択", displaying: "表示中", applyDisplay: "表示適用",
+        noteParts: "", noteExclusive: "1種類選択すると、同カテゴリ内の前の選択は自動で解除されます。", noteDiff: "完成済み差分をクリックで切り替え。複数選択はできません。", registerImage: "画像登録", emptyParts: "まだ画像が登録されていません。", emptyDiff: "完成済み差分画像を登録してください。", partNamePlaceholder: "パーツ名", unnamed: "名称未設定", newCharacter: "新規キャラクター", presetEmpty: "プリセットを選択", displaying: "表示中", applyDisplay: "表示適用",
         noTextLayer: "テキストレイヤーがありません。", noSelectedText: "編集するテキストレイヤーを選択してください。", noEffectLayer: "エフェクトレイヤーがありません。", noSelectedEffect: "編集するエフェクトレイヤーを選択してください。", defaultTextLayerName: "テキスト", defaultTextBody: "TEXT", shapeSection: "ベクター図形レイヤー", shapeDetailSection: "選択中図形詳細", addShapeLayer: "図形追加", defaultShapeLayerName: "図形", noShapeLayer: "図形レイヤーがありません。", noSelectedShape: "編集する図形レイヤーを選択してください。", shapeTarget: "図形", shapeName: "レイヤー名", shapeType: "図形種類", shapeCircle: "○ 円", shapeSquare: "□ 四角", shapeTriangle: "△ 三角", shapeDrawMode: "描画方式", shapeFill: "ベタ塗り", shapeOutline: "アウトラインのみ", shapePlacement: "表示位置", shapeColor: "図形色", shapeOpacity: "透明度", shapeWidth: "横幅", shapeHeight: "縦幅", shapeKeepRatio: "比率維持", shapeLineWidth: "線の太さ", shapeCornerRadius: "角丸", shapeLayerAdded: "図形レイヤーを追加しました。", defaultEffectLayerName: "エフェクト", defaultFont: "default", effectOrderHint: "エフェクトはリスト内の↑↓と「上へ／下へ」で移動できます。各エフェクトは、その位置より下に描画済みのレイヤーにだけ反映されます。", effectMoveUp: "上へ", effectMoveDown: "下へ",
         languageChanged: "表示言語を変更しました。", addedImages: "{count}件の画像を登録しました。", fontAdded: "フォントを登録しました。", bgAdded: "背景画像を登録しました。", pngExported: "PNGを書き出しました。{width} × {height}px", pngExportFailed: "PNG書き出しに失敗しました。", jsonSaved: "JSONを保存しました。", jsonLoaded: "JSONを読み込みました。", jsonLoadFailed: "JSONの読み込みに失敗しました。", cacheSaved: "ブラウザキャッシュに保存しました。", cacheSaveFailed: "キャッシュ保存に失敗しました。", cacheMissing: "保存済みキャッシュがありません。", cacheLoaded: "キャッシュから読み込みました。", cacheLoadFailed: "キャッシュ読込に失敗しました。", cacheDeleteConfirm: "ブラウザに保存したキャッシュを削除しますか？", cacheDeleted: "キャッシュを削除しました。", cacheDeleteFailed: "キャッシュ削除に失敗しました。", cacheAutoLoaded: "保存済みキャッシュを自動読込しました。", enterCharacterName: "キャラクター名を入力してください。", characterAdded: "キャラクターを追加しました。", characterRenamed: "キャラクター名を変更しました。", cannotDeleteLastCharacter: "最後のキャラクターは削除できません。", deleteCharacterConfirm: "現在のキャラクターを削除しますか？", characterDeleted: "キャラクターを削除しました。", enterPresetName: "プリセット名を入力してください。", presetSaved: "プリセットを保存しました。", selectPresetDelete: "削除するプリセットを選択してください。", presetDeleted: "プリセットを削除しました。", presetApplied: "プリセット「{name}」を適用しました。", enterLayerPresetName: "レイヤー構成プリセット名を入力してください。", layerPresetAdded: "レイヤー構成プリセットを作成しました。", cannotDeleteLastLayerPreset: "最後のレイヤー構成プリセットは削除できません。", layerPresetDeleted: "レイヤー構成プリセットを削除しました。", layerPresetChanged: "レイヤー構成プリセットを切り替えました。", enterCategoryName: "カテゴリ名を入力してください。", categoryAdded: "カテゴリを追加しました。", categoryMoved: "カテゴリの並び順を変更しました。", effectMoveUp: "上へ", effectMoveDown: "下へ", effectListUp: "リスト上へ", effectListDown: "リスト下へ", effectAdded: "エフェクトレイヤーを追加しました。"
       },
@@ -1018,6 +1088,7 @@
 
     Object.assign(I18N.ja, {
       categoryTypeSelect: "カテゴリ種類",
+      deleteCategoryButton: "カテゴリ削除",
       categoryChanged: "カテゴリ種類を変更しました。",
       deleteCategoryConfirm: "このカテゴリと登録画像を削除しますか？",
       categoryDeleted: "カテゴリを削除しました。",
@@ -1027,6 +1098,7 @@
     });
     Object.assign(I18N.en, {
       categoryTypeSelect: "Category type",
+      deleteCategoryButton: "Delete category",
       categoryChanged: "Category type changed.",
       deleteCategoryConfirm: "Delete this category and its registered images?",
       categoryDeleted: "Category deleted.",
@@ -1036,6 +1108,7 @@
     });
     Object.assign(I18N.ko, {
       categoryTypeSelect: "카테고리 종류",
+      deleteCategoryButton: "카테고리 삭제",
       categoryChanged: "카테고리 종류를 변경했습니다.",
       deleteCategoryConfirm: "이 카테고리와 등록 이미지를 삭제할까요?",
       categoryDeleted: "카테고리를 삭제했습니다.",
@@ -1156,7 +1229,218 @@
     let previewFrameRequest = 0;
     let previewRenderRunning = false;
     let targetSliderFrameRequest = 0;
+
+    const CLASSICAL_FRAME_PRESETS = [
+      {
+        id: "classical01",
+        name: "クラシカルA",
+        width: 517,
+        height: 517,
+        pieces: {
+          topLeft: "img/frames/classical01/top-left.png",
+          topRight: "img/frames/classical01/top-right.png",
+          bottomRight: "img/frames/classical01/bottom-right.png",
+          bottomLeft: "img/frames/classical01/bottom-left.png"
+        }
+      },
+      {
+        id: "classical02",
+        name: "クラシカルB",
+        width: 523,
+        height: 523,
+        pieces: {
+          topLeft: "img/frames/classical02/top-left.png",
+          topRight: "img/frames/classical02/top-right.png",
+          bottomRight: "img/frames/classical02/bottom-right.png",
+          bottomLeft: "img/frames/classical02/bottom-left.png"
+        }
+      },
+      {
+        id: "classical03",
+        name: "クラシカルC",
+        width: 506,
+        height: 511,
+        pieces: {
+          topLeft: "img/frames/classical03/top-left.png",
+          topRight: "img/frames/classical03/top-right.png",
+          bottomRight: "img/frames/classical03/bottom-right.png",
+          bottomLeft: "img/frames/classical03/bottom-left.png"
+        }
+      }
+    ];
+    const CLASSICAL_FRAME_PRESET_MAP = Object.fromEntries(CLASSICAL_FRAME_PRESETS.map((preset) => [preset.id, preset]));
+    const classicalFrameImageSets = Object.fromEntries(CLASSICAL_FRAME_PRESETS.map((preset) => [preset.id, Object.fromEntries(Object.entries(preset.pieces).map(([key, src]) => {
+      const image = new Image();
+      image.src = src;
+      image.onload = () => { if (typeof renderPreview === "function") renderPreview(); };
+      return [key, image];
+    }))]));
+    function getClassicalFramePreset(presetId) {
+      return CLASSICAL_FRAME_PRESET_MAP[presetId] || CLASSICAL_FRAME_PRESETS[0];
+    }
+    function getClassicalFrameImages(presetId) {
+      return classicalFrameImageSets[presetId] || classicalFrameImageSets[CLASSICAL_FRAME_PRESETS[0].id];
+    }
+    function getClassicalFrameNaturalSize(presetId) {
+      const preset = getClassicalFramePreset(presetId);
+      return { width: Number(preset.width || 517), height: Number(preset.height || preset.width || 517) };
+    }
+    function getClassicalFrameMaxSize(presetId) {
+      const size = getClassicalFrameNaturalSize(presetId);
+      return Math.max(size.width, size.height);
+    }
+    function getClassicalFrameRenderSize(settings) {
+      const natural = getClassicalFrameNaturalSize(settings?.framePreset || CLASSICAL_FRAME_PRESETS[0].id);
+      const maxSize = Math.max(1, Math.max(natural.width, natural.height));
+      const currentSize = Math.max(1, Math.min(maxSize, Number(settings?.size || maxSize)));
+      const scale = currentSize / maxSize;
+      return { width: natural.width * scale, height: natural.height * scale, maxSize, scale };
+    }
+    const tintedAlphaCanvasCache = new Map();
     let pointerState = null;
+
+    Object.assign(I18N.ja, {
+      frameSection: "枠レイヤー",
+      frameDetailSection: "選択中枠詳細",
+      addFrameLayer: "枠追加",
+      defaultFrameLayerName: "枠",
+      noFrameLayer: "枠レイヤーがありません。",
+      noSelectedFrame: "編集する枠レイヤーを選択してください。",
+      frameName: "レイヤー名",
+      framePlacement: "表示位置",
+      frameMode: "枠方向",
+      frameAll: "4方向",
+      frameHorizontal: "上下のみ",
+      frameVertical: "左右のみ",
+      frameColor: "枠色",
+      frameOpacity: "透明度",
+      frameThickness: "枠の太さ",
+      frameLayerAdded: "枠レイヤーを追加しました。",
+      frameLayerSelected: "枠レイヤーを選択しました。",
+      helpText5: "枠レイヤーはキャンバスの境界から内側へ向かって太くなる枠を追加できます。4方向 / 上下のみ / 左右のみを選べます。"
+    });
+    Object.assign(I18N.en, {
+      frameSection: "Frame Layers",
+      frameDetailSection: "Selected Frame Details",
+      addFrameLayer: "Add Frame",
+      defaultFrameLayerName: "Frame",
+      noFrameLayer: "No frame layers yet.",
+      noSelectedFrame: "Select a frame layer to edit.",
+      frameName: "Layer name",
+      framePlacement: "Position",
+      frameMode: "Frame sides",
+      frameAll: "All 4 sides",
+      frameHorizontal: "Top / bottom only",
+      frameVertical: "Left / right only",
+      frameColor: "Frame color",
+      frameOpacity: "Opacity",
+      frameThickness: "Frame thickness",
+      frameLayerAdded: "Frame layer added.",
+      frameLayerSelected: "Frame layer selected.",
+      helpText5: "Frame layers add an inward-growing frame from the canvas boundary. You can choose all 4 sides, top/bottom only, or left/right only."
+    });
+    Object.assign(I18N.ko, {
+      frameSection: "테두리 레이어",
+      frameDetailSection: "선택한 테두리 상세",
+      addFrameLayer: "테두리 추가",
+      defaultFrameLayerName: "테두리",
+      noFrameLayer: "테두리 레이어가 없습니다.",
+      noSelectedFrame: "편집할 테두리 레이어를 선택해 주세요.",
+      frameName: "레이어 이름",
+      framePlacement: "표시 위치",
+      frameMode: "테두리 방향",
+      frameAll: "4방향",
+      frameHorizontal: "위아래만",
+      frameVertical: "좌우만",
+      frameColor: "테두리 색",
+      frameOpacity: "투명도",
+      frameThickness: "테두리 두께",
+      frameLayerAdded: "테두리 레이어를 추가했습니다.",
+      frameLayerSelected: "테두리 레이어를 선택했습니다.",
+      helpText5: "테두리 레이어는 캔버스 경계에서 안쪽으로 두꺼워지는 테두리를 추가합니다. 4방향 / 위아래만 / 좌우만을 선택할 수 있습니다."
+    });
+    Object.assign(I18N.ja, {
+      frameType: "枠タイプ",
+      frameTypeSimple: "通常枠",
+      frameTypeClassical: "クラシカル枠",
+      framePreset: "デザイン",
+      frameSize: "クラシカル枠サイズ",
+      frameInsetX: "左上基準X",
+      frameInsetY: "左上基準Y",
+      frameGapX: "左右間隔",
+      frameGapY: "上下間隔",
+      frameCenterGapX: "左右間隔（中心基準）",
+      frameCenterGapY: "上下間隔（中心基準）",
+      textGradient: "グラデーションにする",
+      gradientColor2: "グラデーション色2",
+      gradientAngle: "グラデーション角度",
+      gradientWidth: "グラデーション幅",
+      helpText5: "枠レイヤーでは通常枠に加えて、4角装飾のクラシカル枠も使えます。クラシカル枠は色変更・縁取り・ドロップシャドウに対応し、左右間隔 / 上下間隔をまとめて調整できます。"
+    });
+    Object.assign(I18N.en, {
+      frameType: "Frame type",
+      frameTypeSimple: "Simple frame",
+      frameTypeClassical: "Classical frame",
+      framePreset: "Design",
+      frameSize: "Classical frame size",
+      frameInsetX: "Top-left base X",
+      frameInsetY: "Top-left base Y",
+      frameGapX: "Horizontal gap",
+      frameGapY: "Vertical gap",
+      frameCenterGapX: "Horizontal spacing (center)",
+      frameCenterGapY: "Vertical spacing (center)",
+      textGradient: "Use gradient",
+      gradientColor2: "Gradient color 2",
+      gradientAngle: "Gradient angle",
+      gradientWidth: "Gradient width",
+      helpText5: "Frame layers support both the regular inward frame and a classical decorative corner frame. The classical frame supports recoloring, stroke, drop shadow, and linked horizontal/vertical spacing controls."
+    });
+    Object.assign(I18N.ko, {
+      frameType: "테두리 타입",
+      frameTypeSimple: "기본 테두리",
+      frameTypeClassical: "클래식 테두리",
+      framePreset: "디자인",
+      frameSize: "클래식 테두리 크기",
+      frameInsetX: "좌상단 기준 X",
+      frameInsetY: "좌상단 기준 Y",
+      frameGapX: "좌우 간격",
+      frameGapY: "상하 간격",
+      frameCenterGapX: "좌우 간격 (중앙 기준)",
+      frameCenterGapY: "상하 간격 (중앙 기준)",
+      textGradient: "그라데이션 사용",
+      gradientColor2: "그라데이션 색상 2",
+      gradientAngle: "그라데이션 각도",
+      gradientWidth: "그라데이션 폭",
+      helpText5: "테두리 레이어는 일반 테두리뿐 아니라 4코너 장식의 클래식 테두리도 지원합니다. 클래식 테두리는 색 변경, 외곽선, 드롭 섀도, 좌우 / 상하 간격의 동시 조정에 대응합니다."
+    });
+    Object.assign(I18N.ja, {
+      helpSectionTextTitle: "テキスト・図形・枠",
+      helpTextGradient: "テキストはチェックボックスで通常色 / グラデーションを切り替え、2色目・角度・幅を調整できます。",
+      helpFrame1: "枠レイヤーは通常枠とクラシカル枠を切り替えできます。通常枠は4方向 / 上下のみ / 左右のみを選べます。",
+      helpFrame2: "クラシカル枠はクラシカルA / B / Cから選び、4角素材の色・透明度・縁取り・ドロップシャドウを調整できます。",
+      helpFrame3: "クラシカル枠の左右間隔 / 上下間隔はキャンバス中心基準で対称に動きます。枠サイズの上限は選択中デザインの原寸です。",
+      helpText4: "テキスト・図形・枠は「立ち絵の背面 / 前面」を選べます。",
+      helpText5: "枠レイヤーでは通常枠に加えて、4角装飾のクラシカル枠も使えます。"
+    });
+    Object.assign(I18N.en, {
+      helpSectionTextTitle: "Text, shapes, and frames",
+      helpTextGradient: "Text layers can switch between a solid color and a gradient. Adjust the second color, angle, and width with the controls.",
+      helpFrame1: "Frame layers can switch between a simple frame and a classical frame. Simple frames support all four sides, top/bottom only, or left/right only.",
+      helpFrame2: "Classical frames can use Classical A / B / C. You can adjust corner color, opacity, stroke, and drop shadow.",
+      helpFrame3: "Classical frame horizontal/vertical spacing moves symmetrically from the canvas center. Frame size is capped at the original size of the selected design.",
+      helpText4: "Text, shapes, and frames can be placed behind or in front of the standing image.",
+      helpText5: "Frame layers also support decorative four-corner classical frames."
+    });
+    Object.assign(I18N.ko, {
+      helpSectionTextTitle: "텍스트・도형・테두리",
+      helpTextGradient: "텍스트는 체크박스로 단색 / 그라데이션을 전환하고, 두 번째 색상・각도・폭을 조정할 수 있습니다.",
+      helpFrame1: "테두리 레이어는 기본 테두리와 클래식 테두리를 전환할 수 있습니다. 기본 테두리는 4방향 / 위아래만 / 좌우만을 선택할 수 있습니다.",
+      helpFrame2: "클래식 테두리는 클래식 A / B / C 중에서 선택하고, 4코너 소재의 색상・투명도・외곽선・드롭 섀도를 조정할 수 있습니다.",
+      helpFrame3: "클래식 테두리의 좌우 간격 / 상하 간격은 캔버스 중심 기준으로 대칭 이동합니다. 테두리 크기 상한은 선택한 디자인의 원본 크기입니다.",
+      helpText4: "텍스트・도형・테두리는 스탠딩 이미지의 뒤 / 앞 배치를 선택할 수 있습니다.",
+      helpText5: "테두리 레이어는 4코너 장식의 클래식 테두리도 지원합니다."
+    });
+
     let state;
     const undoStack = [];
     const redoStack = [];
@@ -1276,6 +1560,7 @@
         x: 600, y: 600, scale: 1, rotation: 0,
         align: "center", writingMode: "horizontal", verticalLatinRotate: true, verticalColumnGap: 24,
         wrapWidth: 900, wrapHeight: 900, fontFamily: DEFAULT_FONT_STACK, fontSize: 86, color: "#ffffff", lineHeight: 1.25, letterSpacing: 0,
+        gradient: { enabled: false, color2: "#8ec5ff", angle: 0, width: 900 },
         stroke: { enabled: true, color: "#111827", width: 8 },
         shadow: { enabled: true, color: "#000000", blur: 12, offsetX: 0, offsetY: 6 },
         inlineStyles: []
@@ -1289,7 +1574,16 @@
         width: 320, height: 320, lockRatio: false, aspectRatio: 1,
         lineWidth: 8, cornerRadius: 0,
         stroke: { enabled: false, color: "#111827", width: 8 },
-        shadow: { enabled: false, color: "#000000", blur: 12, offsetX: 0, offsetY: 6 }
+        shadow: { enabled: false, color: "#000000", blur: 12, offsetX: 0, offsetY: 0 }
+      };
+    }
+    function createFrameLayer() {
+      return {
+        id: uid("frame"), name: t("defaultFrameLayerName"), visible: true, placement: "front",
+        frameType: "simple", framePreset: CLASSICAL_FRAME_PRESETS[0].id, mode: "all", color: "#ffffff", opacity: 1, thickness: 64,
+        size: getClassicalFrameMaxSize(CLASSICAL_FRAME_PRESETS[0].id), insetX: 0, insetY: 0, gapX: 0, gapY: 0, classicalInitialized: false,
+        stroke: { enabled: false, color: "#111827", width: 8 },
+        shadow: { enabled: false, color: "#000000", blur: 12, offsetX: 0, offsetY: 0 }
       };
     }
     function createEffectLayer() {
@@ -1312,10 +1606,11 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 10,
+        version: 25,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
         activeShapeLayerId: "",
+        activeFrameLayerId: "",
         activeEffectLayerId: "",
         activeToolTarget: "standing",
         characters: [firstChar],
@@ -1323,6 +1618,7 @@
         backgroundPanel: createBackgroundPanel(),
         textLayers: [],
         shapeLayers: [],
+        frameLayers: [],
         effectLayers: [],
         layerPresets: [firstLayerPreset],
         canvasPresets: createDefaultCanvasPresets(),
@@ -1358,6 +1654,7 @@
         verticalColumnGap: Math.round(clamp(layer?.verticalColumnGap ?? base.verticalColumnGap, 0, 300)),
         wrapWidth: Math.round(clamp(layer?.wrapWidth ?? base.wrapWidth, 100, 4000)), wrapHeight: Math.round(clamp(layer?.wrapHeight ?? base.wrapHeight, 100, 4000)),
         fontFamily: layer?.fontFamily || DEFAULT_FONT_STACK, fontSize: Math.round(clamp(layer?.fontSize ?? base.fontSize, 10, 300)), color: layer?.color || base.color, lineHeight: clamp(layer?.lineHeight ?? base.lineHeight, 0.5, 3), letterSpacing: Math.round(clamp(layer?.letterSpacing ?? base.letterSpacing, -100, 240)),
+        gradient: { enabled: Boolean(layer?.gradient?.enabled), color2: layer?.gradient?.color2 || base.gradient.color2, angle: clamp(layer?.gradient?.angle ?? base.gradient.angle, -180, 180), width: Math.round(clamp(layer?.gradient?.width ?? base.gradient.width, 10, 4000)) },
         stroke: { enabled: layer?.stroke?.enabled !== false, color: layer?.stroke?.color || "#111827", width: Math.round(clamp(layer?.stroke?.width ?? 8, 0, 80)) },
         shadow: { enabled: layer?.shadow?.enabled !== false, color: layer?.shadow?.color || "#000000", blur: Math.round(clamp(layer?.shadow?.blur ?? 12, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? 0, -200, 200)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? 6, -200, 200)) },
         inlineStyles: safeArray(layer?.inlineStyles).map(normalizeInlineStyle).filter(Boolean)
@@ -1390,6 +1687,31 @@
         lineWidth: Math.round(clamp(layer?.lineWidth ?? base.lineWidth, 1, 120)),
         cornerRadius: Math.round(clamp(layer?.cornerRadius ?? base.cornerRadius, 0, 500)),
         stroke: { enabled: Boolean(layer?.stroke?.enabled), color: layer?.stroke?.color || base.stroke.color, width: Math.round(clamp(layer?.stroke?.width ?? base.stroke.width, 0, 160)) },
+        shadow: { enabled: Boolean(layer?.shadow?.enabled), color: layer?.shadow?.color || base.shadow.color, blur: Math.round(clamp(layer?.shadow?.blur ?? base.shadow.blur, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? base.shadow.offsetX, -240, 240)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? base.shadow.offsetY, -240, 240)) }
+      };
+    }
+    function normalizeFrameLayer(layer) {
+      const base = createFrameLayer();
+      return {
+        ...base,
+        ...layer,
+        id: layer?.id || uid("frame"),
+        name: String(layer?.name || t("defaultFrameLayerName")),
+        visible: layer?.visible !== false,
+        placement: layer?.placement === "back" ? "back" : "front",
+        frameType: layer?.frameType === "classical" ? "classical" : "simple",
+        framePreset: CLASSICAL_FRAME_PRESET_MAP[layer?.framePreset] ? layer.framePreset : CLASSICAL_FRAME_PRESETS[0].id,
+        mode: ["all", "horizontal", "vertical"].includes(layer?.mode) ? layer.mode : base.mode,
+        color: layer?.color || base.color,
+        opacity: clamp(layer?.opacity ?? base.opacity, 0, 1),
+        thickness: Math.round(clamp(layer?.thickness ?? base.thickness, 0, 3000)),
+        size: Math.round(clamp(layer?.size ?? getClassicalFrameMaxSize(CLASSICAL_FRAME_PRESET_MAP[layer?.framePreset] ? layer.framePreset : CLASSICAL_FRAME_PRESETS[0].id), 40, getClassicalFrameMaxSize(CLASSICAL_FRAME_PRESET_MAP[layer?.framePreset] ? layer.framePreset : CLASSICAL_FRAME_PRESETS[0].id)) * 10) / 10,
+        insetX: 0,
+        insetY: 0,
+        gapX: Math.round(clamp(layer?.gapX ?? base.gapX, -8000, 8000) * 10) / 10,
+        gapY: Math.round(clamp(layer?.gapY ?? base.gapY, -8000, 8000) * 10) / 10,
+        classicalInitialized: Boolean(layer?.classicalInitialized),
+        stroke: { enabled: Boolean(layer?.stroke?.enabled), color: layer?.stroke?.color || base.stroke.color, width: Math.round(clamp(layer?.stroke?.width ?? base.stroke.width, 0, 120)) },
         shadow: { enabled: Boolean(layer?.shadow?.enabled), color: layer?.shadow?.color || base.shadow.color, blur: Math.round(clamp(layer?.shadow?.blur ?? base.shadow.blur, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? base.shadow.offsetX, -240, 240)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? base.shadow.offsetY, -240, 240)) }
       };
     }
@@ -1459,6 +1781,9 @@
       normalized.shapeLayers = safeArray(normalized.shapeLayers).map(normalizeShapeLayer);
       if (!normalized.shapeLayers.length) normalized.shapeLayers = [];
       if (!normalized.activeShapeLayerId || !normalized.shapeLayers.some((layer) => layer.id === normalized.activeShapeLayerId)) normalized.activeShapeLayerId = normalized.shapeLayers[0]?.id || "";
+      normalized.frameLayers = safeArray(normalized.frameLayers).map(normalizeFrameLayer);
+      if (!normalized.frameLayers.length) normalized.frameLayers = [];
+      if (!normalized.activeFrameLayerId || !normalized.frameLayers.some((layer) => layer.id === normalized.activeFrameLayerId)) normalized.activeFrameLayerId = normalized.frameLayers[0]?.id || "";
       normalized.effectLayers = safeArray(normalized.effectLayers).map(normalizeEffectLayer);
       if (!normalized.activeEffectLayerId || !normalized.effectLayers.some((layer) => layer.id === normalized.activeEffectLayerId)) normalized.activeEffectLayerId = normalized.effectLayers[0]?.id || "";
       normalized.customFonts = safeArray(normalized.customFonts).map((font) => ({ id: font.id || uid("font"), name: font.name || font.fileName || "Custom Font", family: font.family || `CustomFont_${uid("f")}`, dataUrl: font.dataUrl || "", fileName: font.fileName || font.name || "Custom Font" })).filter((font) => font.dataUrl);
@@ -1473,6 +1798,7 @@
     function activeCharacter() { return state.characters.find((character) => character.id === state.activeCharacterId) || state.characters[0]; }
     function activeTextLayer() { return state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || null; }
     function activeShapeLayer() { return state.shapeLayers.find((layer) => layer.id === state.activeShapeLayerId) || null; }
+    function activeFrameLayer() { return state.frameLayers.find((layer) => layer.id === state.activeFrameLayerId) || null; }
     function activeEffectLayer() {
       if (!Array.isArray(state.effectLayers) || !state.effectLayers.length) return null;
       let layer = state.effectLayers.find((item) => item.id === state.activeEffectLayerId) || null;
@@ -1549,7 +1875,7 @@
 
     function renderAll() {
       ensureAllCharacterLayerKeys();
-      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderShapeLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderShapeDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
+      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderShapeLayerList(); renderFrameLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderShapeDetailEditor(); renderFrameDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
     }
     function renderLayerPresetControls() {
       const select = $("#layerPresetSelect");
@@ -1794,7 +2120,165 @@
       root.appendChild(createColorField(t("shadowColor"), layer.shadow?.color || "#000000", (value) => { layer.shadow.color = value; renderPreview(); }));
       addRange(root, t("shadowBlur"), layer.shadow?.blur ?? 12, 0, 160, 1, "px", (value) => { layer.shadow.blur = Math.round(value); renderPreview(); });
       addRange(root, t("shadowX"), layer.shadow?.offsetX ?? 0, -240, 240, 1, "px", (value) => { layer.shadow.offsetX = Math.round(value); renderPreview(); });
-      addRange(root, t("shadowY"), layer.shadow?.offsetY ?? 6, -240, 240, 1, "px", (value) => { layer.shadow.offsetY = Math.round(value); renderPreview(); });
+      addRange(root, t("shadowY"), layer.shadow?.offsetY ?? 0, -240, 240, 1, "px", (value) => { layer.shadow.offsetY = Math.round(value); renderPreview(); });
+    }
+
+    function frameModeLabel(value) {
+      return { all: t("frameAll"), horizontal: t("frameHorizontal"), vertical: t("frameVertical") }[value] || value;
+    }
+    function renderFrameLayerList() {
+      const root = $("#frameLayerList");
+      if (!root) return;
+      root.innerHTML = "";
+      if (!Array.isArray(state.frameLayers) || !state.frameLayers.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noFrameLayer");
+        root.appendChild(empty);
+        return;
+      }
+      state.frameLayers.forEach((layer) => {
+        const row = document.createElement("div");
+        row.className = `text-row${layer.id === state.activeFrameLayerId ? " active" : ""}`;
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = layer.visible;
+        checkbox.title = t("textVisible");
+        const meta = document.createElement("div");
+        meta.className = "text-meta";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = layer.name;
+        nameInput.placeholder = t("frameName");
+        const note = document.createElement("div");
+        note.className = "text-note";
+        const typeLabel = layer.frameType === "classical" ? t("frameTypeClassical") : t("frameTypeSimple");
+        const presetName = CLASSICAL_FRAME_PRESET_MAP[layer.framePreset || CLASSICAL_FRAME_PRESETS[0].id]?.name || CLASSICAL_FRAME_PRESETS[0].name;
+        note.textContent = layer.frameType === "classical"
+          ? `${layer.placement === "back" ? t("textBack") : t("textFront")} / ${typeLabel} / ${presetName} / ${Math.round(layer.size || 0)}px`
+          : `${layer.placement === "back" ? t("textBack") : t("textFront")} / ${typeLabel} / ${frameModeLabel(layer.mode)} / ${Math.round(layer.thickness || 0)}px`;
+        meta.append(nameInput, note);
+        const selectBtn = document.createElement("button");
+        selectBtn.className = "small secondary";
+        selectBtn.textContent = t("applyButton");
+        checkbox.addEventListener("change", () => { layer.visible = checkbox.checked; renderPreview(); });
+        nameInput.addEventListener("input", () => { layer.name = nameInput.value || t("defaultFrameLayerName"); renderFrameLayerList(); });
+        const selectLayer = () => {
+          state.activeFrameLayerId = layer.id;
+          renderFrameLayerList();
+          renderFrameDetailEditor();
+          setStatusT("frameLayerSelected");
+        };
+        row.addEventListener("click", (event) => { const tag = event.target.tagName.toLowerCase(); if (tag === "input" || tag === "button" || tag === "select") return; selectLayer(); });
+        selectBtn.addEventListener("click", selectLayer);
+        row.append(checkbox, meta, selectBtn);
+        root.appendChild(row);
+      });
+    }
+
+    function renderFrameDetailEditor() {
+      const root = $("#frameDetailEditor");
+      if (!root) return;
+      root.innerHTML = "";
+      const layer = activeFrameLayer();
+      if (!layer) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noSelectedFrame");
+        root.appendChild(empty);
+        return;
+      }
+      const rerender = () => { renderFrameLayerList(); renderFrameDetailEditor(); renderPreview(); };
+      root.appendChild(createField(t("frameName"), "input", layer.name, (value) => { layer.name = value || t("defaultFrameLayerName"); renderFrameLayerList(); }));
+      const basic = document.createElement("div");
+      basic.className = "grid-2";
+      basic.append(
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderFrameLayerList(); renderPreview(); }),
+        createSelectField(t("framePlacement"), layer.placement, [
+          { value: "back", label: t("textBack") },
+          { value: "front", label: t("textFront") }
+        ], (value) => { layer.placement = value; rerender(); }),
+        createSelectField(t("frameType"), layer.frameType || "simple", [
+          { value: "simple", label: t("frameTypeSimple") },
+          { value: "classical", label: t("frameTypeClassical") }
+        ], (value) => {
+          const wasClassical = layer.frameType === "classical";
+          layer.frameType = value;
+          if (value === "classical" && !wasClassical && !layer.classicalInitialized) {
+            fitClassicalFrameLayerToCanvas(layer);
+          }
+          rerender();
+        })
+      );
+      root.appendChild(basic);
+      root.appendChild(createColorField(t("frameColor"), layer.color, (value) => { layer.color = value; renderPreview(); }));
+      addRange(root, t("frameOpacity"), layer.opacity ?? 1, 0, 1, 0.01, "", (value) => { layer.opacity = value; renderPreview(); }, 2);
+
+      if ((layer.frameType || "simple") === "classical") {
+        root.appendChild(createSelectField(t("framePreset"), layer.framePreset || CLASSICAL_FRAME_PRESETS[0].id, CLASSICAL_FRAME_PRESETS.map((preset) => ({ value: preset.id, label: preset.name })), (value) => {
+          const oldPresetId = layer.framePreset || CLASSICAL_FRAME_PRESETS[0].id;
+          const oldMaxSize = getClassicalFrameMaxSize(oldPresetId);
+          const oldSize = Number(layer.size || oldMaxSize);
+          const wasOriginalSize = Math.abs(oldSize - oldMaxSize) < 0.5;
+          layer.framePreset = CLASSICAL_FRAME_PRESET_MAP[value] ? value : CLASSICAL_FRAME_PRESETS[0].id;
+          const newMaxSize = getClassicalFrameMaxSize(layer.framePreset);
+          layer.size = wasOriginalSize ? newMaxSize : Math.min(newMaxSize, Math.max(40, oldSize));
+          layer.classicalInitialized = true;
+          renderFrameLayerList();
+          renderFrameDetailEditor();
+          renderPreview();
+        }));
+        const currentCanvasSize = getCanvasBaseSize();
+        const canvasW = Math.max(1, Number(currentCanvasSize.width || 1));
+        const canvasH = Math.max(1, Number(currentCanvasSize.height || 1));
+        const maxSize = getClassicalFrameMaxSize(layer.framePreset || CLASSICAL_FRAME_PRESETS[0].id);
+        layer.size = Math.min(maxSize, Math.max(40, Number(layer.size || maxSize)));
+        const offsetXMax = Math.max(1, Math.round(canvasW));
+        const offsetYMax = Math.max(1, Math.round(canvasH));
+        const round1 = (value) => Math.round(Number(value || 0) * 10) / 10;
+        const clampGapX = (value) => round1(Math.max(-offsetXMax, Math.min(offsetXMax, Number(value) || 0)));
+        const clampGapY = (value) => round1(Math.max(-offsetYMax, Math.min(offsetYMax, Number(value) || 0)));
+        layer.insetX = 0;
+        layer.insetY = 0;
+        layer.gapX = clampGapX(layer.gapX ?? 0);
+        layer.gapY = clampGapY(layer.gapY ?? 0);
+        const commitClassical = () => { renderFrameLayerList(); renderFrameDetailEditor(); };
+        addRange(root, t("frameSize"), layer.size ?? maxSize, 40, maxSize, 0.1, "px", (value) => {
+          layer.size = Math.min(maxSize, Math.max(40, round1(value)));
+          layer.classicalInitialized = true;
+          renderPreview();
+        }, 1, commitClassical);
+        addRange(root, t("frameCenterGapX"), layer.gapX ?? 0, -offsetXMax, offsetXMax, 0.1, "px", (value) => {
+          layer.gapX = clampGapX(value);
+          layer.classicalInitialized = true;
+          renderPreview();
+        }, 1, commitClassical);
+        addRange(root, t("frameCenterGapY"), layer.gapY ?? 0, -offsetYMax, offsetYMax, 0.1, "px", (value) => {
+          layer.gapY = clampGapY(value);
+          layer.classicalInitialized = true;
+          renderPreview();
+        }, 1, commitClassical);
+        root.appendChild(createCheckboxField(t("stroke"), Boolean(layer.stroke?.enabled), (checked) => { layer.stroke.enabled = checked; renderPreview(); }));
+        root.appendChild(createColorField(t("strokeColor"), layer.stroke?.color || "#111827", (value) => { layer.stroke.color = value; renderPreview(); }));
+        addRange(root, t("strokeWidth"), layer.stroke?.width ?? 8, 0, 120, 1, "px", (value) => { layer.stroke.width = Math.round(value); renderPreview(); });
+        root.appendChild(createCheckboxField(t("shadow"), Boolean(layer.shadow?.enabled), (checked) => { layer.shadow.enabled = checked; renderPreview(); }));
+        root.appendChild(createColorField(t("shadowColor"), layer.shadow?.color || "#000000", (value) => { layer.shadow.color = value; renderPreview(); }));
+        addRange(root, t("shadowBlur"), layer.shadow?.blur ?? 12, 0, 160, 1, "px", (value) => { layer.shadow.blur = Math.round(value); renderPreview(); });
+        addRange(root, t("shadowX"), layer.shadow?.offsetX ?? 0, -240, 240, 1, "px", (value) => { layer.shadow.offsetX = Math.round(value); renderPreview(); });
+        addRange(root, t("shadowY"), layer.shadow?.offsetY ?? 0, -240, 240, 1, "px", (value) => { layer.shadow.offsetY = Math.round(value); renderPreview(); });
+      } else {
+        const frameModeWrap = document.createElement("div");
+        frameModeWrap.className = "grid-2";
+        frameModeWrap.append(
+          createSelectField(t("frameMode"), layer.mode, [
+            { value: "all", label: t("frameAll") },
+            { value: "horizontal", label: t("frameHorizontal") },
+            { value: "vertical", label: t("frameVertical") }
+          ], (value) => { layer.mode = value; rerender(); })
+        );
+        root.appendChild(frameModeWrap);
+        addRange(root, t("frameThickness"), layer.thickness ?? 64, 0, 3000, 1, "px", (value) => { layer.thickness = Math.round(value); renderFrameLayerList(); renderPreview(); });
+      }
     }
 
     function renderCustomFontList() {
@@ -1834,8 +2318,13 @@
       root.appendChild(fontSelect);
 
       const colorGrid = document.createElement("div"); colorGrid.className = "grid-2";
-      colorGrid.append(createColorField(t("textColor"), layer.color, (value) => { layer.color = value; renderPreview(); }), createColorField(t("strokeColor"), layer.stroke.color, (value) => { layer.stroke.color = value; renderPreview(); }));
+      colorGrid.append(
+        createColorField(t("textColor"), layer.color, (value) => { layer.color = value; renderPreview(); }),
+        createColorField(t("strokeColor"), layer.stroke.color, (value) => { layer.stroke.color = value; renderPreview(); }),
+        createColorField(t("gradientColor2"), layer.gradient?.color2 || "#8ec5ff", (value) => { layer.gradient.color2 = value; renderPreview(); })
+      );
       root.appendChild(colorGrid);
+      root.appendChild(createCheckboxField(t("textGradient"), Boolean(layer.gradient?.enabled), (checked) => { layer.gradient.enabled = checked; renderPreview(); }));
 
       addRange(root, t("fontSize"), layer.fontSize, 10, 300, 1, "px", (value) => { layer.fontSize = Math.round(value); renderPreview(); });
       addRange(root, t("wrapWidth"), layer.wrapWidth, 100, 4000, 1, "px", (value) => { layer.wrapWidth = Math.round(value); renderPreview(); });
@@ -1843,6 +2332,8 @@
       addRange(root, t("lineHeight"), layer.lineHeight, 0.5, 3, 0.01, "", (value) => { layer.lineHeight = value; renderPreview(); }, 2);
       addRange(root, t("letterSpacing"), layer.letterSpacing, -100, 240, 1, "px", (value) => { layer.letterSpacing = Math.round(value); renderPreview(); });
       addRange(root, t("verticalColumnGap"), layer.verticalColumnGap, 0, 300, 1, "px", (value) => { layer.verticalColumnGap = Math.round(value); renderPreview(); });
+      addRange(root, t("gradientAngle"), layer.gradient?.angle ?? 0, -180, 180, 1, "°", (value) => { layer.gradient.angle = Math.round(value); renderPreview(); });
+      addRange(root, t("gradientWidth"), layer.gradient?.width ?? 900, 10, 4000, 1, "px", (value) => { layer.gradient.width = Math.round(value); renderPreview(); });
 
       root.appendChild(createCheckboxField(t("stroke"), layer.stroke.enabled, (checked) => { layer.stroke.enabled = checked; renderPreview(); }));
       addRange(root, t("strokeWidth"), layer.stroke.width, 0, 80, 1, "px", (value) => { layer.stroke.width = Math.round(value); renderPreview(); });
@@ -2075,13 +2566,56 @@
     function addRange(root, labelText, value, min, max, step, suffix, onInput, digits = 0, onCommit = null) {
       const row = document.createElement("div"); row.className = "slider-row compact";
       const label = document.createElement("label"); label.textContent = labelText;
-      const input = document.createElement("input"); input.type = "range"; input.min = min; input.max = max; input.step = step; input.value = value;
-      const output = document.createElement("div"); output.className = "value";
-      const format = (v) => `${Number(v).toFixed(digits)}${suffix}`;
-      output.textContent = format(value);
-      input.addEventListener("input", () => { const n = Number(input.value); output.textContent = format(n); onInput(n); });
-      input.addEventListener("change", () => { if (typeof onCommit === "function") onCommit(Number(input.value)); });
-      row.append(label, input, output); root.appendChild(row); return row;
+      const range = document.createElement("input");
+      range.type = "range";
+      range.min = min;
+      range.max = max;
+      range.step = step;
+      range.value = value;
+      const number = document.createElement("input");
+      number.type = "number";
+      number.className = "value";
+      number.step = step;
+      number.inputMode = "decimal";
+      number.value = Number(value).toFixed(digits);
+      number.title = suffix || labelText;
+      const formatNumber = (v) => Number(v).toFixed(digits);
+      let frame = 0;
+      let latest = Number(value);
+      const clampForRange = (v) => Math.max(Number(min), Math.min(Number(max), Number(v)));
+      const schedule = (v) => {
+        latest = Number(v);
+        if (!Number.isFinite(latest)) return;
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          onInput(latest);
+        });
+      };
+      range.addEventListener("input", () => {
+        const v = Number(range.value);
+        number.value = formatNumber(v);
+        schedule(v);
+      });
+      number.addEventListener("input", () => {
+        const v = Number(number.value);
+        if (!Number.isFinite(v)) return;
+        range.value = String(clampForRange(v));
+        schedule(v);
+      });
+      const commit = () => {
+        if (frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+          onInput(latest);
+        }
+        const committed = Number(number.value);
+        if (Number.isFinite(committed)) number.value = formatNumber(committed);
+        if (typeof onCommit === "function") onCommit(Number.isFinite(committed) ? committed : latest);
+      };
+      range.addEventListener("change", commit);
+      number.addEventListener("change", commit);
+      row.append(label, range, number); root.appendChild(row); return row;
     }
 
     function isExclusivePartsLayer(layerId) {
@@ -2314,9 +2848,9 @@
         const card = document.createElement("section"); card.className = "layer-card";
         const head = document.createElement("div"); head.className = "layer-head";
         const titleWrap = document.createElement("div");
+        titleWrap.className = "layer-title-inline";
         const name = document.createElement("div"); name.className = "layer-name"; name.textContent = getLayerName(layer);
-        const note = document.createElement("div"); note.className = "layer-note"; note.textContent = isExclusivePartsLayer(layer.id) ? t("noteExclusive") : t("noteParts");
-        titleWrap.append(name, note);
+        titleWrap.appendChild(name);
         const actionWrap = document.createElement("div");
         actionWrap.className = "button-row layer-header-actions";
         const upBtn = document.createElement("button"); upBtn.type = "button"; upBtn.className = "small secondary"; upBtn.textContent = t("moveUpButton"); upBtn.disabled = layerIndex === 0;
@@ -2329,7 +2863,7 @@
         const deleteCategoryBtn = document.createElement("button");
         deleteCategoryBtn.type = "button";
         deleteCategoryBtn.className = "small danger";
-        deleteCategoryBtn.textContent = t("deleteButton");
+        deleteCategoryBtn.textContent = t("deleteCategoryButton");
         deleteCategoryBtn.addEventListener("click", (event) => {
           event.stopPropagation();
           deleteCategoryFromActivePreset(layer.id);
@@ -2351,8 +2885,11 @@
         });
         typeSelect.addEventListener("change", (event) => setCategoryExclusive(layer.id, event.target.value === "single"));
         typeField.append(typeLabel, typeSelect);
-        actionWrap.append(upBtn, downBtn, uploadBtn, deleteCategoryBtn, typeField, fileInput);
+        actionWrap.append(uploadBtn, deleteCategoryBtn, upBtn, downBtn, fileInput);
         head.append(titleWrap, actionWrap);
+        const bodyControls = document.createElement("div");
+        bodyControls.className = "layer-body-controls";
+        bodyControls.appendChild(typeField);
         const list = document.createElement("div"); list.className = "part-list"; const parts = store[layer.id] || [];
         if (layer.id === "brows") renderBrowsYOffsetControl(list, character);
         if (!parts.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("emptyParts"); list.appendChild(empty); }
@@ -2369,7 +2906,7 @@
             removeBtn.addEventListener("click", () => { store[layer.id] = parts.filter((item) => item.id !== part.id); imageCache.delete(part.dataUrl); renderLayers(); renderPreview(); }); list.appendChild(row);
           }
         }
-        card.append(head, list); root.appendChild(card);
+        card.append(head, bodyControls, list); root.appendChild(card);
       });
     }
 
@@ -2747,12 +3284,14 @@
         for (const bg of state.backgroundLayers) await drawBackground(ctx, bg, width, height);
       }
       applyEffectLayersForPlacement(canvas, "background");
+      for (const layer of state.frameLayers.filter((item) => item.visible && item.placement === "back")) drawFrameLayer(ctx, layer, width, height);
       for (const layer of state.shapeLayers.filter((item) => item.visible && item.placement === "back")) drawShapeLayer(ctx, layer);
       for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "back")) drawTextLayer(ctx, layer);
       applyEffectLayersForPlacement(canvas, "backText");
       await drawStandingGroup(ctx, width, height, character);
       for (const layer of state.shapeLayers.filter((item) => item.visible && item.placement === "front")) drawShapeLayer(ctx, layer);
       for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "front")) drawTextLayer(ctx, layer);
+      for (const layer of state.frameLayers.filter((item) => item.visible && item.placement === "front")) drawFrameLayer(ctx, layer, width, height);
       applyEffectLayersForPlacement(canvas, "frontText");
     }
     function applyEffectLayersForPlacement(canvas, placement) {
@@ -3075,12 +3614,116 @@
     }
     function hasVisibleShadow(settings) { const shadow = settings?.shadow || {}; return Boolean(shadow.enabled) && (Number(shadow.blur || 0) > 0 || Number(shadow.offsetX || 0) !== 0 || Number(shadow.offsetY || 0) !== 0); }
     function clearTextShadow(context) { context.shadowColor = "transparent"; context.shadowBlur = 0; context.shadowOffsetX = 0; context.shadowOffsetY = 0; }
+    function createGradientForBounds(context, settings, bounds) {
+      const gradientSettings = settings?.gradient || {};
+      if (!gradientSettings.enabled) return null;
+      const width = Math.max(1, Number(gradientSettings.width || Math.max(bounds?.w || 0, bounds?.h || 0, 1)));
+      const angle = (Number(gradientSettings.angle || 0) * Math.PI) / 180;
+      const cx = Number(bounds?.x || 0) + Number(bounds?.w || 0) / 2;
+      const cy = Number(bounds?.y || 0) + Number(bounds?.h || 0) / 2;
+      const dx = Math.cos(angle) * width / 2;
+      const dy = Math.sin(angle) * width / 2;
+      const gradient = context.createLinearGradient(cx - dx, cy - dy, cx + dx, cy + dy);
+      gradient.addColorStop(0, settings.color || "#ffffff");
+      gradient.addColorStop(1, gradientSettings.color2 || "#8ec5ff");
+      return gradient;
+    }
+    function withTextFillStyle(context, settings, bounds) {
+      const gradient = createGradientForBounds(context, settings, bounds);
+      return gradient ? { ...settings, _fillStyle: gradient } : settings;
+    }
+    function fitClassicalFrameLayerToCanvas(layer, canvasWidth = null, canvasHeight = null) {
+      if (!layer) return;
+      const baseSize = getCanvasBaseSize();
+      const maxSize = getClassicalFrameMaxSize(layer.framePreset || CLASSICAL_FRAME_PRESETS[0].id);
+      layer.size = maxSize;
+      const w = Math.max(1, Number(canvasWidth ?? baseSize.width ?? 1));
+      const h = Math.max(1, Number(canvasHeight ?? baseSize.height ?? 1));
+      layer.gapX = 0;
+      layer.gapY = 0;
+      layer.classicalInitialized = true;
+    }
+    function stableFineSliderBounds(layer, key, value, min, max, radius) {
+      const lowLimit = Number(min);
+      const highLimit = Number(max);
+      const span = Math.max(1, Number(radius) || 100);
+      const round1 = (v) => Math.round(Number(v || 0) * 10) / 10;
+      const clampValue = (v) => Math.max(lowLimit, Math.min(highLimit, Number(v)));
+      const current = round1(clampValue(value));
+      if (!layer.classicalSliderBounds || typeof layer.classicalSliderBounds !== "object") layer.classicalSliderBounds = {};
+      let bounds = layer.classicalSliderBounds[key];
+      const valid = bounds && Number.isFinite(Number(bounds.min)) && Number.isFinite(Number(bounds.max)) && Number(bounds.min) < Number(bounds.max);
+      if (!valid) {
+        bounds = { min: round1(Math.max(lowLimit, current - span)), max: round1(Math.min(highLimit, current + span)) };
+      } else {
+        bounds = { min: round1(Math.max(lowLimit, Number(bounds.min))), max: round1(Math.min(highLimit, Number(bounds.max))) };
+        if (current < bounds.min) bounds.min = current;
+        if (current > bounds.max) bounds.max = current;
+      }
+      if (bounds.max - bounds.min < Math.min(span, Math.max(1, highLimit - lowLimit))) {
+        const center = current;
+        bounds.min = round1(Math.max(lowLimit, Math.min(bounds.min, center - span)));
+        bounds.max = round1(Math.min(highLimit, Math.max(bounds.max, center + span)));
+      }
+      if (bounds.min >= bounds.max) {
+        bounds.min = lowLimit;
+        bounds.max = highLimit;
+      }
+      layer.classicalSliderBounds[key] = bounds;
+      return bounds;
+    }
+    function getTintedAlphaCanvas(image, color) {
+      if (!image?.complete || !image.naturalWidth || !image.naturalHeight) return null;
+      const key = `${image.src}|${color}`;
+      if (tintedAlphaCanvasCache.has(key)) return tintedAlphaCanvasCache.get(key);
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const ctx = canvas.getContext("2d", { alpha: true });
+      ctx.drawImage(image, 0, 0);
+      ctx.globalCompositeOperation = "source-in";
+      ctx.fillStyle = color || "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "source-over";
+      tintedAlphaCanvasCache.set(key, canvas);
+      return canvas;
+    }
+    function drawTintedFramePiece(context, image, x, y, width, height, settings) {
+      if (!image?.complete) return;
+      const fillCanvas = getTintedAlphaCanvas(image, settings.color || "#ffffff");
+      if (!fillCanvas) return;
+      const targetWidth = Math.max(1, Number(width || 1));
+      const targetHeight = Math.max(1, Number(height || width || 1));
+      if (settings.stroke?.enabled && Number(settings.stroke.width || 0) > 0) {
+        const strokeCanvas = getTintedAlphaCanvas(image, settings.stroke.color || "#111827");
+        const radius = Math.max(1, Number(settings.stroke.width || 0));
+        const steps = Math.max(12, Math.ceil(radius * 4));
+        context.save();
+        clearTextShadow(context);
+        for (let i = 0; i < steps; i++) {
+          const angle = (Math.PI * 2 * i) / steps;
+          const dx = Math.cos(angle) * radius;
+          const dy = Math.sin(angle) * radius;
+          context.drawImage(strokeCanvas, x + dx, y + dy, targetWidth, targetHeight);
+        }
+        context.restore();
+      }
+      context.save();
+      if (settings.shadow?.enabled) {
+        context.shadowColor = settings.shadow.color || "#000000";
+        context.shadowBlur = Number(settings.shadow.blur || 0);
+        context.shadowOffsetX = Number(settings.shadow.offsetX || 0);
+        context.shadowOffsetY = Number(settings.shadow.offsetY || 0);
+      }
+      context.drawImage(fillCanvas, x, y, targetWidth, targetHeight);
+      context.restore();
+    }
     function paintChar(context, char, x, y, settings, layer) {
       context.font = fontStringForSettings(settings); context.lineJoin = "round"; context.miterLimit = 2;
       if (layer === "shadow") { if (!hasVisibleShadow(settings)) return; const shadow = settings.shadow || {}; context.shadowColor = shadow.color || "#000000"; context.shadowBlur = Number(shadow.blur || 0); context.shadowOffsetX = Number(shadow.offsetX || 0); context.shadowOffsetY = Number(shadow.offsetY || 0); context.fillStyle = shadow.color || "#000000"; context.fillText(char, x, y); return; }
       clearTextShadow(context);
       if (layer === "stroke") { if (settings.stroke?.enabled && Number(settings.stroke.width) > 0) { context.strokeStyle = settings.stroke.color || "#111827"; context.lineWidth = Number(settings.stroke.width) || 0; context.strokeText(char, x, y); } return; }
-      context.fillStyle = settings.color || "#ffffff"; context.fillText(char, x, y);
+      context.fillStyle = settings._fillStyle || settings.color || "#ffffff"; context.fillText(char, x, y);
     }
     function drawStyledTextLine(context, text, x, y, settings, letterSpacing, layer) {
       const chars = splitChars(text); const inlineMap = inlineStyleMapForText(text, settings); let cursorX = x;
@@ -3139,6 +3782,59 @@
       }
       context.closePath();
     }
+    function drawFrameLayer(context, layer, canvasWidth, canvasHeight) {
+      if (!layer?.visible) return;
+      const settings = normalizeFrameLayer(layer);
+      const w = Math.max(1, Number(canvasWidth || 1));
+      const h = Math.max(1, Number(canvasHeight || 1));
+      if ((settings.frameType || "simple") === "classical") {
+        const renderSize = getClassicalFrameRenderSize(settings);
+        const partW = renderSize.width;
+        const partH = renderSize.height;
+        const centerX = w / 2;
+        const centerY = h / 2;
+        const baseDistanceX = Math.max(0, (w - partW) / 2);
+        const baseDistanceY = Math.max(0, (h - partH) / 2);
+        const distanceX = Math.max(0, baseDistanceX + Number(settings.gapX || 0));
+        const distanceY = Math.max(0, baseDistanceY + Number(settings.gapY || 0));
+        const leftX = centerX - partW / 2 - distanceX;
+        const rightX = centerX - partW / 2 + distanceX;
+        const topY = centerY - partH / 2 - distanceY;
+        const bottomY = centerY - partH / 2 + distanceY;
+        const frameImages = getClassicalFrameImages(settings.framePreset || CLASSICAL_FRAME_PRESETS[0].id);
+        const placements = [
+          { image: frameImages.topLeft, x: leftX, y: topY },
+          { image: frameImages.topRight, x: rightX, y: topY },
+          { image: frameImages.bottomLeft, x: leftX, y: bottomY },
+          { image: frameImages.bottomRight, x: rightX, y: bottomY }
+        ];
+        context.save();
+        context.globalAlpha = clamp(settings.opacity ?? 1, 0, 1);
+        placements.forEach((piece) => drawTintedFramePiece(context, piece.image, piece.x, piece.y, partW, partH, settings));
+        context.restore();
+        return;
+      }
+      const thickness = Math.max(0, Math.min(Math.round(settings.thickness || 0), Math.ceil(Math.max(w, h))));
+      if (thickness <= 0) return;
+      const mode = settings.mode || "all";
+      context.save();
+      context.globalAlpha = clamp(settings.opacity ?? 1, 0, 1);
+      context.fillStyle = settings.color || "#ffffff";
+      if (mode === "all" || mode === "horizontal") {
+        context.fillRect(0, 0, w, Math.min(thickness, h));
+        context.fillRect(0, Math.max(0, h - thickness), w, Math.min(thickness, h));
+      }
+      if (mode === "all" || mode === "vertical") {
+        const y = mode === "all" ? Math.min(thickness, h) : 0;
+        const sideHeight = mode === "all" ? Math.max(0, h - thickness * 2) : h;
+        if (sideHeight > 0) {
+          context.fillRect(0, y, Math.min(thickness, w), sideHeight);
+          context.fillRect(Math.max(0, w - thickness), y, Math.min(thickness, w), sideHeight);
+        }
+      }
+      context.restore();
+    }
+
     function shapePath(context, settings) {
       const w = Math.max(1, Number(settings.width || 1));
       const h = Math.max(1, Number(settings.height || 1));
@@ -3209,14 +3905,58 @@
 
     function drawTextLayer(context, layer) {
       if (!layer.visible || !layer.text) return;
-      const settings = normalizeTextLayer(layer); context.save(); context.translate(settings.x || 0, settings.y || 0); context.rotate((settings.rotation || 0) * Math.PI / 180); context.scale(settings.scale || 1, settings.scale || 1); context.globalAlpha = 1; context.textBaseline = "alphabetic"; context.font = fontStringForSettings(settings);
+      const settings = normalizeTextLayer(layer);
+      context.save();
+      context.translate(settings.x || 0, settings.y || 0);
+      context.rotate((settings.rotation || 0) * Math.PI / 180);
+      context.scale(settings.scale || 1, settings.scale || 1);
+      context.globalAlpha = 1;
+      context.textBaseline = "alphabetic";
+      context.font = fontStringForSettings(settings);
       const letterSpacing = settings.letterSpacing || 0;
       if (settings.writingMode === "vertical") {
         const entries = buildVerticalEntries(context, settings.text, settings, letterSpacing);
-        ["shadow", "stroke", "fill"].forEach((layerName) => { entries.forEach((entry) => { context.save(); context.translate(entry.x, entry.y); if (entry.rotateLatin) context.rotate(Math.PI / 2); paintCenteredGlyph(context, entry.char, entry.settings, layerName); context.restore(); }); });
+        const bounds = entries.length
+          ? (() => {
+              const xs = entries.map((entry) => entry.x);
+              const ys = entries.map((entry) => entry.y);
+              const maxFont = Math.max(...entries.map((entry) => Number(entry.settings?.fontSize || settings.fontSize || 86)), 1);
+              const minX = Math.min(...xs) - maxFont / 2;
+              const maxX = Math.max(...xs) + maxFont / 2;
+              const minY = Math.min(...ys) - maxFont / 2;
+              const maxY = Math.max(...ys) + maxFont / 2;
+              return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+            })()
+          : { x: -50, y: -50, w: 100, h: 100 };
+        const renderSettings = withTextFillStyle(context, settings, bounds);
+        ["shadow", "stroke", "fill"].forEach((layerName) => {
+          entries.forEach((entry) => {
+            context.save();
+            context.translate(entry.x, entry.y);
+            if (entry.rotateLatin) context.rotate(Math.PI / 2);
+            const entrySettings = layerName === "fill" ? { ...entry.settings, _fillStyle: renderSettings._fillStyle || null } : entry.settings;
+            paintCenteredGlyph(context, entry.char, entrySettings, layerName);
+            context.restore();
+          });
+        });
       } else {
-        const maxWidth = Math.max(100, settings.wrapWidth || 900); const lines = wrapTextLines(context, settings.text, maxWidth, letterSpacing, settings); const lineHeight = Math.max(1, (settings.fontSize || 86) * (settings.lineHeight || 1.25)); const totalHeight = lineHeight * Math.max(1, lines.length); const startY = -totalHeight / 2 + lineHeight * 0.85;
-        lines.forEach((line, lineIndex) => { const yLine = startY + lineIndex * lineHeight; const lineWidth = measureTextWidth(context, line, letterSpacing, settings); let xLine = 0; if (settings.align === "center") xLine -= lineWidth / 2; if (settings.align === "right") xLine -= lineWidth; drawStyledText(context, line, xLine, yLine, settings, letterSpacing); });
+        const maxWidth = Math.max(100, settings.wrapWidth || 900);
+        const lines = wrapTextLines(context, settings.text, maxWidth, letterSpacing, settings);
+        const lineWidths = lines.map((line) => measureTextWidth(context, line, letterSpacing, settings));
+        const maxLineWidth = Math.max(1, ...lineWidths);
+        const lineHeight = Math.max(1, (settings.fontSize || 86) * (settings.lineHeight || 1.25));
+        const totalHeight = lineHeight * Math.max(1, lines.length);
+        const startY = -totalHeight / 2 + lineHeight * 0.85;
+        const boundsX = settings.align === "center" ? -maxLineWidth / 2 : (settings.align === "right" ? -maxLineWidth : 0);
+        const renderSettings = withTextFillStyle(context, settings, { x: boundsX, y: -totalHeight / 2, w: maxLineWidth, h: totalHeight });
+        lines.forEach((line, lineIndex) => {
+          const yLine = startY + lineIndex * lineHeight;
+          const lineWidth = lineWidths[lineIndex];
+          let xLine = 0;
+          if (settings.align === "center") xLine -= lineWidth / 2;
+          if (settings.align === "right") xLine -= lineWidth;
+          drawStyledText(context, line, xLine, yLine, renderSettings, letterSpacing);
+        });
       }
       context.restore();
     }
@@ -3313,6 +4053,9 @@
       $("#addShapeLayerBtn").addEventListener("click", () => { const layer = createShapeLayer(); const { width, height } = getCanvasBaseSize(); layer.x = width / 2; layer.y = height / 2; state.shapeLayers.push(layer); state.activeShapeLayerId = layer.id; state.activeToolTarget = `shape:${layer.id}`; renderAll(); setStatusT("shapeLayerAdded"); });
       $("#duplicateShapeLayerBtn").addEventListener("click", () => { const layer = activeShapeLayer(); if (!layer) return; const copy = normalizeShapeLayer(clone(layer)); copy.id = uid("shape"); copy.name = `${layer.name} copy`; copy.x += 24; copy.y += 24; state.shapeLayers.push(copy); state.activeShapeLayerId = copy.id; state.activeToolTarget = `shape:${copy.id}`; renderAll(); });
       $("#deleteShapeLayerBtn").addEventListener("click", () => { const layer = activeShapeLayer(); if (!layer) return; state.shapeLayers = state.shapeLayers.filter((item) => item.id !== layer.id); state.activeShapeLayerId = state.shapeLayers[0]?.id || ""; state.activeToolTarget = state.activeShapeLayerId ? `shape:${state.activeShapeLayerId}` : "standing"; renderAll(); });
+      $("#addFrameLayerBtn").addEventListener("click", () => { if (!Array.isArray(state.frameLayers)) state.frameLayers = []; const layer = createFrameLayer(); layer.name = `${t("defaultFrameLayerName")} ${state.frameLayers.length + 1}`; state.frameLayers.push(layer); state.activeFrameLayerId = layer.id; renderAll(); setStatusT("frameLayerAdded"); });
+      $("#duplicateFrameLayerBtn").addEventListener("click", () => { const layer = activeFrameLayer(); if (!layer) return; const copy = normalizeFrameLayer(clone(layer)); copy.id = uid("frame"); copy.name = `${layer.name} copy`; state.frameLayers.push(copy); state.activeFrameLayerId = copy.id; renderAll(); });
+      $("#deleteFrameLayerBtn").addEventListener("click", () => { const layer = activeFrameLayer(); if (!layer) return; state.frameLayers = state.frameLayers.filter((item) => item.id !== layer.id); state.activeFrameLayerId = state.frameLayers[0]?.id || ""; renderAll(); });
       $("#addEffectLayerBtn").addEventListener("click", () => {
         if (!Array.isArray(state.effectLayers)) state.effectLayers = [];
         const layer = createEffectLayer();
