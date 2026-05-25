@@ -1035,6 +1035,7 @@
             <li data-i18n="helpEffects1">エフェクトカードはカテゴリ一覧内で上下移動できます。</li>
             <li data-i18n="helpEffects2">エフェクトは、そのカードより下にあるレイヤーだけに反映されます。</li>
             <li data-i18n="helpEffects3">色収差はRGB分離方式です。R / G / B の透明度合計が100%になるよう自動調整されます。</li>
+            <li data-i18n="helpEffects4">ダブルトーンは画像を輝度ベースで2色に置き換えるカラー効果です。暗部色と明部色を指定できます。</li>
           </ul>
         </section>
         <section class="manual-section">
@@ -1136,6 +1137,10 @@
       effectStackInfo: "エフェクトカードは下のカテゴリ一覧内で上下移動できます。カードより下にあるレイヤーだけに反映されます。",
       effectLayerStackNote: "このカードより下のレイヤーに適用",
       effectLayerSelected: "エフェクトレイヤーを選択しました。",
+      effectTypeDuotone: "ダブルトーン",
+      effectDuotoneShadowColor: "暗部色",
+      effectDuotoneHighlightColor: "明部色",
+      effectDuotoneHint: "輝度をもとに、暗い部分を暗部色、明るい部分を明部色へ変換します。Photoshopのダブルトーン風のカラー化に使えます。",
       handMaterialOrderHint: "手元素材パネルは下のレイヤー順一覧に統合されます。エフェクトカードより下にある手元素材はエフェクトの影響を受けます。",
       handMaterialStackNote: "通常レイヤーと同じ描画順",
       handMaterialLayerSelected: "手元素材レイヤーを選択しました。",
@@ -1150,6 +1155,10 @@
       effectStackInfo: "Effect cards can be moved up and down inside the category list below. Each effect is applied only to layers below its card.",
       effectLayerStackNote: "Applies to layers below this card",
       effectLayerSelected: "Effect layer selected.",
+      effectTypeDuotone: "Duotone",
+      effectDuotoneShadowColor: "Shadow color",
+      effectDuotoneHighlightColor: "Highlight color",
+      effectDuotoneHint: "Maps brightness to two colors: dark areas use the shadow color, bright areas use the highlight color. Useful for Photoshop-style duotone color effects.",
       handMaterialOrderHint: "Hand material panels are integrated into the layer order list below. Hand materials placed below an effect card are affected by that effect.",
       handMaterialStackNote: "Drawn in the same order as normal layers",
       handMaterialLayerSelected: "Hand material layer selected.",
@@ -1164,6 +1173,10 @@
       effectStackInfo: "효과 카드는 아래 카테고리 목록 안에서 위아래로 이동할 수 있습니다. 카드보다 아래에 있는 레이어에만 적용됩니다.",
       effectLayerStackNote: "이 카드보다 아래 레이어에 적용",
       effectLayerSelected: "효과 레이어를 선택했습니다.",
+      effectTypeDuotone: "더블톤",
+      effectDuotoneShadowColor: "어두운 색",
+      effectDuotoneHighlightColor: "밝은 색",
+      effectDuotoneHint: "밝기를 기준으로 어두운 부분은 어두운 색, 밝은 부분은 밝은 색으로 변환합니다. Photoshop의 더블톤 같은 컬러 효과에 사용할 수 있습니다.",
       handMaterialOrderHint: "손 소재 패널은 아래 레이어 순서 목록에 통합됩니다. 효과 카드보다 아래에 있는 손 소재는 해당 효과의 영향을 받습니다.",
       handMaterialStackNote: "일반 레이어와 같은 그리기 순서",
       handMaterialLayerSelected: "손 소재 레이어를 선택했습니다.",
@@ -1192,6 +1205,7 @@
       helpEffects1: "エフェクトカードはカテゴリ一覧内で上下移動できます。",
       helpEffects2: "エフェクトは、そのカードより下にあるレイヤーだけに反映されます。",
       helpEffects3: "色収差はRGB分離方式です。R / G / B の透明度合計が100%になるよう自動調整されます。",
+      helpEffects4: "ダブルトーンは画像を輝度ベースで2色に置き換えるカラー効果です。暗部色と明部色を指定できます。",
       helpSectionSaveTitle: "保存・読込・書き出し",
       helpSave1: "JSON保存でプロジェクトをファイルとして保存できます。別ブラウザや別端末で続きから作業する場合に便利です。",
       helpSave2: "キャッシュ保存はブラウザ内保存です。キャッシュ削除や環境変更で消える可能性があるため、重要な作業はJSON保存がおすすめです。",
@@ -1218,6 +1232,7 @@
       helpEffects1: "Effect cards can be moved up and down inside the category list.",
       helpEffects2: "Each effect applies only to layers below its card.",
       helpEffects3: "Chromatic aberration uses RGB splitting. R / G / B opacity is automatically balanced to total 100%.",
+      helpEffects4: "Duotone replaces the image with two colors based on brightness. You can set shadow and highlight colors.",
       helpSectionSaveTitle: "Save, load, and export",
       helpSave1: "Save JSON exports the project as a file. Use it to continue on another browser or device.",
       helpSave2: "Cache Save stores the project in the browser. It may disappear if the cache is cleared, so JSON Save is recommended for important work.",
@@ -1244,6 +1259,7 @@
       helpEffects1: "효과 카드는 카테고리 목록 안에서 위아래로 이동할 수 있습니다.",
       helpEffects2: "효과는 해당 카드보다 아래에 있는 레이어에만 적용됩니다.",
       helpEffects3: "색수차는 RGB 분리 방식입니다. R / G / B 투명도 합계가 100%가 되도록 자동 조정됩니다.",
+      helpEffects4: "더블톤은 밝기를 기준으로 이미지를 두 가지 색으로 바꾸는 컬러 효과입니다. 어두운 색과 밝은 색을 지정할 수 있습니다.",
       helpSectionSaveTitle: "저장・불러오기・내보내기",
       helpSave1: "JSON 저장으로 프로젝트를 파일로 저장할 수 있습니다. 다른 브라우저나 기기에서 이어서 작업할 때 편리합니다.",
       helpSave2: "캐시 저장은 브라우저 내부 저장입니다. 캐시 삭제나 환경 변경으로 사라질 수 있으므로 중요한 작업은 JSON 저장을 권장합니다.",
@@ -1716,7 +1732,7 @@
     function createEffectLayer() {
       return {
         id: uid("effectLayer"), name: t("defaultEffectLayerName"), visible: true, type: "vignette", placement: "standing", stackIndex: 0,
-        color: "#000000", intensity: 0.35, radius: 0.58, shift: 6, blur: 6, toneMode: "grayscale", chromaticRedOpacity: 34, chromaticGreenOpacity: 33, chromaticBlueOpacity: 33, chromaticRedShift: -6, chromaticGreenShift: 0, chromaticBlueShift: 6
+        color: "#000000", intensity: 0.35, radius: 0.58, shift: 6, blur: 6, toneMode: "grayscale", duotoneShadowColor: "#1f2a44", duotoneHighlightColor: "#f6e7d8", chromaticRedOpacity: 34, chromaticGreenOpacity: 33, chromaticBlueOpacity: 33, chromaticRedShift: -6, chromaticGreenShift: 0, chromaticBlueShift: 6
       };
     }
     function createCustomFont(fileName = "Custom Font", dataUrl = "") {
@@ -1873,7 +1889,7 @@
     function normalizeEffectLayer(layer) {
       const base = createEffectLayer();
       const placement = ["background", "backText", "standing", "frontText"].includes(layer?.placement) ? layer.placement : base.placement;
-      const type = ["vignette", "chromatic", "blur", "tone"].includes(layer?.type) ? layer.type : base.type;
+      const type = ["vignette", "chromatic", "blur", "tone", "duotone"].includes(layer?.type) ? layer.type : base.type;
       const toneMode = ["grayscale", "sepia"].includes(layer?.toneMode) ? layer.toneMode : base.toneMode;
       const normalized = {
         ...base,
@@ -1889,6 +1905,8 @@
         shift: Math.round(clamp(layer?.shift ?? base.shift, 0, 60)),
         blur: Math.round(clamp(layer?.blur ?? base.blur, 0, 60)),
         toneMode,
+        duotoneShadowColor: /^#[0-9a-f]{6}$/i.test(layer?.duotoneShadowColor || "") ? layer.duotoneShadowColor : base.duotoneShadowColor,
+        duotoneHighlightColor: /^#[0-9a-f]{6}$/i.test(layer?.duotoneHighlightColor || "") ? layer.duotoneHighlightColor : base.duotoneHighlightColor,
         chromaticRedOpacity: Math.round(clamp(layer?.chromaticRedOpacity ?? 34, 0, 100)),
         chromaticGreenOpacity: Math.round(clamp(layer?.chromaticGreenOpacity ?? 33, 0, 100)),
         chromaticBlueOpacity: Math.round(clamp(layer?.chromaticBlueOpacity ?? 33, 0, 100)),
@@ -2754,7 +2772,7 @@
 
     const EFFECT_STACK_ORDER = ["background", "backText", "standing", "frontText"];
     function effectPlacementIndex(value) { const index = EFFECT_STACK_ORDER.indexOf(value); return index >= 0 ? index : 2; }
-    function effectTypeLabel(value) { return { vignette: t("effectTypeVignette"), chromatic: t("effectTypeChromatic"), blur: t("effectTypeBlur"), tone: t("effectTypeTone") }[value] || value; }
+    function effectTypeLabel(value) { return { vignette: t("effectTypeVignette"), chromatic: t("effectTypeChromatic"), blur: t("effectTypeBlur"), tone: t("effectTypeTone"), duotone: t("effectTypeDuotone") }[value] || value; }
     function effectPlacementLabel(value) { return { background: t("effectPlacementBg"), backText: t("effectPlacementBackText"), standing: t("effectPlacementStanding"), frontText: t("effectPlacementFrontText") }[value] || value; }
     function getEffectStackMax() { return Math.max(0, getStandingLayerEntries().length); }
     function normalizeEffectStackIndex(layer) {
@@ -2877,7 +2895,8 @@
           { value: "vignette", label: t("effectTypeVignette") },
           { value: "chromatic", label: t("effectTypeChromatic") },
           { value: "blur", label: t("effectTypeBlur") },
-          { value: "tone", label: t("effectTypeTone") }
+          { value: "tone", label: t("effectTypeTone") },
+          { value: "duotone", label: t("effectTypeDuotone") }
         ], (value) => { layer.type = value; rerender(); })
       );
       root.appendChild(basic);
@@ -2904,6 +2923,19 @@
           { value: "sepia", label: t("effectToneSepia") }
         ], (value) => { layer.toneMode = value; renderPreview(); });
         root.appendChild(toneField);
+        addRange(root, t("effectIntensity"), layer.intensity, 0, 1, 0.01, "", (value) => { layer.intensity = value; renderPreview(); }, 2);
+      } else if (layer.type === "duotone") {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = t("effectDuotoneHint");
+        root.appendChild(hint);
+        const colorGrid = document.createElement("div");
+        colorGrid.className = "grid-2";
+        colorGrid.append(
+          createColorField(t("effectDuotoneShadowColor"), layer.duotoneShadowColor || "#1f2a44", (value) => { layer.duotoneShadowColor = value; renderPreview(); }),
+          createColorField(t("effectDuotoneHighlightColor"), layer.duotoneHighlightColor || "#f6e7d8", (value) => { layer.duotoneHighlightColor = value; renderPreview(); })
+        );
+        root.appendChild(colorGrid);
         addRange(root, t("effectIntensity"), layer.intensity, 0, 1, 0.01, "", (value) => { layer.intensity = value; renderPreview(); }, 2);
       }
     }
@@ -3190,7 +3222,8 @@
           { value: "vignette", label: t("effectTypeVignette") },
           { value: "chromatic", label: t("effectTypeChromatic") },
           { value: "blur", label: t("effectTypeBlur") },
-          { value: "tone", label: t("effectTypeTone") }
+          { value: "tone", label: t("effectTypeTone") },
+          { value: "duotone", label: t("effectTypeDuotone") }
         ], (value) => { layer.type = value; renderLayers(); renderEffectDetailEditor(); renderPreview(); })
       );
       body.appendChild(controls);
@@ -4003,6 +4036,18 @@
       const b = int & 255;
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
+    function hexToRgb(hex, fallback = { r: 0, g: 0, b: 0 }) {
+      const clean = String(hex || "").trim();
+      const normalized = /^#([0-9a-f]{3})$/i.test(clean)
+        ? `#${clean.slice(1).split("").map((ch) => ch + ch).join("")}`
+        : clean;
+      const match = normalized.match(/^#([0-9a-f]{6})$/i);
+      if (!match) return fallback;
+      const int = parseInt(match[1], 16);
+      return { r: (int >> 16) & 255, g: (int >> 8) & 255, b: int & 255 };
+    }
+    function lerpValue(a, b, t) { return a + (b - a) * t; }
+    function clampByte(value) { return Math.max(0, Math.min(255, Math.round(value))); }
     function clamp01(value) { return Math.max(0, Math.min(1, Number(value) || 0)); }
     function distributeRounded(values, total) {
       const floors = values.map((v) => Math.floor(v));
@@ -4119,6 +4164,40 @@
       return tinted;
     }
 
+    function applyDuotoneEffect(canvas, sourceCanvas, effect) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const ctx = canvas.getContext("2d", { alpha: true });
+      const sourceCtx = sourceCanvas.getContext("2d", { alpha: true });
+      if (!ctx || !sourceCtx || !w || !h) return;
+      const src = sourceCtx.getImageData(0, 0, w, h);
+      const out = ctx.createImageData(w, h);
+      const srcData = src.data;
+      const outData = out.data;
+      const dark = hexToRgb(effect.duotoneShadowColor || "#1f2a44", { r: 31, g: 42, b: 68 });
+      const light = hexToRgb(effect.duotoneHighlightColor || "#f6e7d8", { r: 246, g: 231, b: 216 });
+      const amount = clamp01(effect.intensity ?? 1);
+      for (let i = 0; i < srcData.length; i += 4) {
+        const r = srcData[i];
+        const g = srcData[i + 1];
+        const b = srcData[i + 2];
+        const a = srcData[i + 3];
+        if (a <= 0) {
+          outData[i + 3] = 0;
+          continue;
+        }
+        const lum = clamp01((r * 0.299 + g * 0.587 + b * 0.114) / 255);
+        const toneR = lerpValue(dark.r, light.r, lum);
+        const toneG = lerpValue(dark.g, light.g, lum);
+        const toneB = lerpValue(dark.b, light.b, lum);
+        outData[i] = clampByte(lerpValue(r, toneR, amount));
+        outData[i + 1] = clampByte(lerpValue(g, toneG, amount));
+        outData[i + 2] = clampByte(lerpValue(b, toneB, amount));
+        outData[i + 3] = a;
+      }
+      ctx.putImageData(out, 0, 0);
+    }
+
     function applySingleEffect(canvas, effect) {
       if (!canvas || !effect) return;
       const w = canvas.width;
@@ -4156,6 +4235,10 @@
         ctx.filter = effect.toneMode === "sepia" ? `sepia(${amount}%)` : `grayscale(${amount}%)`;
         ctx.drawImage(source, 0, 0);
         ctx.restore();
+        return;
+      }
+      if (effect.type === "duotone") {
+        applyDuotoneEffect(canvas, source, normalizeEffectLayer(effect));
         return;
       }
       if (effect.type === "chromatic") {

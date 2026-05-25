@@ -25,3 +25,9 @@ Version 41: Improved hand material downscaling quality.
 - Added high-quality multi-step downsampling for hand material drawing.
 - Prevents line art from becoming rough/jagged when hand materials are scaled down very small.
 - Preview and PNG export use the same improved drawing path.
+
+Version 42: Added Duotone effect.
+- Added a Photoshop-style duotone color effect to Effect Layers.
+- Brightness is mapped from Shadow color to Highlight color.
+- Intensity controls how strongly the original colors are replaced.
+- Available in Japanese / English / Korean UI.
