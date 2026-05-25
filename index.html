@@ -3889,7 +3889,9 @@
       }
     }
     async function drawComposite(canvas, width, height, character = activeCharacter(), options = {}) {
-      const ctx = canvas.getContext("2d", { alpha: true }); ctx.clearRect(0, 0, width, height);
+      const ctx = canvas.getContext("2d", { alpha: true });
+      enableHighQualityImageSmoothing(ctx);
+      ctx.clearRect(0, 0, width, height);
       drawBackgroundPanel(ctx, width, height, Boolean(options.forExport));
       if (activeLayerPreset()?.useBackgroundImages) {
         for (const bg of state.backgroundLayers) await drawBackground(ctx, bg, width, height);
@@ -3911,11 +3913,81 @@
         applySingleEffect(canvas, normalizeEffectLayer(layer));
       }
     }
+    function enableHighQualityImageSmoothing(context) {
+      if (!context) return;
+      context.imageSmoothingEnabled = true;
+      try { context.imageSmoothingQuality = "high"; } catch (error) {}
+    }
+    function sourceImageWidth(source) {
+      return Math.max(0, Math.round(Number(source?.naturalWidth || source?.videoWidth || source?.width || 0)));
+    }
+    function sourceImageHeight(source) {
+      return Math.max(0, Math.round(Number(source?.naturalHeight || source?.videoHeight || source?.height || 0)));
+    }
+    function resizeCanvasHighQuality(source, targetWidth, targetHeight) {
+      const sourceWidth = sourceImageWidth(source);
+      const sourceHeight = sourceImageHeight(source);
+      const finalWidth = Math.max(1, Math.round(Math.abs(Number(targetWidth || sourceWidth || 1))));
+      const finalHeight = Math.max(1, Math.round(Math.abs(Number(targetHeight || sourceHeight || 1))));
+      const output = document.createElement("canvas");
+      output.width = finalWidth;
+      output.height = finalHeight;
+      const outputContext = output.getContext("2d", { alpha: true });
+      if (!outputContext || !sourceWidth || !sourceHeight) return output;
+      enableHighQualityImageSmoothing(outputContext);
+
+      // Extremely small hand-material scaling can alias when the browser downsamples in one pass.
+      // Shrink through several half-size passes first so hard 1-bit line art becomes smooth alpha.
+      let current = document.createElement("canvas");
+      current.width = sourceWidth;
+      current.height = sourceHeight;
+      let currentContext = current.getContext("2d", { alpha: true });
+      if (!currentContext) return output;
+      enableHighQualityImageSmoothing(currentContext);
+      currentContext.drawImage(source, 0, 0, sourceWidth, sourceHeight);
+
+      let currentWidth = sourceWidth;
+      let currentHeight = sourceHeight;
+      while (currentWidth * 0.5 > finalWidth || currentHeight * 0.5 > finalHeight) {
+        const nextWidth = Math.max(finalWidth, Math.round(currentWidth * 0.5));
+        const nextHeight = Math.max(finalHeight, Math.round(currentHeight * 0.5));
+        const next = document.createElement("canvas");
+        next.width = nextWidth;
+        next.height = nextHeight;
+        const nextContext = next.getContext("2d", { alpha: true });
+        if (!nextContext) break;
+        enableHighQualityImageSmoothing(nextContext);
+        nextContext.drawImage(current, 0, 0, currentWidth, currentHeight, 0, 0, nextWidth, nextHeight);
+        current = next;
+        currentWidth = nextWidth;
+        currentHeight = nextHeight;
+      }
+
+      outputContext.drawImage(current, 0, 0, currentWidth, currentHeight, 0, 0, finalWidth, finalHeight);
+      return output;
+    }
+    function drawImageHighQuality(context, source, dx, dy, dw, dh) {
+      if (!context || !source) return;
+      const sourceWidth = sourceImageWidth(source);
+      const sourceHeight = sourceImageHeight(source);
+      const targetWidth = Math.max(1, Math.round(Math.abs(Number(dw || sourceWidth || 1))));
+      const targetHeight = Math.max(1, Math.round(Math.abs(Number(dh || sourceHeight || 1))));
+      enableHighQualityImageSmoothing(context);
+      if (!sourceWidth || !sourceHeight) return;
+      if (targetWidth >= sourceWidth * 0.5 && targetHeight >= sourceHeight * 0.5) {
+        context.drawImage(source, dx, dy, dw, dh);
+        return;
+      }
+      const resized = resizeCanvasHighQuality(source, targetWidth, targetHeight);
+      context.drawImage(resized, dx, dy, dw, dh);
+    }
     function createOffscreenCopy(sourceCanvas) {
       const copy = document.createElement("canvas");
       copy.width = sourceCanvas.width;
       copy.height = sourceCanvas.height;
-      copy.getContext("2d", { alpha: true }).drawImage(sourceCanvas, 0, 0);
+      const copyContext = copy.getContext("2d", { alpha: true });
+      enableHighQualityImageSmoothing(copyContext);
+      copyContext.drawImage(sourceCanvas, 0, 0);
       return copy;
     }
     function hexToRgba(hex, alpha = 1) {
@@ -4295,6 +4367,7 @@
       canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
       const ctx = canvas.getContext("2d", { alpha: true });
+      enableHighQualityImageSmoothing(ctx);
       ctx.drawImage(image, 0, 0);
       ctx.globalCompositeOperation = "source-in";
       ctx.fillStyle = color || "#ffffff";
@@ -4482,15 +4555,19 @@
       if (!preset || !images) return;
       const naturalW = Math.max(1, Number(preset.width || 1));
       const naturalH = Math.max(1, Number(preset.height || 1));
+      const scale = Math.max(0.01, Math.abs(Number(layer.scale || 1)));
+      const targetW = Math.max(1, naturalW * scale);
+      const targetH = Math.max(1, naturalH * scale);
       context.save();
       context.translate(Number(layer.x || 0), Number(layer.y || 0));
       context.rotate(((Number(layer.rotation || 0)) * Math.PI) / 180);
-      context.scale((layer.flipX ? -1 : 1) * Number(layer.scale || 1), Number(layer.scale || 1));
+      if (layer.flipX) context.scale(-1, 1);
+      enableHighQualityImageSmoothing(context);
       const drawPart = (image, color) => {
         if (!image?.complete) return;
         const fillCanvas = getTintedAlphaCanvas(image, color || "#ffffff");
         if (!fillCanvas) return;
-        context.drawImage(fillCanvas, -naturalW / 2, -naturalH / 2, naturalW, naturalH);
+        drawImageHighQuality(context, fillCanvas, -targetW / 2, -targetH / 2, targetW, targetH);
       };
       drawPart(images.line, layer.lineColor);
       drawPart(images.base, layer.baseColor);

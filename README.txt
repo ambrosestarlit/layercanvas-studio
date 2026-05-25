@@ -20,3 +20,8 @@ Version 29: Updated the built-in manual.
 
 Added hand material layer preset: gao
 Files: img/hand-materials/gao/{line,base,shadow1,shadow2}.png
+
+Version 41: Improved hand material downscaling quality.
+- Added high-quality multi-step downsampling for hand material drawing.
+- Prevents line art from becoming rough/jagged when hand materials are scaled down very small.
+- Preview and PNG export use the same improved drawing path.
