@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LayerCanvas Studio</title>
   <meta name="description" content="A browser-based layered image editor for character variants, illustration variations, and thumbnails." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DotGothic16&family=Hachi+Maru+Pop&family=Kaisei+Tokumin:wght@400;700&family=Kiwi+Maru:wght@400;500&family=Kosugi+Maru&family=M+PLUS+1p:wght@400;700;800&family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Sans+JP:wght@400;700;900&family=Noto+Serif+JP:wght@400;700;900&family=Reggae+One&family=RocknRoll+One&family=Sawarabi+Gothic&family=Sawarabi+Mincho&family=Shippori+Mincho:wght@400;700&family=Yusei+Magic&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #f7fbf8;
@@ -319,6 +322,19 @@
       box-shadow: 0 0 0 2px rgba(61, 127, 112, 0.24), var(--shadow);
     }
 
+    .hand-material-layer-card {
+      border-color: rgba(246, 190, 150, 0.9);
+      background: rgba(255, 252, 248, 0.96);
+    }
+
+    .hand-material-layer-card .layer-head {
+      background: linear-gradient(90deg, rgba(255, 224, 197, 0.84), rgba(255, 255, 255, 0.88));
+    }
+
+    .hand-material-layer-card.active {
+      box-shadow: 0 0 0 2px rgba(214, 133, 86, 0.24), var(--shadow);
+    }
+
     .effect-card-body {
       padding: 0.65rem;
       display: grid;
@@ -357,6 +373,12 @@
 
     .text-row { grid-template-columns: auto minmax(0, 1fr) auto; }
     .font-row { grid-template-columns: 1fr auto; cursor: default; }
+    .font-row.preview-only { grid-template-columns: 1fr; cursor: default; }
+    .font-group-title { color: var(--mint-deep); font-weight: 800; font-size: 0.86rem; padding: 0.25rem 0.2rem 0; }
+    .font-preview-name { font-size: 1rem; line-height: 1.35; }
+    .font-preview-sample { color: var(--muted); font-size: 0.82rem; margin-top: 0.12rem; }
+    select.font-preview-select { font-size: 1rem; }
+    select.font-preview-select option { font-size: 1rem; padding: 0.45rem 0.65rem; }
     .part-row:hover, .text-row:hover { background: #f8fffc; }
     .part-row.active, .text-row.active { border-color: var(--mint-dark); background: #f1fbf8; }
     .part-row input[type="checkbox"], .text-row input[type="checkbox"] { width: 1.05rem; height: 1.05rem; accent-color: var(--mint-deep); }
@@ -851,6 +873,7 @@
               <button id="duplicateTextLayerBtn" class="secondary" data-i18n="duplicateButton">複製</button>
               <button id="deleteTextLayerBtn" class="danger" data-i18n="deleteButton">削除</button>
             </div>
+            <div class="hint" data-i18n="textOrderHint">テキストレイヤーパネルは下のレイヤー順一覧に統合されます。テキストも画像・手元素材・エフェクトと同じ並びで↑↓移動できます。</div>
             <div id="textLayerList" class="part-list"></div>
           </div>
         </details>
@@ -883,6 +906,24 @@
         <details class="control-section" open>
           <summary data-i18n="shapeDetailSection">選択中図形詳細</summary>
           <div id="shapeDetailEditor" class="section-body"></div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="handMaterialSection">手元素材レイヤー</summary>
+          <div class="section-body">
+            <div class="button-row">
+              <button id="addHandMaterialLayerBtn" data-i18n="addHandMaterialLayer">手元素材追加</button>
+              <button id="duplicateHandMaterialLayerBtn" class="secondary" data-i18n="duplicateButton">複製</button>
+              <button id="deleteHandMaterialLayerBtn" class="danger" data-i18n="deleteButton">削除</button>
+            </div>
+            <div class="hint" data-i18n="handMaterialOrderHint">手元素材パネルは下のレイヤー順一覧に統合されます。エフェクトカードより下にある手元素材はエフェクトの影響を受けます。</div>
+            <div id="handMaterialLayerList" class="part-list"></div>
+          </div>
+        </details>
+
+        <details class="control-section" open>
+          <summary data-i18n="handMaterialDetailSection">選択中手元素材詳細</summary>
+          <div id="handMaterialDetailEditor" class="section-body"></div>
         </details>
 
         <details class="control-section" open>
@@ -1046,7 +1087,7 @@
         previewTitle: "プレビュー / 書き出し", previewSubtitle: "プレビュー上で立ち絵全体またはテキストを移動・回転・拡大縮小できます。背景は専用スライダーで調整します。",
         previewBgLabel: "プレビュー背景", bgTransparent: "透明確認", bgWhite: "白", bgMint: "くすみミント", exportHeightLabel: "書き出し縦幅(px)", sizeLabel: "サイズ", sizeOriginal: "原寸", sizeHeight: "縦幅指定", exportPngButton: "PNG書き出し", exportSettingsButton: "書き出し", exportSettingsTitle: "書き出し設定", closeButton: "閉じる",
         jsonSaveButton: "JSON保存", jsonLoadButton: "JSON読込", cacheSaveButton: "キャッシュ保存", cacheLoadButton: "キャッシュ読込", cacheDeleteButton: "キャッシュ削除",
-        backgroundSection: "背景レイヤー", textSection: "テキストレイヤー", textDetailSection: "選択中テキスト詳細", effectSection: "エフェクトレイヤー", effectDetailSection: "選択中エフェクト詳細", commonFontSection: "共通フォント一覧", customFontSection: "任意フォント", registerFont: "フォント登録", commonFontHint: "登録したフォントはすべてのテキストレイヤーで共通利用できます。フォントのプルダウンには default の後に登録フォントが追加されます。", fontHint: "登録したフォントはテキストレイヤーと文字部分指定で選択できます。", transformSection: "選択対象の位置・サイズ・角度", transformHint: "操作対象をチェックで選び、表示移動 / 移動 / サイズ / 回転を選んでプレビュー上でドラッグできます。細かい数値調整はここで行います。",
+        backgroundSection: "背景レイヤー", textSection: "テキストレイヤー", textDetailSection: "選択中テキスト詳細", textOrderHint: "テキストレイヤーパネルは下のレイヤー順一覧に統合されます。テキストも画像・手元素材・エフェクトと同じ並びで↑↓移動できます。", effectSection: "エフェクトレイヤー", effectDetailSection: "選択中エフェクト詳細", commonFontSection: "共通フォント一覧", customFontSection: "任意フォント", registerFont: "フォント登録", commonFontHint: "標準Googleフォントと登録フォントはすべてのテキストレイヤーで共通利用できます。フォントのプルダウン内で字体サンプルも確認できます。", fontHint: "登録したフォントはテキストレイヤーと文字部分指定で選択できます。", transformSection: "選択対象の位置・サイズ・角度", transformHint: "操作対象をチェックで選び、表示移動 / 移動 / サイズ / 回転を選んでプレビュー上でドラッグできます。細かい数値調整はここで行います。",
         addTextLayer: "テキスト追加", addEffectLayer: "エフェクト追加", duplicateButton: "複製", toolTargetLabel: "操作対象", toolModeLabel: "プレビュー操作", toolPan: "表示移動", toolMove: "ドラッグ移動", toolScale: "ドラッグでサイズ", toolRotate: "ドラッグで回転", undoButton: "戻る", redoButton: "やり直す", undoDone: "操作を戻しました。", redoDone: "操作をやり直しました。", standingTarget: "立ち絵", textTarget: "テキスト", previewFit: "全体表示", previewOriginal: "原寸表示", previewZoom: "倍率",
         scaleLabel: "スケール", xMoveLabel: "X移動", yMoveLabel: "Y移動", rotationLabel: "角度",
         hintText: "背景1→背景2→背面テキスト→立ち絵→前面テキストの順に描画します。プレビュー操作の変更はPNG書き出しにも反映されます。",
@@ -1055,7 +1096,7 @@
         inlineStyleTitle: "文字部分指定", inlineStyleHint: "指定した文字列だけフォント・色・サイズ・フチ・影を変更できます。複数指定はコンマで区切ってください。", inlineStyleEmpty: "指定はまだありません。", inlineStyleItem: "指定 {number}", inlineStyleTargets: "指定したい文字列", inlineStyleTargetsPlaceholder: "例：赤い, 海", inlineStyleFont: "指定フォント", inlineStyleColor: "色", inlineStyleSize: "サイズ", inlineStyleStrokeColor: "フチ色", inlineStyleStrokeWidth: "フチ太さ", inlineStyleShadowColor: "影色", inlineStyleShadowBlur: "影ぼかし", addInlineStyle: "+ 追加",
         layer_armFront: "腕(手前)", layer_itemFront: "アイテム(手前)", layer_hairFront: "髪の毛(手前)", layer_eyes: "目元", layer_brows: "眉毛", layer_mouth: "口", layer_effect: "表情効果", layer_armBack: "腕(奥)", layer_itemMiddle: "アイテム(中)", layer_base: "ベース", layer_itemBack: "アイテム(奥)", layer_hairBack: "髪の毛(奥)", layer_diffBase: "ベース",
         noteParts: "", noteExclusive: "1種類選択すると、同カテゴリ内の前の選択は自動で解除されます。", noteDiff: "完成済み差分をクリックで切り替え。複数選択はできません。", registerImage: "画像登録", emptyParts: "まだ画像が登録されていません。", emptyDiff: "完成済み差分画像を登録してください。", partNamePlaceholder: "パーツ名", unnamed: "名称未設定", newCharacter: "新規キャラクター", presetEmpty: "プリセットを選択", displaying: "表示中", applyDisplay: "表示適用",
-        noTextLayer: "テキストレイヤーがありません。", noSelectedText: "編集するテキストレイヤーを選択してください。", noEffectLayer: "エフェクトレイヤーがありません。", noSelectedEffect: "編集するエフェクトレイヤーを選択してください。", defaultTextLayerName: "テキスト", defaultTextBody: "TEXT", shapeSection: "ベクター図形レイヤー", shapeDetailSection: "選択中図形詳細", addShapeLayer: "図形追加", defaultShapeLayerName: "図形", noShapeLayer: "図形レイヤーがありません。", noSelectedShape: "編集する図形レイヤーを選択してください。", shapeTarget: "図形", shapeName: "レイヤー名", shapeType: "図形種類", shapeCircle: "○ 円", shapeSquare: "□ 四角", shapeTriangle: "△ 三角", shapeDrawMode: "描画方式", shapeFill: "ベタ塗り", shapeOutline: "アウトラインのみ", shapePlacement: "表示位置", shapeColor: "図形色", shapeOpacity: "透明度", shapeWidth: "横幅", shapeHeight: "縦幅", shapeKeepRatio: "比率維持", shapeLineWidth: "線の太さ", shapeCornerRadius: "角丸", shapeLayerAdded: "図形レイヤーを追加しました。", defaultEffectLayerName: "エフェクト", defaultFont: "default", effectOrderHint: "エフェクトはリスト内の↑↓と「上へ／下へ」で移動できます。各エフェクトは、その位置より下に描画済みのレイヤーにだけ反映されます。", effectMoveUp: "上へ", effectMoveDown: "下へ",
+        noTextLayer: "テキストレイヤーがありません。", noSelectedText: "編集するテキストレイヤーを選択してください。", noEffectLayer: "エフェクトレイヤーがありません。", noSelectedEffect: "編集するエフェクトレイヤーを選択してください。", defaultTextLayerName: "テキスト", defaultTextBody: "TEXT", shapeSection: "ベクター図形レイヤー", shapeDetailSection: "選択中図形詳細", addShapeLayer: "図形追加", defaultShapeLayerName: "図形", noShapeLayer: "図形レイヤーがありません。", noSelectedShape: "編集する図形レイヤーを選択してください。", shapeTarget: "図形", shapeName: "レイヤー名", shapeType: "図形種類", shapeCircle: "○ 円", shapeSquare: "□ 四角", shapeTriangle: "△ 三角", shapeDrawMode: "描画方式", shapeFill: "ベタ塗り", shapeOutline: "アウトラインのみ", shapePlacement: "表示位置", shapeColor: "図形色", shapeOpacity: "透明度", shapeWidth: "横幅", shapeHeight: "縦幅", shapeKeepRatio: "比率維持", shapeLineWidth: "線の太さ", shapeCornerRadius: "角丸", shapeLayerAdded: "図形レイヤーを追加しました。", handMaterialSection: "手元素材レイヤー", handMaterialDetailSection: "選択中手元素材詳細", addHandMaterialLayer: "手元素材追加", defaultHandMaterialLayerName: "手元素材", noHandMaterialLayer: "手元素材レイヤーがありません。", noSelectedHandMaterial: "編集する手元素材レイヤーを選択してください。", handMaterialTarget: "手元素材", handMaterialName: "レイヤー名", handMaterialPreset: "素材", handMaterialPlacement: "表示位置", handMaterialFlipX: "左右反転", handMaterialLineColor: "線画色", handMaterialBaseColor: "ベース色", handMaterialShadow1Color: "影1色", handMaterialShadow2Color: "影2色", handMaterialLayerAdded: "手元素材レイヤーを追加しました。", handMaterialPresetGao: "がおー", eyedropper: "スポイト", defaultEffectLayerName: "エフェクト", defaultFont: "default", effectOrderHint: "エフェクトはリスト内の↑↓と「上へ／下へ」で移動できます。各エフェクトは、その位置より下に描画済みのレイヤーにだけ反映されます。", effectMoveUp: "上へ", effectMoveDown: "下へ",
         languageChanged: "表示言語を変更しました。", addedImages: "{count}件の画像を登録しました。", fontAdded: "フォントを登録しました。", bgAdded: "背景画像を登録しました。", pngExported: "PNGを書き出しました。{width} × {height}px", pngExportFailed: "PNG書き出しに失敗しました。", jsonSaved: "JSONを保存しました。", jsonLoaded: "JSONを読み込みました。", jsonLoadFailed: "JSONの読み込みに失敗しました。", cacheSaved: "ブラウザキャッシュに保存しました。", cacheSaveFailed: "キャッシュ保存に失敗しました。", cacheMissing: "保存済みキャッシュがありません。", cacheLoaded: "キャッシュから読み込みました。", cacheLoadFailed: "キャッシュ読込に失敗しました。", cacheDeleteConfirm: "ブラウザに保存したキャッシュを削除しますか？", cacheDeleted: "キャッシュを削除しました。", cacheDeleteFailed: "キャッシュ削除に失敗しました。", cacheAutoLoaded: "保存済みキャッシュを自動読込しました。", enterCharacterName: "キャラクター名を入力してください。", characterAdded: "キャラクターを追加しました。", characterRenamed: "キャラクター名を変更しました。", cannotDeleteLastCharacter: "最後のキャラクターは削除できません。", deleteCharacterConfirm: "現在のキャラクターを削除しますか？", characterDeleted: "キャラクターを削除しました。", enterPresetName: "プリセット名を入力してください。", presetSaved: "プリセットを保存しました。", selectPresetDelete: "削除するプリセットを選択してください。", presetDeleted: "プリセットを削除しました。", presetApplied: "プリセット「{name}」を適用しました。", enterLayerPresetName: "レイヤー構成プリセット名を入力してください。", layerPresetAdded: "レイヤー構成プリセットを作成しました。", cannotDeleteLastLayerPreset: "最後のレイヤー構成プリセットは削除できません。", layerPresetDeleted: "レイヤー構成プリセットを削除しました。", layerPresetChanged: "レイヤー構成プリセットを切り替えました。", enterCategoryName: "カテゴリ名を入力してください。", categoryAdded: "カテゴリを追加しました。", categoryMoved: "カテゴリの並び順を変更しました。", effectMoveUp: "上へ", effectMoveDown: "下へ", effectListUp: "リスト上へ", effectListDown: "リスト下へ", effectAdded: "エフェクトレイヤーを追加しました。"
       },
       en: {},
@@ -1063,11 +1104,11 @@
     };
 
     I18N.en = { ...I18N.ja,
-      shapeSection: "Vector Shape Layers", shapeDetailSection: "Selected Shape Details", addShapeLayer: "Add Shape", defaultShapeLayerName: "Shape", noShapeLayer: "No shape layers yet.", noSelectedShape: "Select a shape layer to edit.", shapeTarget: "Shape", shapeName: "Layer name", shapeType: "Shape type", shapeCircle: "○ Circle", shapeSquare: "□ Rectangle", shapeTriangle: "△ Triangle", shapeDrawMode: "Draw mode", shapeFill: "Fill", shapeOutline: "Outline only", shapePlacement: "Position", shapeColor: "Shape color", shapeOpacity: "Opacity", shapeWidth: "Width", shapeHeight: "Height", shapeKeepRatio: "Keep aspect ratio", shapeLineWidth: "Line width", shapeCornerRadius: "Corner roundness", shapeLayerAdded: "Shape layer added.",
+      shapeSection: "Vector Shape Layers", shapeDetailSection: "Selected Shape Details", addShapeLayer: "Add Shape", defaultShapeLayerName: "Shape", noShapeLayer: "No shape layers yet.", noSelectedShape: "Select a shape layer to edit.", shapeTarget: "Shape", shapeName: "Layer name", shapeType: "Shape type", shapeCircle: "○ Circle", shapeSquare: "□ Rectangle", shapeTriangle: "△ Triangle", shapeDrawMode: "Draw mode", shapeFill: "Fill", shapeOutline: "Outline only", shapePlacement: "Position", shapeColor: "Shape color", shapeOpacity: "Opacity", shapeWidth: "Width", shapeHeight: "Height", shapeKeepRatio: "Keep aspect ratio", shapeLineWidth: "Line width", shapeCornerRadius: "Corner roundness", shapeLayerAdded: "Shape layer added.", handMaterialSection: "Hand Material Layers", handMaterialDetailSection: "Selected Hand Material Details", addHandMaterialLayer: "Add Hand Material", defaultHandMaterialLayerName: "Hand Material", noHandMaterialLayer: "No hand material layers yet.", noSelectedHandMaterial: "Select a hand material layer to edit.", handMaterialTarget: "Hand Material", handMaterialName: "Layer name", handMaterialPreset: "Material", handMaterialPlacement: "Position", handMaterialFlipX: "Flip horizontally", handMaterialLineColor: "Line color", handMaterialBaseColor: "Base color", handMaterialShadow1Color: "Shadow 1 color", handMaterialShadow2Color: "Shadow 2 color", handMaterialLayerAdded: "Hand material layer added.", handMaterialPresetGao: "Gao", eyedropper: "Eyedropper",
       appTitle: "LayerCanvas Studio", appSubtitle: "Create character variants, illustration variations, and thumbnails by layering images, text, and backgrounds, then export as PNG.", layerPresetLabel: "Layer Structure Preset", layerPresetNameLabel: "Preset name", layerPresetNamePlaceholder: "Example: Image Variant Set", newCreateButton: "New", defaultLayerPresetName: "Character Variant Set", categorySection: "Category Management", categoryNameLabel: "Category name", categoryNamePlaceholder: "Example: Front Hair", addLayerButton: "Add Layer", categoryTypeMulti: "Combinable layer", categoryTypeSingle: "Single layer", categoryTarget: "Category", categoryTypeHint: "Choose the category type before adding to control whether multiple items can be combined or only one can be active.", categoryOrderHint: "Use ↑ / ↓ on category panels to reorder; drawing order follows the same structure.", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "This preset uses only the background panel. Background image layers are disabled.", characterLabel: "Character", characterNameLabel: "Character name", characterNamePlaceholder: "Character name", addButton: "Add", renameButton: "Rename", deleteButton: "Delete", presetLabel: "Preset", presetNameLabel: "Preset name", presetNamePlaceholder: "Example: Normal smile / Shy / Angry", savePresetButton: "Save current combination", applyButton: "Apply",
       basicSettings: "Basic Settings", canvasHeightLabel: "Height", canvasWidthLabel: "Width", canvasSizePresetLabel: "Canvas Size Preset", canvasPresetNameLabel: "Preset name", canvasPresetNamePlaceholder: "Example: Thumbnail / DLsite", canvasPresetRegister: "Save preset", canvasPresetImageSize: "Image size", canvasPresetSaved: "Canvas size preset saved.", selectCanvasPresetDelete: "Select a canvas size preset to delete.", canvasPresetDeleted: "Canvas size preset deleted.", canvasPresetApplied: "Canvas size applied.",
       previewTitle: "Preview / Export", previewSubtitle: "Move, rotate, and scale the whole standing image or text layers on the preview. Backgrounds use their own sliders.", previewBgLabel: "Preview background", bgTransparent: "Transparency check", bgWhite: "White", bgMint: "Muted mint", exportHeightLabel: "Export height (px)", sizeLabel: "Size", sizeOriginal: "Original", sizeHeight: "Custom height", exportPngButton: "Export PNG", exportSettingsButton: "Export", exportSettingsTitle: "Export Settings", closeButton: "Close", jsonSaveButton: "Save JSON", jsonLoadButton: "Load JSON", cacheSaveButton: "Save cache", cacheLoadButton: "Load cache", cacheDeleteButton: "Delete cache",
-      backgroundSection: "Background Layers", textSection: "Text Layers", textDetailSection: "Selected Text Details", commonFontSection: "Shared Font List", registerFont: "Add Font", commonFontHint: "Registered fonts are shared by all text layers. The font dropdown shows default first, then added custom fonts.", transformSection: "Selected Target Position / Size / Rotation", transformHint: "Choose the target with checkboxes, select Move / Size / Rotate, then drag on the preview. Fine adjustment is here.", addTextLayer: "Add Text", duplicateButton: "Duplicate", toolTargetLabel: "Target", toolModeLabel: "Preview Tool", toolPan: "Pan view", toolMove: "Move", toolScale: "Scale", toolRotate: "Rotate", undoButton: "Undo", redoButton: "Redo", undoDone: "Undid the last operation.", redoDone: "Redid the operation.", standingTarget: "Standing image", textTarget: "Text", previewFit: "Fit", previewOriginal: "Original", previewZoom: "Zoom", scaleLabel: "Scale", xMoveLabel: "X Move", yMoveLabel: "Y Move", rotationLabel: "Rotation", hintText: "Draw order: Background 1 → Background 2 → Back Text → Standing Image → Front Text. Preview edits are applied to PNG export.", noteExclusive: "Selecting one item automatically clears the previous selection in this category.", noteParts: "Multiple items can be combined in this category.", noteDiff: "Click a completed variant to switch. Multiple selection is not allowed.",
+      backgroundSection: "Background Layers", textSection: "Text Layers", textDetailSection: "Selected Text Details", textOrderHint: "Text layer panels are integrated into the layer-order list below. You can move text up and down in the same stack as images, hand materials, and effects.", commonFontSection: "Shared Font List", registerFont: "Add Font", commonFontHint: "Default Google Fonts and registered fonts are shared by all text layers. The font dropdown also previews each typeface.", transformSection: "Selected Target Position / Size / Rotation", transformHint: "Choose the target with checkboxes, select Move / Size / Rotate, then drag on the preview. Fine adjustment is here.", addTextLayer: "Add Text", duplicateButton: "Duplicate", toolTargetLabel: "Target", toolModeLabel: "Preview Tool", toolPan: "Pan view", toolMove: "Move", toolScale: "Scale", toolRotate: "Rotate", undoButton: "Undo", redoButton: "Redo", undoDone: "Undid the last operation.", redoDone: "Redid the operation.", standingTarget: "Standing image", textTarget: "Text", previewFit: "Fit", previewOriginal: "Original", previewZoom: "Zoom", scaleLabel: "Scale", xMoveLabel: "X Move", yMoveLabel: "Y Move", rotationLabel: "Rotation", hintText: "Draw order: Background 1 → Background 2 → Back Text → Standing Image → Front Text. Preview edits are applied to PNG export.", noteExclusive: "Selecting one item automatically clears the previous selection in this category.", noteParts: "Multiple items can be combined in this category.", noteDiff: "Click a completed variant to switch. Multiple selection is not allowed.",
       bg1: "Background 1", bg2: "Background 2", bgVisible: "Visible", bgRegister: "Add background", bgClear: "Clear background", bgNotLoaded: "Not loaded", bgLoaded: "Loaded: {name}", bgScale: "BG Scale", bgX: "BG X", bgY: "BG Y", bgPanel: "Background Panel", bgPanelColor: "Background color", bgPanelVisible: "Show in preview", bgPanelExport: "Export background panel", browsAboveHairFront: "Show brows above front hair", browsYOffset: "Brows Y",
       textName: "Layer name", textBody: "Text", textBodyPlaceholder: "Enter text", textVisible: "Visible", textPlacement: "Position", textBack: "Behind standing image", textFront: "In front of standing image", textAlign: "Alignment", wrapLineAlign: "Wrapped line alignment", alignLeft: "Left", alignCenter: "Center", alignRight: "Right", alignTop: "Top", alignBottom: "Bottom", writingMode: "Writing direction", writingHorizontal: "Horizontal", writingVertical: "Vertical", verticalLatinRotate: "Rotate Latin/numbers sideways", verticalColumnGap: "Vertical column gap", wrapWidth: "Wrap width", wrapHeight: "Wrap height", font: "Font", fontSize: "Font size", textColor: "Text color", lineHeight: "Line height", letterSpacing: "Letter spacing", stroke: "Stroke", strokeColor: "Stroke color", strokeWidth: "Stroke width", shadow: "Drop shadow", shadowColor: "Shadow color", shadowBlur: "Shadow blur", shadowX: "Shadow X", shadowY: "Shadow Y", effectChromaticTarget: "Chromatic target", effectChromaticTargetFull: "Whole image", effectChromaticTargetLine: "Line art extraction only", effectLineExtractHint: "Automatically extracts dark lines and outline edges, then applies chromatic aberration only to those areas. Pale or white lines may appear weaker.",
       inlineStyleTitle: "Partial Text Styling", inlineStyleHint: "Change font, color, size, stroke, and shadow only for specified text. Separate multiple strings with commas.", inlineStyleEmpty: "No assignments yet.", inlineStyleItem: "Assignment {number}", inlineStyleTargets: "Target text", inlineStyleTargetsPlaceholder: "e.g. red, sea", inlineStyleFont: "Assigned font", inlineStyleColor: "Color", inlineStyleSize: "Size", inlineStyleStrokeColor: "Stroke color", inlineStyleStrokeWidth: "Stroke width", inlineStyleShadowColor: "Shadow color", inlineStyleShadowBlur: "Shadow blur", addInlineStyle: "+ Add",
@@ -1075,11 +1116,11 @@
     };
 
     I18N.ko = { ...I18N.ja,
-      shapeSection: "벡터 도형 레이어", shapeDetailSection: "선택한 도형 상세", addShapeLayer: "도형 추가", defaultShapeLayerName: "도형", noShapeLayer: "도형 레이어가 없습니다.", noSelectedShape: "편집할 도형 레이어를 선택해 주세요.", shapeTarget: "도형", shapeName: "레이어 이름", shapeType: "도형 종류", shapeCircle: "○ 원", shapeSquare: "□ 사각형", shapeTriangle: "△ 삼각형", shapeDrawMode: "그리기 방식", shapeFill: "채우기", shapeOutline: "외곽선만", shapePlacement: "표시 위치", shapeColor: "도형 색", shapeOpacity: "투명도", shapeWidth: "가로", shapeHeight: "세로", shapeKeepRatio: "비율 유지", shapeLineWidth: "선 두께", shapeCornerRadius: "모서리 둥글기", shapeLayerAdded: "도형 레이어를 추가했습니다.",
+      shapeSection: "벡터 도형 레이어", shapeDetailSection: "선택한 도형 상세", addShapeLayer: "도형 추가", defaultShapeLayerName: "도형", noShapeLayer: "도형 레이어가 없습니다.", noSelectedShape: "편집할 도형 레이어를 선택해 주세요.", shapeTarget: "도형", shapeName: "레이어 이름", shapeType: "도형 종류", shapeCircle: "○ 원", shapeSquare: "□ 사각형", shapeTriangle: "△ 삼각형", shapeDrawMode: "그리기 방식", shapeFill: "채우기", shapeOutline: "외곽선만", shapePlacement: "표시 위치", shapeColor: "도형 색", shapeOpacity: "투명도", shapeWidth: "가로", shapeHeight: "세로", shapeKeepRatio: "비율 유지", shapeLineWidth: "선 두께", shapeCornerRadius: "모서리 둥글기", shapeLayerAdded: "도형 레이어를 추가했습니다.", handMaterialSection: "손 소재 레이어", handMaterialDetailSection: "선택한 손 소재 상세", addHandMaterialLayer: "손 소재 추가", defaultHandMaterialLayerName: "손 소재", noHandMaterialLayer: "손 소재 레이어가 없습니다.", noSelectedHandMaterial: "편집할 손 소재 레이어를 선택해 주세요.", handMaterialTarget: "손 소재", handMaterialName: "레이어 이름", handMaterialPreset: "소재", handMaterialPlacement: "표시 위치", handMaterialFlipX: "좌우 반전", handMaterialLineColor: "선화 색", handMaterialBaseColor: "베이스 색", handMaterialShadow1Color: "그림자1 색", handMaterialShadow2Color: "그림자2 색", handMaterialLayerAdded: "손 소재 레이어를 추가했습니다.", handMaterialPresetGao: "가오", eyedropper: "스포이트",
       appTitle: "LayerCanvas Studio", appSubtitle: "이미지, 텍스트, 배경을 레이어로 겹쳐 캐릭터 차분, 일러스트 차분, 썸네일을 만들고 PNG로 내보냅니다.", layerPresetLabel: "레이어 구성 프리셋", layerPresetNameLabel: "프리셋 이름", layerPresetNamePlaceholder: "예: 이미지 차분 세트", newCreateButton: "새로 만들기", defaultLayerPresetName: "캐릭터 차분 세트", categorySection: "카테고리 관리", categoryNameLabel: "카테고리명", categoryNamePlaceholder: "예: 앞머리", addLayerButton: "레이어 추가", categoryTypeMulti: "조합 레이어", categoryTypeSingle: "단독 레이어", categoryTarget: "카테고리", categoryTypeHint: "추가 전에 카테고리 종류를 선택하면, 여러 항목 조합 가능 여부와 1개만 활성화할지를 정할 수 있습니다.", categoryOrderHint: "카테고리 패널의 ↑ / ↓로 순서를 바꾸면 그리기 순서도 함께 변경됩니다.", moveUpButton: "↑", moveDownButton: "↓", bgImageDisabledHint: "이 프리셋에서는 배경 이미지 레이어를 사용하지 않고 배경 패널만 사용할 수 있습니다.", characterLabel: "캐릭터", characterNameLabel: "캐릭터 이름", characterNamePlaceholder: "캐릭터 이름", addButton: "추가", renameButton: "이름 변경", deleteButton: "삭제", presetLabel: "프리셋", presetNameLabel: "프리셋 이름", presetNamePlaceholder: "예: 기본 미소 / 부끄러움 / 화남", savePresetButton: "현재 조합 저장", applyButton: "적용",
       basicSettings: "기본 설정", canvasHeightLabel: "세로", canvasWidthLabel: "가로", canvasSizePresetLabel: "캔버스 크기 프리셋", canvasPresetNameLabel: "프리셋 이름", canvasPresetNamePlaceholder: "예: 썸네일 / DLsite", canvasPresetRegister: "프리셋 등록", canvasPresetImageSize: "이미지 크기", canvasPresetSaved: "캔버스 크기 프리셋을 등록했습니다.", selectCanvasPresetDelete: "삭제할 캔버스 크기 프리셋을 선택해 주세요.", canvasPresetDeleted: "캔버스 크기 프리셋을 삭제했습니다.", canvasPresetApplied: "캔버스 크기를 적용했습니다.",
       previewTitle: "미리보기 / 내보내기", previewSubtitle: "미리보기에서 스탠딩 이미지 전체 또는 텍스트를 이동, 회전, 크기 조절할 수 있습니다. 배경은 전용 슬라이더로 조정합니다.", previewBgLabel: "미리보기 배경", bgTransparent: "투명 확인", bgWhite: "흰색", bgMint: "차분한 민트", exportHeightLabel: "내보내기 세로(px)", sizeLabel: "크기", sizeOriginal: "원본", sizeHeight: "세로 지정", exportPngButton: "PNG 내보내기", exportSettingsButton: "내보내기", exportSettingsTitle: "내보내기 설정", closeButton: "닫기", jsonSaveButton: "JSON 저장", jsonLoadButton: "JSON 불러오기", cacheSaveButton: "캐시 저장", cacheLoadButton: "캐시 불러오기", cacheDeleteButton: "캐시 삭제",
-      backgroundSection: "배경 레이어", textSection: "텍스트 레이어", textDetailSection: "선택한 텍스트 상세", commonFontSection: "공통 폰트 목록", registerFont: "폰트 등록", commonFontHint: "등록한 폰트는 모든 텍스트 레이어에서 공통으로 사용됩니다. 폰트 드롭다운에는 default 다음에 사용자 폰트가 추가됩니다.", transformSection: "선택 대상 위치 / 크기 / 각도", transformHint: "조작 대상을 체크로 선택하고 이동 / 크기 / 회전 버튼을 고른 뒤 미리보기에서 드래그하세요. 세부 조정은 여기서 합니다.", addTextLayer: "텍스트 추가", duplicateButton: "복제", toolTargetLabel: "조작 대상", toolModeLabel: "미리보기 조작", toolPan: "표시 이동", toolMove: "이동", toolScale: "크기", toolRotate: "회전", undoButton: "되돌리기", redoButton: "다시 실행", undoDone: "작업을 되돌렸습니다.", redoDone: "작업을 다시 실행했습니다.", standingTarget: "스탠딩 이미지", textTarget: "텍스트", previewFit: "전체 표시", previewOriginal: "원본 표시", previewZoom: "배율", scaleLabel: "스케일", xMoveLabel: "X 이동", yMoveLabel: "Y 이동", rotationLabel: "각도", hintText: "배경1→배경2→뒤 텍스트→스탠딩 이미지→앞 텍스트 순서로 그립니다. 미리보기 조작은 PNG 내보내기에 반영됩니다.", noteExclusive: "하나를 선택하면 같은 카테고리의 이전 선택은 자동으로 해제됩니다.", noteParts: "같은 카테고리 안에서 여러 항목을 겹칠 수 있습니다.", noteDiff: "완성된 차분을 클릭해 전환합니다. 복수 선택은 불가능합니다.",
+      backgroundSection: "배경 레이어", textSection: "텍스트 레이어", textDetailSection: "선택한 텍스트 상세", textOrderHint: "텍스트 레이어 패널은 아래 레이어 순서 목록에 통합됩니다. 텍스트도 이미지, 손 소재, 이펙트와 같은 순서에서 ↑↓로 이동할 수 있습니다.", commonFontSection: "공통 폰트 목록", registerFont: "폰트 등록", commonFontHint: "등록한 폰트는 모든 텍스트 레이어에서 공통으로 사용됩니다. 폰트 드롭다운에는 default 다음에 사용자 폰트가 추가됩니다.", transformSection: "선택 대상 위치 / 크기 / 각도", transformHint: "조작 대상을 체크로 선택하고 이동 / 크기 / 회전 버튼을 고른 뒤 미리보기에서 드래그하세요. 세부 조정은 여기서 합니다.", addTextLayer: "텍스트 추가", duplicateButton: "복제", toolTargetLabel: "조작 대상", toolModeLabel: "미리보기 조작", toolPan: "표시 이동", toolMove: "이동", toolScale: "크기", toolRotate: "회전", undoButton: "되돌리기", redoButton: "다시 실행", undoDone: "작업을 되돌렸습니다.", redoDone: "작업을 다시 실행했습니다.", standingTarget: "스탠딩 이미지", textTarget: "텍스트", previewFit: "전체 표시", previewOriginal: "원본 표시", previewZoom: "배율", scaleLabel: "스케일", xMoveLabel: "X 이동", yMoveLabel: "Y 이동", rotationLabel: "각도", hintText: "배경1→배경2→뒤 텍스트→스탠딩 이미지→앞 텍스트 순서로 그립니다. 미리보기 조작은 PNG 내보내기에 반영됩니다.", noteExclusive: "하나를 선택하면 같은 카테고리의 이전 선택은 자동으로 해제됩니다.", noteParts: "같은 카테고리 안에서 여러 항목을 겹칠 수 있습니다.", noteDiff: "완성된 차분을 클릭해 전환합니다. 복수 선택은 불가능합니다.",
       bg1: "배경1", bg2: "배경2", bgVisible: "표시", bgRegister: "배경 이미지 등록", bgClear: "배경 삭제", bgNotLoaded: "미등록", bgLoaded: "등록됨: {name}", bgScale: "배경 스케일", bgX: "배경 X", bgY: "배경 Y", bgPanel: "배경 패널", bgPanelColor: "배경색", bgPanelVisible: "미리보기에 표시", bgPanelExport: "배경 패널 내보내기", browsAboveHairFront: "눈썹을 앞머리보다 위에 표시", browsYOffset: "눈썹 Y",
       textName: "레이어 이름", textBody: "텍스트", textBodyPlaceholder: "표시할 텍스트 입력", textVisible: "표시", textPlacement: "표시 위치", textBack: "스탠딩 이미지 뒤", textFront: "스탠딩 이미지 앞", textAlign: "문자 정렬", wrapLineAlign: "줄바꿈 줄 정렬", alignLeft: "왼쪽", alignCenter: "가운데", alignRight: "오른쪽", alignTop: "위", alignBottom: "아래", writingMode: "문자 방향", writingHorizontal: "가로쓰기", writingVertical: "세로쓰기", verticalLatinRotate: "영문/숫자 옆으로 회전", verticalColumnGap: "세로 열 간격", wrapWidth: "줄바꿈 폭", wrapHeight: "줄바꿈 높이", font: "폰트", fontSize: "폰트 크기", textColor: "문자색", lineHeight: "줄 간격", letterSpacing: "자간", stroke: "외곽선", strokeColor: "외곽선 색", strokeWidth: "외곽선 두께", shadow: "드롭 섀도", shadowColor: "그림자 색", shadowBlur: "그림자 흐림", shadowX: "그림자 X", shadowY: "그림자 Y", effectChromaticTarget: "색수차 대상", effectChromaticTargetFull: "이미지 전체", effectChromaticTargetLine: "선화 추출만", effectLineExtractHint: "어두운 선과 윤곽 에지를 자동 추출해 그 부분에만 색수차를 겹칩니다. 연한 선이나 흰 선은 약하게 반영될 수 있습니다.",
       inlineStyleTitle: "부분 텍스트 지정", inlineStyleHint: "지정한 문자열에만 폰트, 색상, 크기, 외곽선, 그림자를 변경할 수 있습니다. 여러 항목은 쉼표로 구분하세요.", inlineStyleEmpty: "아직 지정이 없습니다.", inlineStyleItem: "지정 {number}", inlineStyleTargets: "지정할 문자열", inlineStyleTargetsPlaceholder: "예: 빨간, 바다", inlineStyleFont: "지정 폰트", inlineStyleColor: "색상", inlineStyleSize: "크기", inlineStyleStrokeColor: "외곽선 색", inlineStyleStrokeWidth: "외곽선 두께", inlineStyleShadowColor: "그림자 색", inlineStyleShadowBlur: "그림자 흐림", addInlineStyle: "+ 추가",
@@ -1094,7 +1135,11 @@
       categoryDeleted: "カテゴリを削除しました。",
       effectStackInfo: "エフェクトカードは下のカテゴリ一覧内で上下移動できます。カードより下にあるレイヤーだけに反映されます。",
       effectLayerStackNote: "このカードより下のレイヤーに適用",
-      effectLayerSelected: "エフェクトレイヤーを選択しました。"
+      effectLayerSelected: "エフェクトレイヤーを選択しました。",
+      handMaterialOrderHint: "手元素材パネルは下のレイヤー順一覧に統合されます。エフェクトカードより下にある手元素材はエフェクトの影響を受けます。",
+      handMaterialStackNote: "通常レイヤーと同じ描画順",
+      handMaterialLayerSelected: "手元素材レイヤーを選択しました。",
+      handMaterialMoved: "手元素材レイヤーの並び順を変更しました。"
     });
     Object.assign(I18N.en, {
       categoryTypeSelect: "Category type",
@@ -1104,7 +1149,11 @@
       categoryDeleted: "Category deleted.",
       effectStackInfo: "Effect cards can be moved up and down inside the category list below. Each effect is applied only to layers below its card.",
       effectLayerStackNote: "Applies to layers below this card",
-      effectLayerSelected: "Effect layer selected."
+      effectLayerSelected: "Effect layer selected.",
+      handMaterialOrderHint: "Hand material panels are integrated into the layer order list below. Hand materials placed below an effect card are affected by that effect.",
+      handMaterialStackNote: "Drawn in the same order as normal layers",
+      handMaterialLayerSelected: "Hand material layer selected.",
+      handMaterialMoved: "Hand material layer order changed."
     });
     Object.assign(I18N.ko, {
       categoryTypeSelect: "카테고리 종류",
@@ -1114,7 +1163,11 @@
       categoryDeleted: "카테고리를 삭제했습니다.",
       effectStackInfo: "효과 카드는 아래 카테고리 목록 안에서 위아래로 이동할 수 있습니다. 카드보다 아래에 있는 레이어에만 적용됩니다.",
       effectLayerStackNote: "이 카드보다 아래 레이어에 적용",
-      effectLayerSelected: "효과 레이어를 선택했습니다."
+      effectLayerSelected: "효과 레이어를 선택했습니다.",
+      handMaterialOrderHint: "손 소재 패널은 아래 레이어 순서 목록에 통합됩니다. 효과 카드보다 아래에 있는 손 소재는 해당 효과의 영향을 받습니다.",
+      handMaterialStackNote: "일반 레이어와 같은 그리기 순서",
+      handMaterialLayerSelected: "손 소재 레이어를 선택했습니다.",
+      handMaterialMoved: "손 소재 레이어 순서를 변경했습니다."
     });
 
 
@@ -1203,6 +1256,26 @@
     const LAYERS = DEFAULT_LAYER_CATEGORIES;
     const DIFF_LAYERS = [{ id: "diffBase", name: "ベース" }];
     const DEFAULT_FONT_STACK = '"Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
+    const DEFAULT_GOOGLE_FONTS = [
+      { label: "Noto Sans JP", value: '"Noto Sans JP", sans-serif' },
+      { label: "Noto Serif JP", value: '"Noto Serif JP", serif' },
+      { label: "M PLUS 1p", value: '"M PLUS 1p", sans-serif' },
+      { label: "M PLUS Rounded 1c", value: '"M PLUS Rounded 1c", sans-serif' },
+      { label: "Zen Kaku Gothic New", value: '"Zen Kaku Gothic New", sans-serif' },
+      { label: "Zen Maru Gothic", value: '"Zen Maru Gothic", sans-serif' },
+      { label: "Kosugi Maru", value: '"Kosugi Maru", sans-serif' },
+      { label: "Sawarabi Gothic", value: '"Sawarabi Gothic", sans-serif' },
+      { label: "Sawarabi Mincho", value: '"Sawarabi Mincho", serif' },
+      { label: "Shippori Mincho", value: '"Shippori Mincho", serif' },
+      { label: "Kaisei Tokumin", value: '"Kaisei Tokumin", serif' },
+      { label: "Kiwi Maru", value: '"Kiwi Maru", serif' },
+      { label: "Yusei Magic", value: '"Yusei Magic", sans-serif' },
+      { label: "Dela Gothic One", value: '"Dela Gothic One", sans-serif' },
+      { label: "RocknRoll One", value: '"RocknRoll One", sans-serif' },
+      { label: "Reggae One", value: '"Reggae One", sans-serif' },
+      { label: "DotGothic16", value: '"DotGothic16", monospace' },
+      { label: "Hachi Maru Pop", value: '"Hachi Maru Pop", cursive' }
+    ];
     const DB_NAME = "stand-diff-generator-db";
     const DB_VERSION = 2;
     const STORE_NAME = "projects";
@@ -1295,6 +1368,33 @@
       const currentSize = Math.max(1, Math.min(maxSize, Number(settings?.size || maxSize)));
       const scale = currentSize / maxSize;
       return { width: natural.width * scale, height: natural.height * scale, maxSize, scale };
+    }
+    const HAND_MATERIAL_PRESETS = [
+      {
+        id: "gao",
+        nameKey: "handMaterialPresetGao",
+        width: 468,
+        height: 1200,
+        parts: {
+          line: "img/hand-materials/gao/line.png",
+          base: "img/hand-materials/gao/base.png",
+          shadow1: "img/hand-materials/gao/shadow1.png",
+          shadow2: "img/hand-materials/gao/shadow2.png"
+        }
+      }
+    ];
+    const HAND_MATERIAL_PRESET_MAP = Object.fromEntries(HAND_MATERIAL_PRESETS.map((preset) => [preset.id, preset]));
+    const handMaterialImageSets = Object.fromEntries(HAND_MATERIAL_PRESETS.map((preset) => [preset.id, Object.fromEntries(Object.entries(preset.parts).map(([key, src]) => {
+      const image = new Image();
+      image.src = src;
+      image.onload = () => { if (typeof renderPreview === "function") renderPreview(); };
+      return [key, image];
+    }))]));
+    function getHandMaterialPreset(presetId) {
+      return HAND_MATERIAL_PRESET_MAP[presetId] || HAND_MATERIAL_PRESETS[0];
+    }
+    function getHandMaterialImages(presetId) {
+      return handMaterialImageSets[presetId] || handMaterialImageSets[HAND_MATERIAL_PRESETS[0].id];
     }
     const tintedAlphaCanvasCache = new Map();
     let pointerState = null;
@@ -1440,6 +1540,24 @@
       helpText4: "텍스트・도형・테두리는 스탠딩 이미지의 뒤 / 앞 배치를 선택할 수 있습니다.",
       helpText5: "테두리 레이어는 4코너 장식의 클래식 테두리도 지원합니다."
     });
+    Object.assign(I18N.ja, {
+      defaultGoogleFontGroup: "標準Googleフォント",
+      customFontGroup: "登録フォント",
+      googleFontHint: "以下の無料Webフォントは登録なしで選択できます。フォントプルダウン内でも字体サンプルを確認できます。",
+      fontPreviewSample: "あアAa123"
+    });
+    Object.assign(I18N.en, {
+      defaultGoogleFontGroup: "Default Google Fonts",
+      customFontGroup: "Registered Fonts",
+      googleFontHint: "These free web fonts are available without registration. The font dropdown shows each typeface as a sample.",
+      fontPreviewSample: "Aa123"
+    });
+    Object.assign(I18N.ko, {
+      defaultGoogleFontGroup: "기본 Google Fonts",
+      customFontGroup: "등록 폰트",
+      googleFontHint: "아래 무료 웹 폰트는 별도 등록 없이 선택할 수 있습니다. 폰트 드롭다운에서도 글꼴 샘플을 확인할 수 있습니다.",
+      fontPreviewSample: "가Aa123"
+    });
 
     let state;
     const undoStack = [];
@@ -1557,7 +1675,7 @@
     function createTextLayer() {
       return {
         id: uid("text"), name: "TEXT", text: "TEXT", visible: true, placement: "front",
-        x: 600, y: 600, scale: 1, rotation: 0,
+        x: 600, y: 600, scale: 1, rotation: 0, stackIndex: 0, stackOrder: 0, stackIntegrated: true,
         align: "center", lineAlign: "center", verticalLineAlign: "center", writingMode: "horizontal", verticalLatinRotate: true, verticalColumnGap: 24,
         wrapWidth: 900, wrapHeight: 900, fontFamily: DEFAULT_FONT_STACK, fontSize: 86, color: "#ffffff", lineHeight: 1.25, letterSpacing: 0,
         gradient: { enabled: false, color2: "#8ec5ff", angle: 0, width: 900 },
@@ -1575,6 +1693,15 @@
         lineWidth: 8, cornerRadius: 0,
         stroke: { enabled: false, color: "#111827", width: 8 },
         shadow: { enabled: false, color: "#000000", blur: 12, offsetX: 0, offsetY: 0 }
+      };
+    }
+    function createHandMaterialLayer() {
+      const preset = HAND_MATERIAL_PRESETS[0];
+      return {
+        id: uid("handMaterial"), name: t("defaultHandMaterialLayerName"), visible: true, placement: "front",
+        x: 600, y: 600, scale: 1, rotation: 0, stackIndex: 0,
+        presetId: preset.id, flipX: false,
+        lineColor: "#111827", baseColor: "#f6d7c3", shadow1Color: "#e2b89d", shadow2Color: "#c28d72"
       };
     }
     function createFrameLayer() {
@@ -1606,10 +1733,11 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 25,
+        version: 26,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
         activeShapeLayerId: "",
+        activeHandMaterialLayerId: "",
         activeFrameLayerId: "",
         activeEffectLayerId: "",
         activeToolTarget: "standing",
@@ -1618,6 +1746,7 @@
         backgroundPanel: createBackgroundPanel(),
         textLayers: [],
         shapeLayers: [],
+        handMaterialLayers: [],
         frameLayers: [],
         effectLayers: [],
         layerPresets: [firstLayerPreset],
@@ -1648,6 +1777,7 @@
         ...layer,
         id: layer?.id || uid("text"), name: layer?.name || t("defaultTextLayerName"), text: String(layer?.text ?? t("defaultTextBody")), visible: layer?.visible !== false, placement: layer?.placement === "back" ? "back" : "front",
         x: Number(layer?.x ?? base.x), y: Number(layer?.y ?? base.y), scale: clamp(layer?.scale ?? base.scale, 0.05, 4), rotation: clamp(layer?.rotation ?? base.rotation, -180, 180),
+        stackIndex: Math.round(clamp(layer?.stackIndex ?? (layer?.placement === "back" ? 0 : 999), 0, 999)), stackOrder: Math.round(Number(layer?.stackOrder ?? 0)), stackIntegrated: layer?.stackIntegrated !== false,
         align: ["left", "center", "right"].includes(layer?.align) ? layer.align : "center",
         lineAlign: ["left", "center", "right"].includes(layer?.lineAlign) ? layer.lineAlign : (["left", "center", "right"].includes(layer?.align) ? layer.align : "center"),
         verticalLineAlign: ["top", "center", "bottom"].includes(layer?.verticalLineAlign) ? layer.verticalLineAlign : "center",
@@ -1690,6 +1820,29 @@
         cornerRadius: Math.round(clamp(layer?.cornerRadius ?? base.cornerRadius, 0, 500)),
         stroke: { enabled: Boolean(layer?.stroke?.enabled), color: layer?.stroke?.color || base.stroke.color, width: Math.round(clamp(layer?.stroke?.width ?? base.stroke.width, 0, 160)) },
         shadow: { enabled: Boolean(layer?.shadow?.enabled), color: layer?.shadow?.color || base.shadow.color, blur: Math.round(clamp(layer?.shadow?.blur ?? base.shadow.blur, 0, 160)), offsetX: Math.round(clamp(layer?.shadow?.offsetX ?? base.shadow.offsetX, -240, 240)), offsetY: Math.round(clamp(layer?.shadow?.offsetY ?? base.shadow.offsetY, -240, 240)) }
+      };
+    }
+    function normalizeHandMaterialLayer(layer) {
+      const base = createHandMaterialLayer();
+      const preset = HAND_MATERIAL_PRESET_MAP[layer?.presetId] ? HAND_MATERIAL_PRESET_MAP[layer.presetId] : HAND_MATERIAL_PRESETS[0];
+      return {
+        ...base,
+        ...layer,
+        id: layer?.id || uid("handMaterial"),
+        name: String(layer?.name || t("defaultHandMaterialLayerName")),
+        visible: layer?.visible !== false,
+        placement: layer?.placement === "back" ? "back" : "front",
+        x: Number(layer?.x ?? base.x),
+        y: Number(layer?.y ?? base.y),
+        scale: clamp(layer?.scale ?? base.scale, 0.05, 4),
+        rotation: clamp(layer?.rotation ?? base.rotation, -180, 180),
+        stackIndex: Math.round(clamp(layer?.stackIndex ?? (layer?.placement === "back" ? 999 : 0), 0, 999)),
+        presetId: preset.id,
+        flipX: Boolean(layer?.flipX),
+        lineColor: layer?.lineColor || base.lineColor,
+        baseColor: layer?.baseColor || base.baseColor,
+        shadow1Color: layer?.shadow1Color || base.shadow1Color,
+        shadow2Color: layer?.shadow2Color || base.shadow2Color
       };
     }
     function normalizeFrameLayer(layer) {
@@ -1780,9 +1933,22 @@
       normalized.textLayers = safeArray(normalized.textLayers).map(normalizeTextLayer);
       if (!normalized.textLayers.length) normalized.textLayers = [];
       if (!normalized.activeTextLayerId || !normalized.textLayers.some((layer) => layer.id === normalized.activeTextLayerId)) normalized.activeTextLayerId = normalized.textLayers[0]?.id || "";
+      const activePresetForTextStack = normalized.layerPresets.find((preset) => preset.id === normalized.settings.activeLayerPresetId) || normalized.layerPresets[0];
+      const textStackMax = safeArray(activePresetForTextStack?.categories).length;
+      normalized.textLayers.forEach((layer, index) => {
+        layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, textStackMax));
+        layer.stackOrder = Math.round(Number(layer.stackOrder ?? index));
+        layer.stackIntegrated = layer.stackIntegrated !== false;
+      });
       normalized.shapeLayers = safeArray(normalized.shapeLayers).map(normalizeShapeLayer);
       if (!normalized.shapeLayers.length) normalized.shapeLayers = [];
       if (!normalized.activeShapeLayerId || !normalized.shapeLayers.some((layer) => layer.id === normalized.activeShapeLayerId)) normalized.activeShapeLayerId = normalized.shapeLayers[0]?.id || "";
+      normalized.handMaterialLayers = safeArray(normalized.handMaterialLayers).map(normalizeHandMaterialLayer);
+      if (!normalized.handMaterialLayers.length) normalized.handMaterialLayers = [];
+      if (!normalized.activeHandMaterialLayerId || !normalized.handMaterialLayers.some((layer) => layer.id === normalized.activeHandMaterialLayerId)) normalized.activeHandMaterialLayerId = normalized.handMaterialLayers[0]?.id || "";
+      const activePresetForHandStack = normalized.layerPresets.find((preset) => preset.id === normalized.settings.activeLayerPresetId) || normalized.layerPresets[0];
+      const handStackMax = safeArray(activePresetForHandStack?.categories).length;
+      for (const layer of normalized.handMaterialLayers) layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, handStackMax));
       normalized.frameLayers = safeArray(normalized.frameLayers).map(normalizeFrameLayer);
       if (!normalized.frameLayers.length) normalized.frameLayers = [];
       if (!normalized.activeFrameLayerId || !normalized.frameLayers.some((layer) => layer.id === normalized.activeFrameLayerId)) normalized.activeFrameLayerId = normalized.frameLayers[0]?.id || "";
@@ -1792,14 +1958,16 @@
       normalized.activeToolTarget = normalized.activeToolTarget || "standing";
       const validTextTarget = normalized.textLayers.some((layer) => `text:${layer.id}` === normalized.activeToolTarget);
       const validShapeTarget = normalized.shapeLayers.some((layer) => `shape:${layer.id}` === normalized.activeToolTarget);
+      const validHandMaterialTarget = normalized.handMaterialLayers.some((layer) => `handMaterial:${layer.id}` === normalized.activeToolTarget);
       const validLayerTarget = safeArray(normalized.layerPresets).some((preset) => safeArray(preset.categories).some((category) => `layer:${category.id}` === normalized.activeToolTarget));
-      if (normalized.activeToolTarget !== "standing" && !validTextTarget && !validShapeTarget && !validLayerTarget) normalized.activeToolTarget = normalized.activeTextLayerId ? `text:${normalized.activeTextLayerId}` : (normalized.activeShapeLayerId ? `shape:${normalized.activeShapeLayerId}` : "standing");
+      if (normalized.activeToolTarget !== "standing" && !validTextTarget && !validShapeTarget && !validHandMaterialTarget && !validLayerTarget) normalized.activeToolTarget = normalized.activeTextLayerId ? `text:${normalized.activeTextLayerId}` : (normalized.activeShapeLayerId ? `shape:${normalized.activeShapeLayerId}` : (normalized.activeHandMaterialLayerId ? `handMaterial:${normalized.activeHandMaterialLayerId}` : "standing"));
       return normalized;
     }
 
     function activeCharacter() { return state.characters.find((character) => character.id === state.activeCharacterId) || state.characters[0]; }
     function activeTextLayer() { return state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || null; }
     function activeShapeLayer() { return state.shapeLayers.find((layer) => layer.id === state.activeShapeLayerId) || null; }
+    function activeHandMaterialLayer() { return state.handMaterialLayers.find((layer) => layer.id === state.activeHandMaterialLayerId) || null; }
     function activeFrameLayer() { return state.frameLayers.find((layer) => layer.id === state.activeFrameLayerId) || null; }
     function activeEffectLayer() {
       if (!Array.isArray(state.effectLayers) || !state.effectLayers.length) return null;
@@ -1826,21 +1994,51 @@
       if (textMatch) return state.textLayers.find((layer) => layer.id === textMatch[1]) || null;
       const shapeMatch = String(state.activeToolTarget || "").match(/^shape:(.+)$/);
       if (shapeMatch) return state.shapeLayers.find((layer) => layer.id === shapeMatch[1]) || null;
+      const handMaterialMatch = String(state.activeToolTarget || "").match(/^handMaterial:(.+)$/);
+      if (handMaterialMatch) return state.handMaterialLayers.find((layer) => layer.id === handMaterialMatch[1]) || null;
       const layer = activeTransformLayer();
       if (layer) return layer.transform;
       return activeCharacter().transform;
     }
 
+    function fontPreviewLabel(label) {
+      return `${label}　${t("fontPreviewSample")}`;
+    }
     function fontOptions() {
-      return [{ label: t("defaultFont"), value: DEFAULT_FONT_STACK }, ...state.customFonts.map((font) => ({ label: font.name, value: `"${font.family}"` }))];
+      return [
+        { label: t("defaultFont"), value: DEFAULT_FONT_STACK, group: "default" },
+        ...DEFAULT_GOOGLE_FONTS.map((font) => ({ ...font, group: "google" })),
+        ...state.customFonts.map((font) => ({ label: font.name, value: `"${font.family}"`, group: "custom" }))
+      ];
+    }
+    function fontOptionDisplayText(optionInfo) {
+      if (optionInfo.group === "default") return optionInfo.label;
+      return fontPreviewLabel(optionInfo.label);
+    }
+    function syncFontPreviewSelect(select) {
+      const found = fontOptions().find((option) => option.value === select.value);
+      const family = found?.value || select.value || DEFAULT_FONT_STACK;
+      select.style.fontFamily = family;
+      select.title = found ? fontOptionDisplayText(found) : family;
+    }
+    async function ensureFontReady(fontFamily, fontSize = 86) {
+      if (!fontFamily || !document.fonts?.load) return;
+      try {
+        await document.fonts.load(`700 ${Math.max(1, fontSize)}px ${fontFamily}`);
+        await document.fonts.load(`400 ${Math.max(1, fontSize)}px ${fontFamily}`);
+      } catch (error) {
+        console.warn("font preview load skipped:", fontFamily, error);
+      }
     }
     function populateFontSelect(select, value) {
       select.innerHTML = "";
+      select.classList.add("font-preview-select");
       for (const optionInfo of fontOptions()) {
         const option = document.createElement("option");
         option.value = optionInfo.value;
-        option.textContent = optionInfo.label;
+        option.textContent = fontOptionDisplayText(optionInfo);
         option.selected = optionInfo.value === value;
+        option.style.fontFamily = optionInfo.value;
         select.appendChild(option);
       }
       if (![...select.options].some((option) => option.value === value)) {
@@ -1848,8 +2046,21 @@
         option.value = value || DEFAULT_FONT_STACK;
         option.textContent = value || t("defaultFont");
         option.selected = true;
+        option.style.fontFamily = value || DEFAULT_FONT_STACK;
         select.appendChild(option);
       }
+      syncFontPreviewSelect(select);
+      const selectedValue = select.value;
+      ensureFontReady(selectedValue).then(() => {
+        if (select.isConnected && select.value === selectedValue) renderPreview();
+      });
+      select.addEventListener("change", () => {
+        syncFontPreviewSelect(select);
+        const nextValue = select.value;
+        ensureFontReady(nextValue).then(() => {
+          if (select.isConnected && select.value === nextValue) renderPreview();
+        });
+      });
     }
 
     async function registerCustomFonts() {
@@ -1877,7 +2088,7 @@
 
     function renderAll() {
       ensureAllCharacterLayerKeys();
-      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderShapeLayerList(); renderFrameLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderShapeDetailEditor(); renderFrameDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
+      renderLayerPresetControls(); renderCharacterControls(); renderCanvasSettingsControls(); renderPresetControls(); renderBackgroundControls(); renderTextLayerList(); renderShapeLayerList(); renderHandMaterialLayerList(); renderFrameLayerList(); renderEffectLayerList(); renderCustomFontList(); renderTextDetailEditor(); renderShapeDetailEditor(); renderHandMaterialDetailEditor(); renderFrameDetailEditor(); renderEffectDetailEditor(); renderLayers(); renderToolTargetOptions(); syncSettingsControls(); updatePreviewStageBg(); syncTargetSliders(); renderPreview(); applyLanguage(); syncUndoRedoButtons();
     }
     function renderLayerPresetControls() {
       const select = $("#layerPresetSelect");
@@ -1990,30 +2201,12 @@
 
     function renderTextLayerList() {
       const root = $("#textLayerList"); root.innerHTML = "";
-      if (!state.textLayers.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("noTextLayer"); root.appendChild(empty); return; }
-      state.textLayers.forEach((layer) => {
-        const row = document.createElement("div"); row.className = `text-row${layer.id === state.activeTextLayerId ? " active" : ""}`;
-        const checkbox = document.createElement("input"); checkbox.type = "checkbox"; checkbox.checked = layer.visible; checkbox.title = t("textVisible");
-        const meta = document.createElement("div"); meta.className = "text-meta";
-        const nameLabel = document.createElement("div"); nameLabel.className = "layer-name"; nameLabel.textContent = syncTextLayerName(layer);
-        const note = document.createElement("div"); note.className = "text-note"; note.textContent = `${layer.placement === "back" ? t("textBack") : t("textFront")} / ${String(layer.text || "").replace(/\s+/g, " ").slice(0, 40)}`;
-        meta.append(nameLabel, note);
-        const selectBtn = document.createElement("button"); selectBtn.className = "small secondary"; selectBtn.textContent = t("applyButton");
-        checkbox.addEventListener("change", () => { layer.visible = checkbox.checked; renderPreview(); });
-        const selectLayer = () => { state.activeTextLayerId = layer.id; state.activeToolTarget = `text:${layer.id}`; renderAll(); };
-        row.addEventListener("click", (event) => { const tag = event.target.tagName.toLowerCase(); if (tag === "input" || tag === "button") return; selectLayer(); });
-        selectBtn.addEventListener("click", selectLayer);
-        row.append(checkbox, meta, selectBtn); root.appendChild(row);
-      });
+      const note = document.createElement("div");
+      note.className = "empty";
+      note.textContent = (state.textLayers || []).length ? t("textOrderHint") : t("noTextLayer");
+      root.appendChild(note);
     }
 
-    function shapeTypeLabel(value) {
-      return { circle: t("shapeCircle"), square: t("shapeSquare"), triangle: t("shapeTriangle") }[value] || value;
-    }
-    function getToolShapeLayerLabel(layer) {
-      const layerName = String(layer?.name || t("defaultShapeLayerName")).trim() || t("defaultShapeLayerName");
-      return `${layerName}：${shapeTypeLabel(layer?.shapeType || "circle")}`;
-    }
     function renderShapeLayerList() {
       const root = $("#shapeLayerList");
       if (!root) return;
@@ -2138,6 +2331,145 @@
     function frameModeLabel(value) {
       return { all: t("frameAll"), horizontal: t("frameHorizontal"), vertical: t("frameVertical") }[value] || value;
     }
+    function getToolHandMaterialLayerLabel(layer) {
+      const preset = getHandMaterialPreset(layer?.presetId);
+      return `${layer?.name || t("defaultHandMaterialLayerName")}：${t(preset.nameKey) || preset.id}`;
+    }
+
+    function normalizeHandMaterialStackIndexes() {
+      const max = Math.max(0, getActiveLayers().length);
+      (state.handMaterialLayers || []).forEach((layer, index) => {
+        layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, max));
+        layer.stackOrder = Math.round(Number(layer.stackOrder ?? index));
+      });
+    }
+    function normalizeTextStackIndexes() {
+      const max = Math.max(0, getActiveLayers().length);
+      (state.textLayers || []).forEach((layer, index) => {
+        if (layer.stackIntegrated === false) return;
+        layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, max));
+        layer.stackOrder = Math.round(Number(layer.stackOrder ?? index));
+      });
+    }
+
+    function getStandingLayerEntries() {
+      const categories = getActiveLayers();
+      const maxStackIndex = categories.length;
+      const buckets = Array.from({ length: maxStackIndex + 1 }, () => []);
+      for (const layer of state.handMaterialLayers || []) {
+        const stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, maxStackIndex));
+        layer.stackIndex = stackIndex;
+        layer.stackOrder = Math.round(Number(layer.stackOrder ?? 0));
+        buckets[stackIndex].push({ kind: "handMaterial", layer, stackIndex, stackOrder: layer.stackOrder });
+      }
+      for (const layer of state.textLayers || []) {
+        if (layer.stackIntegrated === false) continue;
+        const stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, maxStackIndex));
+        layer.stackIndex = stackIndex;
+        layer.stackOrder = Math.round(Number(layer.stackOrder ?? 0));
+        buckets[stackIndex].push({ kind: "text", layer, stackIndex, stackOrder: layer.stackOrder });
+      }
+      const entries = [];
+      for (let index = 0; index <= maxStackIndex; index++) {
+        buckets[index].sort((a, b) => a.stackOrder - b.stackOrder);
+        for (const entry of buckets[index]) entries.push(entry);
+        if (index < categories.length) entries.push({ kind: "category", layer: categories[index] });
+      }
+      return entries;
+    }
+
+    function getStandingEntryIndex(kind, id) { return getStandingLayerEntries().findIndex((entry) => entry.kind === kind && entry.layer?.id === id); }
+    function canMoveStandingEntry(kind, id, direction) {
+      const entries = getStandingLayerEntries();
+      const index = entries.findIndex((entry) => entry.kind === kind && entry.layer?.id === id);
+      return index >= 0 && index + direction >= 0 && index + direction < entries.length;
+    }
+
+    function applyStandingLayerEntries(entries) {
+      const preset = activeLayerPreset();
+      preset.categories = entries.filter((entry) => entry.kind === "category").map((entry) => entry.layer);
+      let nextStackIndex = 0;
+      const nextStackOrder = {};
+      const handLayers = [];
+      const textLayers = [];
+      for (const entry of entries) {
+        if (entry.kind === "category") {
+          nextStackIndex += 1;
+          continue;
+        }
+        if (!entry.layer) continue;
+        entry.layer.stackIndex = nextStackIndex;
+        entry.layer.stackOrder = nextStackOrder[nextStackIndex] || 0;
+        nextStackOrder[nextStackIndex] = (nextStackOrder[nextStackIndex] || 0) + 1;
+        if (entry.kind === "handMaterial") handLayers.push(entry.layer);
+        else if (entry.kind === "text") textLayers.push(entry.layer);
+      }
+      state.handMaterialLayers = handLayers;
+      const nonIntegratedTextLayers = (state.textLayers || []).filter((layer) => layer.stackIntegrated === false);
+      state.textLayers = textLayers.concat(nonIntegratedTextLayers);
+      normalizeHandMaterialStackIndexes();
+      normalizeTextStackIndexes();
+      for (const layer of state.effectLayers || []) if (layer.placement === "standing") normalizeEffectStackIndex(layer);
+    }
+
+    function moveStandingLayerEntry(kind, id, direction) {
+      const entries = getStandingLayerEntries();
+      const index = entries.findIndex((entry) => entry.kind === kind && entry.layer?.id === id);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= entries.length) return;
+      [entries[index], entries[nextIndex]] = [entries[nextIndex], entries[index]];
+      applyStandingLayerEntries(entries);
+      if (kind === "handMaterial") {
+        state.activeHandMaterialLayerId = id;
+        state.activeToolTarget = `handMaterial:${id}`;
+      } else if (kind === "text") {
+        state.activeTextLayerId = id;
+        state.activeToolTarget = `text:${id}`;
+      } else if (kind === "category" && !activeLayerPreset()?.useBackgroundImages) {
+        state.activeToolTarget = `layer:${id}`;
+      }
+      renderAll();
+      setStatusT(kind === "handMaterial" ? "handMaterialMoved" : "categoryMoved");
+    }
+
+    function renderHandMaterialLayerList() {
+      const root = $("#handMaterialLayerList");
+      if (!root) return;
+      root.innerHTML = "";
+      const note = document.createElement("div");
+      note.className = "empty";
+      note.textContent = (state.handMaterialLayers || []).length ? t("handMaterialOrderHint") : t("noHandMaterialLayer");
+      root.appendChild(note);
+    }
+
+    function renderHandMaterialDetailEditor() {
+      const root = $("#handMaterialDetailEditor");
+      if (!root) return;
+      root.innerHTML = "";
+      const layer = activeHandMaterialLayer();
+      if (!layer) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noSelectedHandMaterial");
+        root.appendChild(empty);
+        return;
+      }
+      const rerender = () => { renderLayers(); renderHandMaterialLayerList(); renderHandMaterialDetailEditor(); renderToolTargetOptions(); renderPreview(); };
+      root.appendChild(createField(t("handMaterialName"), "input", layer.name, (value) => { layer.name = value || t("defaultHandMaterialLayerName"); renderLayers(); renderHandMaterialLayerList(); renderToolTargetOptions(); }));
+      const basic = document.createElement("div");
+      basic.className = "grid-2";
+      basic.append(
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderLayers(); renderHandMaterialLayerList(); renderPreview(); }),
+        createSelectField(t("handMaterialPreset"), layer.presetId, HAND_MATERIAL_PRESETS.map((preset) => ({ value: preset.id, label: t(preset.nameKey) || preset.id })), (value) => { layer.presetId = HAND_MATERIAL_PRESET_MAP[value] ? value : HAND_MATERIAL_PRESETS[0].id; rerender(); }),
+        createCheckboxField(t("handMaterialFlipX"), Boolean(layer.flipX), (checked) => { layer.flipX = checked; renderLayers(); renderHandMaterialLayerList(); renderPreview(); })
+      );
+      root.appendChild(basic);
+      root.appendChild(createColorField(t("handMaterialLineColor"), layer.lineColor, (value) => { layer.lineColor = value; renderPreview(); }));
+      root.appendChild(createColorField(t("handMaterialBaseColor"), layer.baseColor, (value) => { layer.baseColor = value; renderPreview(); }));
+      root.appendChild(createColorField(t("handMaterialShadow1Color"), layer.shadow1Color, (value) => { layer.shadow1Color = value; renderPreview(); }));
+      root.appendChild(createColorField(t("handMaterialShadow2Color"), layer.shadow2Color, (value) => { layer.shadow2Color = value; renderPreview(); }));
+    }
+
     function renderFrameLayerList() {
       const root = $("#frameLayerList");
       if (!root) return;
@@ -2293,12 +2625,41 @@
       }
     }
 
+    function renderFontPreviewRow(font) {
+      const row = document.createElement("div");
+      row.className = "font-row preview-only";
+      row.style.fontFamily = font.value;
+      const body = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "font-preview-name";
+      name.textContent = font.label;
+      const sample = document.createElement("div");
+      sample.className = "font-preview-sample";
+      sample.textContent = t("fontPreviewSample");
+      body.append(name, sample);
+      row.appendChild(body);
+      return row;
+    }
+    function appendFontGroupTitle(root, text) {
+      const title = document.createElement("div");
+      title.className = "font-group-title";
+      title.textContent = text;
+      root.appendChild(title);
+    }
     function renderCustomFontList() {
       const root = $("#customFontList"); root.innerHTML = "";
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = t("googleFontHint");
+      root.appendChild(hint);
+      appendFontGroupTitle(root, t("defaultGoogleFontGroup"));
+      DEFAULT_GOOGLE_FONTS.forEach((font) => root.appendChild(renderFontPreviewRow(font)));
+      appendFontGroupTitle(root, t("customFontGroup"));
       if (!state.customFonts.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("inlineStyleEmpty"); root.appendChild(empty); return; }
       state.customFonts.forEach((font) => {
         const row = document.createElement("div"); row.className = "font-row";
-        const input = document.createElement("input"); input.type = "text"; input.value = font.name;
+        row.style.fontFamily = `"${font.family}"`;
+        const input = document.createElement("input"); input.type = "text"; input.value = font.name; input.style.fontFamily = `"${font.family}"`;
         const remove = document.createElement("button"); remove.className = "small danger"; remove.textContent = t("deleteButton");
         input.addEventListener("input", () => { font.name = input.value || font.fileName || "Custom Font"; renderTextDetailEditor(); });
         remove.addEventListener("click", () => { state.customFonts = state.customFonts.filter((item) => item.id !== font.id); renderAll(); });
@@ -2311,16 +2672,16 @@
       const layer = activeTextLayer();
       if (!layer) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("noSelectedText"); root.appendChild(empty); return; }
       syncTextLayerName(layer);
-      const textField = createField(t("textBody"), "textarea", layer.text, (value) => { layer.text = value; syncTextLayerName(layer); renderTextLayerList(); renderToolTargetOptions(); renderPreview(); });
+      root.appendChild(createField(t("textName"), "input", getTextLayerSyncedName(layer), (value) => { layer.name = value || t("defaultTextLayerName"); renderTextLayerList(); renderLayers(); renderToolTargetOptions(); }));
+      const textField = createField(t("textBody"), "textarea", layer.text, (value) => { layer.text = value; syncTextLayerName(layer); renderTextLayerList(); renderLayers(); renderToolTargetOptions(); renderPreview(); });
       textField.querySelector("textarea").placeholder = t("textBodyPlaceholder");
       root.append(textField);
 
       const basic = document.createElement("div"); basic.className = "grid-2";
       basic.append(
-        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderTextLayerList(); renderPreview(); }),
-        createSelectField(t("textPlacement"), layer.placement, [{ value: "back", label: t("textBack") }, { value: "front", label: t("textFront") }], (value) => { layer.placement = value; renderTextLayerList(); renderPreview(); }),
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderTextLayerList(); renderLayers(); renderPreview(); }),
         createSelectField(t("textAlign"), layer.align, [{ value: "left", label: t("alignLeft") }, { value: "center", label: t("alignCenter") }, { value: "right", label: t("alignRight") }], (value) => { layer.align = value; renderPreview(); }),
-        createSelectField(t("writingMode"), layer.writingMode, [{ value: "horizontal", label: t("writingHorizontal") }, { value: "vertical", label: t("writingVertical") }], (value) => { layer.writingMode = value; renderTextDetailEditor(); renderPreview(); })
+        createSelectField(t("writingMode"), layer.writingMode, [{ value: "horizontal", label: t("writingHorizontal") }, { value: "vertical", label: t("writingVertical") }], (value) => { layer.writingMode = value; renderTextDetailEditor(); renderLayers(); renderPreview(); })
       );
       root.appendChild(basic);
       const wrapAlignOptions = layer.writingMode === "vertical"
@@ -2332,9 +2693,10 @@
         else layer.lineAlign = value;
         renderPreview();
       }));
+      const hint = document.createElement("div"); hint.className = "hint"; hint.textContent = t("textOrderHint"); root.appendChild(hint);
       root.appendChild(createCheckboxField(t("verticalLatinRotate"), layer.verticalLatinRotate, (checked) => { layer.verticalLatinRotate = checked; renderPreview(); }));
 
-      const fontSelect = createSelectField(t("font"), layer.fontFamily, [], (value) => { layer.fontFamily = value; renderPreview(); });
+      const fontSelect = createSelectField(t("font"), layer.fontFamily, [], (value) => { layer.fontFamily = value; renderLayers(); renderPreview(); });
       populateFontSelect(fontSelect.querySelector("select"), layer.fontFamily);
       root.appendChild(fontSelect);
 
@@ -2347,7 +2709,7 @@
       root.appendChild(colorGrid);
       root.appendChild(createCheckboxField(t("textGradient"), Boolean(layer.gradient?.enabled), (checked) => { layer.gradient.enabled = checked; renderPreview(); }));
 
-      addRange(root, t("fontSize"), layer.fontSize, 10, 800, 1, "px", (value) => { layer.fontSize = Math.round(value); renderPreview(); });
+      addRange(root, t("fontSize"), layer.fontSize, 10, 800, 1, "px", (value) => { layer.fontSize = Math.round(value); renderLayers(); renderPreview(); });
       addRange(root, t("wrapWidth"), layer.wrapWidth, 100, 4000, 1, "px", (value) => { layer.wrapWidth = Math.round(value); renderPreview(); });
       addRange(root, t("wrapHeight"), layer.wrapHeight, 100, 4000, 1, "px", (value) => { layer.wrapHeight = Math.round(value); renderPreview(); });
       addRange(root, t("lineHeight"), layer.lineHeight, 0.5, 3, 0.01, "", (value) => { layer.lineHeight = value; renderPreview(); }, 2);
@@ -2371,7 +2733,7 @@
       const head = document.createElement("div"); head.className = "inline-style-head"; head.innerHTML = `<span>${t("inlineStyleTitle")}</span>`;
       const addBtn = document.createElement("button"); addBtn.className = "small"; addBtn.textContent = t("addInlineStyle"); addBtn.addEventListener("click", () => { layer.inlineStyles.push(normalizeInlineStyle({ targets: "", fontFamily: layer.fontFamily, color: layer.color, fontSize: layer.fontSize, strokeColor: layer.stroke.color, strokeWidth: layer.stroke.width, shadowColor: layer.shadow.color, shadowBlur: layer.shadow.blur })); renderTextDetailEditor(); renderPreview(); });
       head.appendChild(addBtn); inlineBox.appendChild(head);
-      const hint = document.createElement("div"); hint.className = "hint"; hint.textContent = t("inlineStyleHint"); inlineBox.appendChild(hint);
+      const inlineHint = document.createElement("div"); inlineHint.className = "hint"; inlineHint.textContent = t("inlineStyleHint"); inlineBox.appendChild(inlineHint);
       if (!layer.inlineStyles.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("inlineStyleEmpty"); inlineBox.appendChild(empty); }
       layer.inlineStyles.forEach((style, index) => inlineBox.appendChild(renderInlineStyleItem(layer, style, index)));
       root.appendChild(inlineBox);
@@ -2394,7 +2756,7 @@
     function effectPlacementIndex(value) { const index = EFFECT_STACK_ORDER.indexOf(value); return index >= 0 ? index : 2; }
     function effectTypeLabel(value) { return { vignette: t("effectTypeVignette"), chromatic: t("effectTypeChromatic"), blur: t("effectTypeBlur"), tone: t("effectTypeTone") }[value] || value; }
     function effectPlacementLabel(value) { return { background: t("effectPlacementBg"), backText: t("effectPlacementBackText"), standing: t("effectPlacementStanding"), frontText: t("effectPlacementFrontText") }[value] || value; }
-    function getEffectStackMax() { return Math.max(0, getActiveLayers().length); }
+    function getEffectStackMax() { return Math.max(0, getStandingLayerEntries().length); }
     function normalizeEffectStackIndex(layer) {
       if (!layer) return 0;
       const max = getEffectStackMax();
@@ -2581,8 +2943,25 @@
       const row = document.createElement("div"); row.className = "color-line";
       const text = document.createElement("input"); text.type = "text"; text.value = value;
       const color = document.createElement("input"); color.type = "color"; color.value = /^#[0-9a-f]{6}$/i.test(value) ? value : "#ffffff";
+      const eyedropperBtn = document.createElement("button");
+      eyedropperBtn.type = "button";
+      eyedropperBtn.className = "small secondary";
+      eyedropperBtn.textContent = t("eyedropper") || "Eyedropper";
+      eyedropperBtn.title = eyedropperBtn.textContent;
       const apply = (val) => { text.value = val; color.value = /^#[0-9a-f]{6}$/i.test(val) ? val : color.value; onInput(val); };
-      text.addEventListener("input", () => onInput(text.value)); color.addEventListener("input", () => apply(color.value)); row.append(text, color); field.append(label, row); return field;
+      text.addEventListener("input", () => onInput(text.value));
+      color.addEventListener("input", () => apply(color.value));
+      eyedropperBtn.addEventListener("click", async () => {
+        if (!("EyeDropper" in window)) { alert("EyeDropper API is not supported in this browser."); return; }
+        try {
+          const eyeDropper = new EyeDropper();
+          const result = await eyeDropper.open();
+          if (result?.sRGBHex) apply(result.sRGBHex);
+        } catch (error) {
+          if (error?.name !== "AbortError") console.warn("EyeDropper failed", error);
+        }
+      });
+      row.append(text, color, eyedropperBtn); field.append(label, row); return field;
     }
     function addRange(root, labelText, value, min, max, step, suffix, onInput, digits = 0, onCommit = null) {
       const row = document.createElement("div"); row.className = "slider-row compact";
@@ -2686,6 +3065,7 @@
           if (presetInfo.selection && typeof presetInfo.selection === "object") delete presetInfo.selection[categoryId];
         }
       }
+      normalizeHandMaterialStackIndexes();
       for (const layer of state.effectLayers || []) {
         if (layer.placement === "standing") normalizeEffectStackIndex(layer);
       }
@@ -2694,13 +3074,10 @@
       setStatusT("categoryDeleted");
     }
     function moveActiveCategory(index, direction) {
-      const preset = activeLayerPreset();
-      const categories = preset.categories || [];
-      const nextIndex = index + direction;
-      if (nextIndex < 0 || nextIndex >= categories.length) return;
-      [categories[index], categories[nextIndex]] = [categories[nextIndex], categories[index]];
-      for (const layer of state.effectLayers || []) if (layer.placement === "standing") normalizeEffectStackIndex(layer);
-      renderAll(); setStatusT("categoryMoved");
+      const categories = activeLayerPreset().categories || [];
+      const category = categories[index];
+      if (!category) return;
+      moveStandingLayerEntry("category", category.id, direction);
     }
     function addCategoryToActivePreset() {
       const input = $("#categoryNameInput");
@@ -2834,8 +3211,8 @@
     }
 
     function getStandingVisualEntries() {
-      const layers = getActiveLayers();
-      const maxStackIndex = layers.length;
+      const standingEntries = getStandingLayerEntries();
+      const maxStackIndex = standingEntries.length;
       const buckets = Array.from({ length: maxStackIndex + 1 }, () => []);
       for (const effect of state.effectLayers || []) {
         if (effect.placement !== "standing") continue;
@@ -2846,16 +3223,183 @@
       const entries = [];
       for (let index = 0; index <= maxStackIndex; index++) {
         for (const effect of buckets[index]) entries.push({ kind: "effect", effect, stackIndex: index, maxStackIndex });
-        if (index < layers.length) entries.push({ kind: "category", layer: layers[index], layerIndex: index });
+        if (index < standingEntries.length) entries.push(standingEntries[index]);
       }
       return entries;
+    }
+
+    function renderHandMaterialStackCard(layer) {
+      const card = document.createElement("section");
+      card.className = `layer-card hand-material-layer-card${layer.id === state.activeHandMaterialLayerId ? " active" : ""}`;
+      const head = document.createElement("div");
+      head.className = "layer-head";
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "layer-title-inline";
+      const name = document.createElement("div");
+      name.className = "layer-name";
+      name.textContent = layer.name || t("defaultHandMaterialLayerName");
+      const note = document.createElement("div");
+      note.className = "layer-note";
+      const preset = getHandMaterialPreset(layer.presetId);
+      note.textContent = `${t("handMaterialStackNote")} / ${t(preset.nameKey) || preset.id}${layer.flipX ? " / Flip" : ""}`;
+      titleWrap.append(name, note);
+
+      const actionWrap = document.createElement("div");
+      actionWrap.className = "button-row layer-header-actions";
+      const selectBtn = document.createElement("button");
+      selectBtn.type = "button";
+      selectBtn.className = "small secondary";
+      selectBtn.textContent = t("applyButton");
+      const upBtn = document.createElement("button");
+      upBtn.type = "button";
+      upBtn.className = "small secondary";
+      upBtn.textContent = t("moveUpButton");
+      upBtn.disabled = !canMoveStandingEntry("handMaterial", layer.id, -1);
+      const downBtn = document.createElement("button");
+      downBtn.type = "button";
+      downBtn.className = "small secondary";
+      downBtn.textContent = t("moveDownButton");
+      downBtn.disabled = !canMoveStandingEntry("handMaterial", layer.id, 1);
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "small danger";
+      delBtn.textContent = t("deleteButton");
+
+      const selectLayer = () => {
+        state.activeHandMaterialLayerId = layer.id;
+        state.activeToolTarget = `handMaterial:${layer.id}`;
+        renderLayers();
+        renderHandMaterialLayerList();
+        renderHandMaterialDetailEditor();
+        renderToolTargetOptions();
+        syncTargetSliders();
+        renderPreview();
+        setStatusT("handMaterialLayerSelected");
+      };
+      selectBtn.addEventListener("click", (event) => { event.stopPropagation(); selectLayer(); });
+      upBtn.addEventListener("click", (event) => { event.stopPropagation(); moveStandingLayerEntry("handMaterial", layer.id, -1); });
+      downBtn.addEventListener("click", (event) => { event.stopPropagation(); moveStandingLayerEntry("handMaterial", layer.id, 1); });
+      delBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        state.handMaterialLayers = (state.handMaterialLayers || []).filter((item) => item.id !== layer.id);
+        state.activeHandMaterialLayerId = state.handMaterialLayers[0]?.id || "";
+        if (String(state.activeToolTarget || "") === `handMaterial:${layer.id}`) state.activeToolTarget = state.activeHandMaterialLayerId ? `handMaterial:${state.activeHandMaterialLayerId}` : "standing";
+        for (const effect of state.effectLayers || []) if (effect.placement === "standing") normalizeEffectStackIndex(effect);
+        renderAll();
+      });
+      actionWrap.append(selectBtn, upBtn, downBtn, delBtn);
+      head.append(titleWrap, actionWrap);
+
+      const body = document.createElement("div");
+      body.className = "effect-card-body";
+      const controls = document.createElement("div");
+      controls.className = "grid-2";
+      controls.append(
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderLayers(); renderHandMaterialLayerList(); renderPreview(); }),
+        createSelectField(t("handMaterialPreset"), layer.presetId, HAND_MATERIAL_PRESETS.map((preset) => ({ value: preset.id, label: t(preset.nameKey) || preset.id })), (value) => { layer.presetId = HAND_MATERIAL_PRESET_MAP[value] ? value : HAND_MATERIAL_PRESETS[0].id; renderLayers(); renderHandMaterialDetailEditor(); renderPreview(); }),
+        createCheckboxField(t("handMaterialFlipX"), Boolean(layer.flipX), (checked) => { layer.flipX = checked; renderLayers(); renderHandMaterialDetailEditor(); renderPreview(); })
+      );
+      body.appendChild(controls);
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = t("handMaterialOrderHint");
+      body.appendChild(hint);
+      card.addEventListener("click", (event) => {
+        const tag = event.target.tagName.toLowerCase();
+        if (tag === "input" || tag === "button" || tag === "select" || tag === "label") return;
+        selectLayer();
+      });
+      card.append(head, body);
+      return card;
+    }
+
+    function renderTextStackCard(layer) {
+      const card = document.createElement("section");
+      card.className = `layer-card${layer.id === state.activeTextLayerId ? " active" : ""}`;
+      const head = document.createElement("div");
+      head.className = "layer-head";
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "layer-title-inline";
+      const name = document.createElement("div");
+      name.className = "layer-name";
+      name.textContent = getTextLayerSyncedName(layer);
+      const note = document.createElement("div");
+      note.className = "layer-note";
+      note.textContent = String(layer.text || "").replace(/\s+/g, " ").trim().slice(0, 48) || t("defaultTextBody");
+      titleWrap.append(name, note);
+
+      const actionWrap = document.createElement("div");
+      actionWrap.className = "button-row layer-header-actions";
+      const selectBtn = document.createElement("button");
+      selectBtn.type = "button";
+      selectBtn.className = "small";
+      selectBtn.textContent = t("applyButton");
+      const upBtn = document.createElement("button");
+      upBtn.type = "button";
+      upBtn.className = "small secondary";
+      upBtn.textContent = t("moveUpButton");
+      upBtn.disabled = !canMoveStandingEntry("text", layer.id, -1);
+      const downBtn = document.createElement("button");
+      downBtn.type = "button";
+      downBtn.className = "small secondary";
+      downBtn.textContent = t("moveDownButton");
+      downBtn.disabled = !canMoveStandingEntry("text", layer.id, 1);
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "small danger";
+      delBtn.textContent = t("deleteButton");
+
+      const selectLayer = () => {
+        state.activeTextLayerId = layer.id;
+        state.activeToolTarget = `text:${layer.id}`;
+        renderLayers();
+        renderTextLayerList();
+        renderTextDetailEditor();
+        renderToolTargetOptions();
+        syncTargetSliders();
+        renderPreview();
+      };
+      selectBtn.addEventListener("click", (event) => { event.stopPropagation(); selectLayer(); });
+      upBtn.addEventListener("click", (event) => { event.stopPropagation(); moveStandingLayerEntry("text", layer.id, -1); });
+      downBtn.addEventListener("click", (event) => { event.stopPropagation(); moveStandingLayerEntry("text", layer.id, 1); });
+      delBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        state.textLayers = (state.textLayers || []).filter((item) => item.id !== layer.id);
+        state.activeTextLayerId = state.textLayers[0]?.id || "";
+        if (String(state.activeToolTarget || "") === `text:${layer.id}`) state.activeToolTarget = state.activeTextLayerId ? `text:${state.activeTextLayerId}` : "standing";
+        for (const effect of state.effectLayers || []) if (effect.placement === "standing") normalizeEffectStackIndex(effect);
+        renderAll();
+      });
+      actionWrap.append(selectBtn, upBtn, downBtn, delBtn);
+      head.append(titleWrap, actionWrap);
+
+      const body = document.createElement("div");
+      body.className = "effect-card-body";
+      const controls = document.createElement("div");
+      controls.className = "grid-2";
+      controls.append(
+        createCheckboxField(t("textVisible"), layer.visible, (checked) => { layer.visible = checked; renderLayers(); renderTextDetailEditor(); renderPreview(); }),
+        createSelectField(t("writingMode"), layer.writingMode, [{ value: "horizontal", label: t("writingHorizontal") }, { value: "vertical", label: t("writingVertical") }], (value) => { layer.writingMode = value; renderLayers(); renderTextDetailEditor(); renderPreview(); })
+      );
+      body.appendChild(controls);
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = t("textOrderHint");
+      body.appendChild(hint);
+      card.addEventListener("click", (event) => {
+        const tag = event.target.tagName.toLowerCase();
+        if (tag === "input" || tag === "button" || tag === "select" || tag === "label") return;
+        selectLayer();
+      });
+      card.append(head, body);
+      return card;
     }
 
     function renderLayers() {
       const root = $("#layersRoot"); root.innerHTML = "";
       const character = activeCharacter(); const layers = getActiveLayers(); const store = getLayerStore(character);
       const entries = getStandingVisualEntries();
-      if (!layers.length && !(state.effectLayers || []).some((layer) => layer.placement === "standing")) {
+      if (!getStandingLayerEntries().length && !(state.effectLayers || []).some((layer) => layer.placement === "standing")) {
         const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("emptyParts"); root.appendChild(empty); return;
       }
       entries.forEach((entry) => {
@@ -2863,8 +3407,16 @@
           root.appendChild(renderEffectStackCard(entry.effect, entry.stackIndex, entry.maxStackIndex));
           return;
         }
+        if (entry.kind === "handMaterial") {
+          root.appendChild(renderHandMaterialStackCard(entry.layer));
+          return;
+        }
+        if (entry.kind === "text") {
+          root.appendChild(renderTextStackCard(entry.layer));
+          return;
+        }
         const layer = entry.layer;
-        const layerIndex = entry.layerIndex;
+        const layerIndex = getActiveLayers().findIndex((item) => item.id === layer.id);
         if (!Array.isArray(store[layer.id])) store[layer.id] = [];
         const card = document.createElement("section"); card.className = "layer-card";
         const head = document.createElement("div"); head.className = "layer-head";
@@ -2874,10 +3426,10 @@
         titleWrap.appendChild(name);
         const actionWrap = document.createElement("div");
         actionWrap.className = "button-row layer-header-actions";
-        const upBtn = document.createElement("button"); upBtn.type = "button"; upBtn.className = "small secondary"; upBtn.textContent = t("moveUpButton"); upBtn.disabled = layerIndex === 0;
-        upBtn.addEventListener("click", () => moveActiveCategory(layerIndex, -1));
-        const downBtn = document.createElement("button"); downBtn.type = "button"; downBtn.className = "small secondary"; downBtn.textContent = t("moveDownButton"); downBtn.disabled = layerIndex === layers.length - 1;
-        downBtn.addEventListener("click", () => moveActiveCategory(layerIndex, 1));
+        const upBtn = document.createElement("button"); upBtn.type = "button"; upBtn.className = "small secondary"; upBtn.textContent = t("moveUpButton"); upBtn.disabled = !canMoveStandingEntry("category", layer.id, -1);
+        upBtn.addEventListener("click", () => moveStandingLayerEntry("category", layer.id, -1));
+        const downBtn = document.createElement("button"); downBtn.type = "button"; downBtn.className = "small secondary"; downBtn.textContent = t("moveDownButton"); downBtn.disabled = !canMoveStandingEntry("category", layer.id, 1);
+        downBtn.addEventListener("click", () => moveStandingLayerEntry("category", layer.id, 1));
         const uploadBtn = document.createElement("button"); uploadBtn.className = "small"; uploadBtn.textContent = t("registerImage");
         const fileInput = document.createElement("input"); fileInput.type = "file"; fileInput.accept = "image/png,image/jpeg,image/webp"; fileInput.multiple = true;
         uploadBtn.addEventListener("click", () => fileInput.click()); fileInput.addEventListener("change", async (event) => { await addImagesToLayer(layer.id, Array.from(event.target.files || [])); fileInput.value = ""; });
@@ -2940,6 +3492,15 @@
     function setToolTarget(target) {
       if (target === "standing") {
         state.activeToolTarget = "standing";
+      } else if (target === "handMaterial" || String(target || "").startsWith("handMaterial:")) {
+        const layerId = target === "handMaterial" ? (state.activeHandMaterialLayerId || state.handMaterialLayers[0]?.id || "") : String(target || "").replace(/^handMaterial:/, "");
+        const layer = state.handMaterialLayers.find((item) => item.id === layerId) || state.handMaterialLayers[0];
+        if (layer) {
+          state.activeHandMaterialLayerId = layer.id;
+          state.activeToolTarget = `handMaterial:${layer.id}`;
+        } else {
+          state.activeToolTarget = "standing";
+        }
       } else if (target === "shape" || String(target || "").startsWith("shape:")) {
         const layerId = target === "shape" ? (state.activeShapeLayerId || state.shapeLayers[0]?.id || "") : String(target || "").replace(/^shape:/, "");
         const layer = state.shapeLayers.find((item) => item.id === layerId) || state.shapeLayers[0];
@@ -2972,8 +3533,10 @@
       renderToolTargetOptions();
       renderTextLayerList();
       renderShapeLayerList();
+      renderHandMaterialLayerList();
       renderTextDetailEditor();
       renderShapeDetailEditor();
+      renderHandMaterialDetailEditor();
       syncTargetSliders();
       renderPreview();
     }
@@ -2984,6 +3547,7 @@
 
       const currentTextLayer = state.textLayers.find((layer) => layer.id === state.activeTextLayerId) || state.textLayers[0] || null;
       const currentShapeLayer = state.shapeLayers.find((layer) => layer.id === state.activeShapeLayerId) || state.shapeLayers[0] || null;
+      const currentHandMaterialLayer = state.handMaterialLayers.find((layer) => layer.id === state.activeHandMaterialLayerId) || state.handMaterialLayers[0] || null;
       const layers = getActiveLayers();
       const layerTargetEnabled = !activeLayerPreset()?.useBackgroundImages && layers.length > 0;
       const currentLayerId = String(state.activeToolTarget || "").replace(/^layer:/, "");
@@ -2997,6 +3561,10 @@
         const matchedLayer = currentShapeLayer ? state.shapeLayers.find((layer) => `shape:${layer.id}` === state.activeToolTarget) : null;
         if (matchedLayer) state.activeShapeLayerId = matchedLayer.id;
         else state.activeToolTarget = currentShapeLayer ? `shape:${currentShapeLayer.id}` : "standing";
+      } else if (String(state.activeToolTarget || "").startsWith("handMaterial:")) {
+        const matchedLayer = currentHandMaterialLayer ? state.handMaterialLayers.find((layer) => `handMaterial:${layer.id}` === state.activeToolTarget) : null;
+        if (matchedLayer) state.activeHandMaterialLayerId = matchedLayer.id;
+        else state.activeToolTarget = currentHandMaterialLayer ? `handMaterial:${currentHandMaterialLayer.id}` : "standing";
       } else if (String(state.activeToolTarget || "").startsWith("layer:")) {
         if (!layerTargetEnabled || !currentLayer) state.activeToolTarget = "standing";
       }
@@ -3004,6 +3572,7 @@
       const isStanding = state.activeToolTarget === "standing";
       const isText = String(state.activeToolTarget || "").startsWith("text:");
       const isShape = String(state.activeToolTarget || "").startsWith("shape:");
+      const isHandMaterial = String(state.activeToolTarget || "").startsWith("handMaterial:");
       const isLayer = String(state.activeToolTarget || "").startsWith("layer:");
       root.innerHTML = "";
 
@@ -3057,7 +3626,28 @@
       }
       shapeSelect.addEventListener("change", () => setToolTarget(`shape:${shapeSelect.value}`));
 
-      root.append(standingLabel, textLabel, textSelect, shapeLabel, shapeSelect);
+      const handMaterialLabel = document.createElement("label");
+      handMaterialLabel.className = `target-check${isHandMaterial ? " active" : ""}`;
+      const handMaterialCheck = document.createElement("input");
+      handMaterialCheck.type = "checkbox";
+      handMaterialCheck.checked = isHandMaterial;
+      handMaterialCheck.disabled = state.handMaterialLayers.length === 0;
+      handMaterialCheck.addEventListener("change", () => setToolTarget("handMaterial"));
+      handMaterialLabel.append(handMaterialCheck, document.createTextNode(` ${t("handMaterialTarget")}`));
+
+      const handMaterialSelect = document.createElement("select");
+      handMaterialSelect.className = "target-text-select";
+      handMaterialSelect.disabled = state.handMaterialLayers.length === 0;
+      for (const layer of state.handMaterialLayers) {
+        const option = document.createElement("option");
+        option.value = layer.id;
+        option.textContent = getToolHandMaterialLayerLabel(layer);
+        option.selected = layer.id === state.activeHandMaterialLayerId;
+        handMaterialSelect.appendChild(option);
+      }
+      handMaterialSelect.addEventListener("change", () => setToolTarget(`handMaterial:${handMaterialSelect.value}`));
+
+      root.append(standingLabel, textLabel, textSelect, shapeLabel, shapeSelect, handMaterialLabel, handMaterialSelect);
 
       if (layerTargetEnabled) {
         const layerLabel = document.createElement("label");
@@ -3225,7 +3815,7 @@
       const target = selectedTransformTarget(); if (!target) return;
       armSliderHistory();
       target.x = Number($("#targetX").value || 0); target.y = Number($("#targetY").value || 0); target.scale = Number($("#targetScale").value || 1); target.rotation = Number($("#targetRotation").value || 0);
-      syncTargetSliders(); renderPreview(); if (state.activeToolTarget?.startsWith("text:")) renderTextDetailTransformOnly(); if (state.activeToolTarget?.startsWith("shape:")) renderShapeLayerList();
+      syncTargetSliders(); renderPreview(); if (state.activeToolTarget?.startsWith("text:")) renderTextDetailTransformOnly(); if (state.activeToolTarget?.startsWith("shape:")) renderShapeLayerList(); if (state.activeToolTarget?.startsWith("handMaterial:")) renderHandMaterialLayerList();
     }
     function renderTextDetailTransformOnly() { /* The transform sliders are authoritative; full editor rerender is noisy while dragging. */ }
 
@@ -3307,11 +3897,11 @@
       applyEffectLayersForPlacement(canvas, "background");
       for (const layer of state.frameLayers.filter((item) => item.visible && item.placement === "back")) drawFrameLayer(ctx, layer, width, height);
       for (const layer of state.shapeLayers.filter((item) => item.visible && item.placement === "back")) drawShapeLayer(ctx, layer);
-      for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "back")) drawTextLayer(ctx, layer);
+      for (const layer of state.textLayers.filter((item) => item.visible && item.stackIntegrated === false && item.placement === "back")) drawTextLayer(ctx, layer);
       applyEffectLayersForPlacement(canvas, "backText");
       await drawStandingGroup(ctx, width, height, character);
       for (const layer of state.shapeLayers.filter((item) => item.visible && item.placement === "front")) drawShapeLayer(ctx, layer);
-      for (const layer of state.textLayers.filter((item) => item.visible && item.placement === "front")) drawTextLayer(ctx, layer);
+      for (const layer of state.textLayers.filter((item) => item.visible && item.stackIntegrated === false && item.placement === "front")) drawTextLayer(ctx, layer);
       for (const layer of state.frameLayers.filter((item) => item.visible && item.placement === "front")) drawFrameLayer(ctx, layer, width, height);
       applyEffectLayersForPlacement(canvas, "frontText");
     }
@@ -3603,6 +4193,10 @@
           if (entry.effect.visible) applySingleEffect(canvas, normalizeEffectLayer(entry.effect));
         } else if (entry.kind === "category") {
           await drawStandingLayer(ctx, width, height, character, entry.layer, contentWidth, contentHeight);
+        } else if (entry.kind === "handMaterial") {
+          if (entry.layer?.visible) drawHandMaterialLayer(ctx, entry.layer);
+        } else if (entry.kind === "text") {
+          if (entry.layer?.visible) drawTextLayer(ctx, entry.layer);
         }
       }
     }
@@ -3882,6 +4476,29 @@
         context.closePath();
       }
     }
+    function drawHandMaterialLayer(context, layer) {
+      const preset = getHandMaterialPreset(layer?.presetId);
+      const images = getHandMaterialImages(layer?.presetId);
+      if (!preset || !images) return;
+      const naturalW = Math.max(1, Number(preset.width || 1));
+      const naturalH = Math.max(1, Number(preset.height || 1));
+      context.save();
+      context.translate(Number(layer.x || 0), Number(layer.y || 0));
+      context.rotate(((Number(layer.rotation || 0)) * Math.PI) / 180);
+      context.scale((layer.flipX ? -1 : 1) * Number(layer.scale || 1), Number(layer.scale || 1));
+      const drawPart = (image, color) => {
+        if (!image?.complete) return;
+        const fillCanvas = getTintedAlphaCanvas(image, color || "#ffffff");
+        if (!fillCanvas) return;
+        context.drawImage(fillCanvas, -naturalW / 2, -naturalH / 2, naturalW, naturalH);
+      };
+      drawPart(images.line, layer.lineColor);
+      drawPart(images.base, layer.baseColor);
+      drawPart(images.shadow1, layer.shadow1Color);
+      drawPart(images.shadow2, layer.shadow2Color);
+      context.restore();
+    }
+
     function drawShapeLayer(context, layer) {
       if (!layer?.visible) return;
       const settings = normalizeShapeLayer(layer);
@@ -4081,6 +4698,9 @@
       $("#addShapeLayerBtn").addEventListener("click", () => { const layer = createShapeLayer(); const { width, height } = getCanvasBaseSize(); layer.x = width / 2; layer.y = height / 2; state.shapeLayers.push(layer); state.activeShapeLayerId = layer.id; state.activeToolTarget = `shape:${layer.id}`; renderAll(); setStatusT("shapeLayerAdded"); });
       $("#duplicateShapeLayerBtn").addEventListener("click", () => { const layer = activeShapeLayer(); if (!layer) return; const copy = normalizeShapeLayer(clone(layer)); copy.id = uid("shape"); copy.name = `${layer.name} copy`; copy.x += 24; copy.y += 24; state.shapeLayers.push(copy); state.activeShapeLayerId = copy.id; state.activeToolTarget = `shape:${copy.id}`; renderAll(); });
       $("#deleteShapeLayerBtn").addEventListener("click", () => { const layer = activeShapeLayer(); if (!layer) return; state.shapeLayers = state.shapeLayers.filter((item) => item.id !== layer.id); state.activeShapeLayerId = state.shapeLayers[0]?.id || ""; state.activeToolTarget = state.activeShapeLayerId ? `shape:${state.activeShapeLayerId}` : "standing"; renderAll(); });
+      $("#addHandMaterialLayerBtn").addEventListener("click", () => { if (!Array.isArray(state.handMaterialLayers)) state.handMaterialLayers = []; const layer = createHandMaterialLayer(); const { width, height } = getCanvasBaseSize(); layer.x = width / 2; layer.y = height / 2; layer.name = `${t("defaultHandMaterialLayerName")} ${state.handMaterialLayers.length + 1}`; layer.stackIndex = 0; state.handMaterialLayers.push(layer); state.activeHandMaterialLayerId = layer.id; state.activeToolTarget = `handMaterial:${layer.id}`; renderAll(); setStatusT("handMaterialLayerAdded"); });
+      $("#duplicateHandMaterialLayerBtn").addEventListener("click", () => { const layer = activeHandMaterialLayer(); if (!layer) return; const copy = normalizeHandMaterialLayer(clone(layer)); copy.id = uid("handMaterial"); copy.name = `${layer.name} copy`; copy.x += 24; copy.y += 24; state.handMaterialLayers.push(copy); state.activeHandMaterialLayerId = copy.id; state.activeToolTarget = `handMaterial:${copy.id}`; renderAll(); });
+      $("#deleteHandMaterialLayerBtn").addEventListener("click", () => { const layer = activeHandMaterialLayer(); if (!layer) return; state.handMaterialLayers = state.handMaterialLayers.filter((item) => item.id !== layer.id); state.activeHandMaterialLayerId = state.handMaterialLayers[0]?.id || ""; state.activeToolTarget = state.activeHandMaterialLayerId ? `handMaterial:${state.activeHandMaterialLayerId}` : "standing"; renderAll(); });
       $("#addFrameLayerBtn").addEventListener("click", () => { if (!Array.isArray(state.frameLayers)) state.frameLayers = []; const layer = createFrameLayer(); layer.name = `${t("defaultFrameLayerName")} ${state.frameLayers.length + 1}`; state.frameLayers.push(layer); state.activeFrameLayerId = layer.id; renderAll(); setStatusT("frameLayerAdded"); });
       $("#duplicateFrameLayerBtn").addEventListener("click", () => { const layer = activeFrameLayer(); if (!layer) return; const copy = normalizeFrameLayer(clone(layer)); copy.id = uid("frame"); copy.name = `${layer.name} copy`; state.frameLayers.push(copy); state.activeFrameLayerId = copy.id; renderAll(); });
       $("#deleteFrameLayerBtn").addEventListener("click", () => { const layer = activeFrameLayer(); if (!layer) return; state.frameLayers = state.frameLayers.filter((item) => item.id !== layer.id); state.activeFrameLayerId = state.frameLayers[0]?.id || ""; renderAll(); });

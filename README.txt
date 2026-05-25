@@ -16,3 +16,7 @@ Version 29: Updated the built-in manual.
 - Added classical frame A/B/C explanation.
 - Added canvas-center-based symmetric spacing explanation.
 - Added note that each classical frame size is capped at that design's original image size.
+
+
+Added hand material layer preset: gao
+Files: img/hand-materials/gao/{line,base,shadow1,shadow2}.png
