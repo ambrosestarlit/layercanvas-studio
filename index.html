@@ -1250,50 +1250,169 @@
       helpSave3: "내보내기에서 PNG를 저장할 수 있습니다. 원본 크기 또는 세로 지정 중 선택할 수 있습니다."
     });
 
+
     Object.assign(I18N.ja, {
-      bgSourceType: "背景ソース",
-      bgSourceUpload: "任意画像",
-      bgSourceTexture: "テクスチャ背景",
-      bgTexturePreset: "テクスチャ柄",
-      bgTextureLoaded: "テクスチャ：{name}",
-      bgTextureHint: "ベース色と各柄色を変更できます。柄は透過PNGをシームレスにループ表示します。位置・拡大縮小・角度は背景全体のスライダーで調整できます。",
-      bgTextureBaseColor: "ベース色",
-      bgRotation: "背景角度",
-      bgPattern1: "柄1",
-      bgPattern2: "柄2",
-      bgPattern3: "柄3",
-      bgPatternVisible: "柄を表示",
-      bgPatternColor: "柄色"
+      effectTypeDuotone: "ダブルトーン",
+      effectDuotoneShadowColor: "暗部色",
+      effectDuotoneHighlightColor: "明部色",
+      effectDuotoneHint: "輝度をもとに、暗い部分を暗部色、明るい部分を明部色へ変換します。Photoshopのダブルトーン風のカラー化に使えます。",
+      effectTypeDiffusion: "ディフュージョン",
+      effectTypeOverlay: "オーバーレイカラー",
+      effectTypeNoise: "ノイズ / フィルムグレイン",
+      effectTypeHalftone: "ハーフトーン",
+      effectTypeScanline: "スキャンライン / CRT風",
+      effectContrast: "コントラスト",
+      effectBrightness: "明度",
+      effectOpacityLabel: "不透明度",
+      effectBlendMode: "合成モード",
+      effectBlendNormal: "通常",
+      effectBlendMultiply: "乗算",
+      effectBlendScreen: "スクリーン",
+      effectBlendOverlay: "オーバーレイ",
+      effectBlendSoftLight: "ソフトライト",
+      effectNoiseSize: "粒サイズ",
+      effectMonochrome: "モノクロ",
+      effectDotSize: "ドットサイズ",
+      effectDotGap: "間隔",
+      effectAngle: "角度",
+      effectHalftoneUniform: "均一に適用する",
+      effectLineThickness: "線の太さ",
+      effectLineGap: "線の間隔"
     });
     Object.assign(I18N.en, {
-      bgSourceType: "Background source",
-      bgSourceUpload: "Custom image",
-      bgSourceTexture: "Texture background",
-      bgTexturePreset: "Texture preset",
-      bgTextureLoaded: "Texture: {name}",
-      bgTextureHint: "You can change the base color and each pattern color. Pattern PNGs repeat seamlessly. Position, scale, and rotation are controlled by the overall background sliders.",
-      bgTextureBaseColor: "Base color",
-      bgRotation: "Background rotation",
-      bgPattern1: "Pattern 1",
-      bgPattern2: "Pattern 2",
-      bgPattern3: "Pattern 3",
-      bgPatternVisible: "Show pattern",
-      bgPatternColor: "Pattern color"
+      effectTypeDuotone: "Duotone",
+      effectDuotoneShadowColor: "Shadow color",
+      effectDuotoneHighlightColor: "Highlight color",
+      effectDuotoneHint: "Maps brightness to two colors: dark areas use the shadow color, bright areas use the highlight color. Useful for Photoshop-style duotone color effects.",
+      effectTypeDiffusion: "Diffusion",
+      effectTypeOverlay: "Overlay Color",
+      effectTypeNoise: "Noise / Film Grain",
+      effectTypeHalftone: "Halftone",
+      effectTypeScanline: "Scanlines / CRT",
+      effectContrast: "Contrast",
+      effectBrightness: "Brightness",
+      effectOpacityLabel: "Opacity",
+      effectBlendMode: "Blend mode",
+      effectBlendNormal: "Normal",
+      effectBlendMultiply: "Multiply",
+      effectBlendScreen: "Screen",
+      effectBlendOverlay: "Overlay",
+      effectBlendSoftLight: "Soft Light",
+      effectNoiseSize: "Grain Size",
+      effectMonochrome: "Monochrome",
+      effectDotSize: "Dot Size",
+      effectDotGap: "Spacing",
+      effectAngle: "Angle",
+      effectHalftoneUniform: "Apply Uniformly",
+      effectLineThickness: "Line Thickness",
+      effectLineGap: "Line Gap"
+    });
+    Object.assign(I18N.ko, {
+      effectTypeDuotone: "더블톤",
+      effectDuotoneShadowColor: "어두운 부분 색",
+      effectDuotoneHighlightColor: "밝은 부분 색",
+      effectDuotoneHint: "밝기를 기준으로 어두운 부분은 어두운 색, 밝은 부분은 밝은 색으로 변환합니다. Photoshop 더블톤 느낌의 컬러 효과에 사용할 수 있습니다.",
+      effectTypeDiffusion: "디퓨전",
+      effectTypeOverlay: "오버레이 컬러",
+      effectTypeNoise: "노이즈 / 필름 그레인",
+      effectTypeHalftone: "하프톤",
+      effectTypeScanline: "스캔라인 / CRT",
+      effectContrast: "콘트라스트",
+      effectBrightness: "밝기",
+      effectOpacityLabel: "불투명도",
+      effectBlendMode: "합성 모드",
+      effectBlendNormal: "일반",
+      effectBlendMultiply: "곱하기",
+      effectBlendScreen: "스크린",
+      effectBlendOverlay: "오버레이",
+      effectBlendSoftLight: "소프트 라이트",
+      effectNoiseSize: "입자 크기",
+      effectMonochrome: "흑백",
+      effectDotSize: "도트 크기",
+      effectDotGap: "간격",
+      effectAngle: "각도",
+      effectHalftoneUniform: "균일하게 적용",
+      effectLineThickness: "선 두께",
+      effectLineGap: "선 간격"
+    });
+
+    Object.assign(I18N.ja, {
+      bgSourceType: "背景ソース",
+      bgSourceCustom: "任意画像",
+      bgSourceTexture: "テクスチャ背景",
+      bgTexturePreset: "背景種類",
+      bgTextureCheck: "チェック01",
+      bgTextureDot: "ドット背景",
+      bgTextureBorder: "ボーダー背景",
+      bgTextureBaseColor: "ベース色",
+      bgTextureAddLayer: "レイヤー追加",
+      bgTextureHint: "初期状態はベース＋1レイヤーです。必要に応じてレイヤーを追加してください。",
+      bgPatternType: "素材タイプ",
+      bgPatternTypeDot: "ドット",
+      bgPatternTypeBorder: "ボーダー",
+      bgPatternTypeDash: "破線",
+      bgPatternTypeDotLine: "ドットライン",
+      bgPatternSize: "サイズ",
+      bgPatternGap: "間隔",
+      bgPatternAngle: "角度",
+      bgPatternThickness: "太さ",
+      bgPatternItemGap: "破線 / ドット間隔",
+      bgPatternLineGap: "ライン間隔",
+      bgPatternOffsetX: "横位置",
+      bgRotation: "背景角度",
+      bgLayer: "レイヤー"
+    });
+    Object.assign(I18N.en, {
+      bgSourceType: "Background Source",
+      bgSourceCustom: "Custom Image",
+      bgSourceTexture: "Texture Background",
+      bgTexturePreset: "Background Type",
+      bgTextureCheck: "Check 01",
+      bgTextureDot: "Dot Background",
+      bgTextureBorder: "Border Background",
+      bgTextureBaseColor: "Base Color",
+      bgTextureAddLayer: "Add Layer",
+      bgTextureHint: "The initial state is Base + 1 layer. Add layers only when needed.",
+      bgPatternType: "Material Type",
+      bgPatternTypeDot: "Dots",
+      bgPatternTypeBorder: "Border",
+      bgPatternTypeDash: "Dashed",
+      bgPatternTypeDotLine: "Dot Line",
+      bgPatternSize: "Size",
+      bgPatternGap: "Spacing",
+      bgPatternAngle: "Angle",
+      bgPatternThickness: "Thickness",
+      bgPatternItemGap: "Dash / Dot Gap",
+      bgPatternLineGap: "Line Gap",
+      bgPatternOffsetX: "Horizontal Position",
+      bgRotation: "Background Rotation",
+      bgLayer: "Layer"
     });
     Object.assign(I18N.ko, {
       bgSourceType: "배경 소스",
-      bgSourceUpload: "임의 이미지",
+      bgSourceCustom: "임의 이미지",
       bgSourceTexture: "텍스처 배경",
-      bgTexturePreset: "텍스처 프리셋",
-      bgTextureLoaded: "텍스처: {name}",
-      bgTextureHint: "베이스 색과 각 패턴 색을 변경할 수 있습니다. 패턴 PNG는 심리스로 반복됩니다. 위치, 크기, 각도는 배경 전체 슬라이더로 조정합니다.",
+      bgTexturePreset: "배경 종류",
+      bgTextureCheck: "체크01",
+      bgTextureDot: "도트 배경",
+      bgTextureBorder: "보더 배경",
       bgTextureBaseColor: "베이스 색",
+      bgTextureAddLayer: "레이어 추가",
+      bgTextureHint: "초기 상태는 베이스 + 1레이어입니다. 필요할 때만 레이어를 추가하세요.",
+      bgPatternType: "소재 종류",
+      bgPatternTypeDot: "도트",
+      bgPatternTypeBorder: "보더",
+      bgPatternTypeDash: "점선",
+      bgPatternTypeDotLine: "도트 라인",
+      bgPatternSize: "크기",
+      bgPatternGap: "간격",
+      bgPatternAngle: "각도",
+      bgPatternThickness: "두께",
+      bgPatternItemGap: "점선 / 도트 간격",
+      bgPatternLineGap: "라인 간격",
+      bgPatternOffsetX: "가로 위치",
       bgRotation: "배경 각도",
-      bgPattern1: "패턴 1",
-      bgPattern2: "패턴 2",
-      bgPattern3: "패턴 3",
-      bgPatternVisible: "패턴 표시",
-      bgPatternColor: "패턴 색"
+      bgLayer: "레이어"
     });
 
     const DEFAULT_LAYER_CATEGORIES = [
@@ -1706,102 +1825,104 @@
     }
 
     function defaultTransform() { return { x: 0, y: 0, scale: 1, rotation: 0 }; }
-    function createTextureBackgroundPattern(index, overrides = {}) {
-      return {
-        id: overrides.id || `pattern${index}`,
-        nameKey: overrides.nameKey || `bgPattern${index}`,
-        visible: overrides.visible !== false,
-        color: overrides.color || ["#d9d9d9", "#9ca3af", "#111827"][index - 1] || "#111827",
-        scale: Number(overrides.scale ?? 1),
-        rotation: Number(overrides.rotation || 0),
-        assetPath: overrides.assetPath || "",
-        fileName: overrides.fileName || "",
-        tileWidth: Number(overrides.tileWidth || 500),
-        tileHeight: Number(overrides.tileHeight || 500)
-      };
-    }
-    function createBackgroundLayer(index) {
-      return {
-        id: `bg${index}`,
-        nameKey: `bg${index}`,
-        visible: false,
-        mode: "upload",
-        dataUrl: "",
-        fileName: "",
-        width: 0,
-        height: 0,
-        x: 0,
-        y: 0,
-        scale: 1,
-        rotation: 0,
-        texturePresetId: "",
-        textureBaseColor: "#ffffff",
-        texturePatterns: []
-      };
-    }
-    function createBackgroundPanel() { return { visible: false, color: "#ffffff", exportEnabled: false }; }
     const TEXTURE_BACKGROUND_PRESETS = [
       {
         id: "check01",
-        label: { ja: "チェック01", en: "Check 01", ko: "체크01" },
-        baseWidth: 500,
-        baseHeight: 500,
+        legacyIds: ["check", "チェック01"],
+        labelKey: "bgTextureCheck",
+        maxLayers: 3,
+        fixedLayers: true,
         patterns: [
-          { id: "pattern1", nameKey: "bgPattern1", fileName: "pattern1.png", assetPath: "./img/background-textures/check01/pattern1.png", tileWidth: 500, tileHeight: 500, defaultColor: "#d8dee9" },
-          { id: "pattern2", nameKey: "bgPattern2", fileName: "pattern2.png", assetPath: "./img/background-textures/check01/pattern2.png", tileWidth: 500, tileHeight: 500, defaultColor: "#94a3b8" },
-          { id: "pattern3", nameKey: "bgPattern3", fileName: "pattern3.png", assetPath: "./img/background-textures/check01/pattern3.png", tileWidth: 500, tileHeight: 500, defaultColor: "#0f172a" }
+          { id: "pattern3", label: "柄3", type: "image", color: "#0f172a", assetPath: "./img/background-textures/check01/pattern3.png", tileWidth: 500, tileHeight: 500 },
+          { id: "pattern2", label: "柄2", type: "image", color: "#94a3b8", assetPath: "./img/background-textures/check01/pattern2.png", tileWidth: 500, tileHeight: 500 },
+          { id: "pattern1", label: "柄1", type: "image", color: "#d8dee9", assetPath: "./img/background-textures/check01/pattern1.png", tileWidth: 500, tileHeight: 500 }
         ]
-      }
+      },
+      { id: "dot", legacyIds: ["dotbg01"], labelKey: "bgTextureDot", maxLayers: 2 },
+      { id: "border", legacyIds: ["borderbg01"], labelKey: "bgTextureBorder", maxLayers: 3 }
     ];
-    function getLocalizedPresetLabel(label) {
-      if (typeof label === "string") return label;
-      const lang = currentLanguage();
-      return label?.[lang] || label?.ja || Object.values(label || {})[0] || "";
+    function getTexturePresetById(id) {
+      const key = String(id || "check01");
+      return TEXTURE_BACKGROUND_PRESETS.find((preset) => preset.id === key || preset.legacyIds?.includes(key)) || TEXTURE_BACKGROUND_PRESETS[0];
     }
-    function getTextureBackgroundPresetById(id) {
-      return TEXTURE_BACKGROUND_PRESETS.find((preset) => preset.id === id) || null;
+    function getTexturePatternDisplayName(bg, actualIndex) {
+      const length = bg.texturePatterns?.length || 0;
+      if (bg.texturePresetId === "dot") return `${t("bgPatternTypeDot")}${length - actualIndex}`;
+      if (bg.texturePresetId === "check01") return bg.texturePatterns?.[actualIndex]?.label || `柄${actualIndex + 1}`;
+      return `${t("bgLayer")} ${length - actualIndex}`;
     }
-    function getTextureBackgroundPresetName(id) {
-      return getLocalizedPresetLabel(getTextureBackgroundPresetById(id)?.label || "");
+    function getTexturePatternDefaultType(presetId) { const preset = getTexturePresetById(presetId); if (preset.id === "border") return "border"; if (preset.id === "check01") return "image"; return "dot"; }
+    function normalizeTexturePatternType(presetId, value) {
+      const preset = getTexturePresetById(presetId);
+      if (preset.id === "check01") return "image";
+      if (preset.id === "dot") return "dot";
+      if (["border", "dash", "dotline", "image"].includes(value)) return value;
+      if (value === "stripe") return "border";
+      if (value === "dashline") return "dash";
+      if (value === "dots") return "dotline";
+      return "border";
     }
-    function getTexturePatternScaleMax(patternLike = {}) {
-      const tileW = Number(patternLike.tileWidth || patternLike.width || 500) || 500;
-      const tileH = Number(patternLike.tileHeight || patternLike.height || 500) || 500;
-      return Math.max(0.05, Math.min(20, 500 / Math.max(tileW, tileH)));
-    }
-    function applyTexturePresetToBackground(bg, presetId) {
-      const preset = getTextureBackgroundPresetById(presetId);
-      bg.texturePresetId = preset ? preset.id : "";
-      bg.mode = preset ? "texture" : (bg.mode === "texture" ? "upload" : bg.mode);
-      if (!preset) {
-        bg.texturePatterns = [];
-        return;
+    function createTexturePattern(presetId, type = null, orderIndex = 0) {
+      const preset = getTexturePresetById(presetId);
+      const resolvedType = normalizeTexturePatternType(preset.id, type || getTexturePatternDefaultType(preset.id));
+      if (preset.id === "check01") {
+        const src = preset.patterns?.[orderIndex] || preset.patterns?.[0] || {};
+        return { id: src.id || uid("bgPattern"), type: "image", label: src.label || "", visible: true, color: src.color || "#111827", assetPath: src.assetPath || "", tileWidth: src.tileWidth || 500, tileHeight: src.tileHeight || 500, angle: 0, offsetX: 0, size: 10, gap: 30, lineGap: 24, thickness: 1 };
       }
-      bg.fileName = getLocalizedPresetLabel(preset.label);
-      bg.width = Number(preset.baseWidth || 500);
-      bg.height = Number(preset.baseHeight || 500);
-      const currentPatterns = Array.isArray(bg.texturePatterns) ? bg.texturePatterns : [];
-      bg.texturePatterns = preset.patterns.map((pattern, index) => {
-        const existing = currentPatterns.find((item) => item.id === pattern.id) || currentPatterns[index] || {};
-        return createTextureBackgroundPattern(index + 1, {
-          id: pattern.id,
-          nameKey: pattern.nameKey || `bgPattern${index + 1}`,
-          visible: existing.visible !== false,
-          color: existing.color || pattern.defaultColor || "#111827",
-          scale: clamp(existing.scale ?? 1, 0.05, getTexturePatternScaleMax(pattern)),
-          rotation: clamp(existing.rotation ?? 0, -180, 180),
-          assetPath: pattern.assetPath,
-          fileName: pattern.fileName || "",
-          tileWidth: pattern.tileWidth || preset.baseWidth || 500,
-          tileHeight: pattern.tileHeight || preset.baseHeight || 500
-        });
-      });
-      if (!bg.textureBaseColor) bg.textureBaseColor = "#ffffff";
+      if (preset.id === "border") {
+        const palette = ["#0f172a", "#94a3b8", "#d8dee9"];
+        const color = palette[Math.min(orderIndex, palette.length - 1)] || palette[palette.length - 1];
+        if (resolvedType === "dash") return { id: uid("bgPattern"), type: "dash", visible: true, color, size: 6, gap: 22, lineGap: 71, angle: 90, offsetX: 294, thickness: 8 };
+        if (resolvedType === "dotline") return { id: uid("bgPattern"), type: "dotline", visible: true, color, size: 6, gap: 22, lineGap: 71, angle: 90, offsetX: 294, thickness: 8 };
+        return { id: uid("bgPattern"), type: "border", visible: true, color, thickness: 72, gap: 70, angle: 0, offsetX: 151, size: 10, lineGap: 24 };
+      }
+      const palette = ["#1d4ed8", "#60a5fa"];
+      const sizes = [14, 8];
+      const gaps = [48, 30];
+      return { id: uid("bgPattern"), type: "dot", visible: true, color: palette[Math.min(orderIndex, palette.length - 1)] || palette[palette.length - 1], size: sizes[Math.min(orderIndex, sizes.length - 1)] || 10, gap: gaps[Math.min(orderIndex, gaps.length - 1)] || 30, angle: 0, offsetX: 0, thickness: 1, lineGap: 24 };
+    }
+    function resetTextureBackground(bg, presetId) {
+      const preset = getTexturePresetById(presetId);
+      bg.sourceType = "texture";
+      bg.mode = "texture";
+      bg.texturePresetId = preset.id;
+      bg.textureBaseColor = bg.textureBaseColor || "#ffffff";
+      bg.texturePatterns = preset.fixedLayers
+        ? (preset.patterns || []).map((item, index) => createTexturePattern(preset.id, item.type || getTexturePatternDefaultType(preset.id), index))
+        : [createTexturePattern(preset.id, getTexturePatternDefaultType(preset.id), 0)];
+      bg.fileName = t(preset.labelKey);
+      bg.width = 500;
+      bg.height = 500;
       bg.visible = true;
+      bg.dataUrl = "";
     }
-    function clearBackgroundLayer(bg) {
-      Object.assign(bg, createBackgroundLayer(Number(String(bg.id || "bg1").replace(/\D+/g, "") || 1)));
+    function normalizeTexturePattern(presetId, pattern, index = 0) {
+      const preset = getTexturePresetById(presetId);
+      const migratedType = normalizeTexturePatternType(preset.id, pattern?.type || pattern?.kind);
+      const base = createTexturePattern(preset.id, migratedType, index);
+      return {
+        ...base,
+        ...(pattern && typeof pattern === "object" ? pattern : {}),
+        id: pattern?.id || base.id,
+        type: migratedType,
+        label: pattern?.label || base.label || "",
+        visible: pattern?.visible !== false,
+        color: typeof pattern?.color === "string" ? pattern.color : base.color,
+        assetPath: pattern?.assetPath || base.assetPath || "",
+        tileWidth: Number(pattern?.tileWidth || base.tileWidth || 500),
+        tileHeight: Number(pattern?.tileHeight || base.tileHeight || 500),
+        size: clamp(pattern?.size ?? base.size, 1, 300),
+        gap: clamp(pattern?.gap ?? base.gap, 1, 500),
+        lineGap: clamp(pattern?.lineGap ?? base.lineGap, 1, 500),
+        thickness: clamp(pattern?.thickness ?? base.thickness, 1, 300),
+        angle: clamp(pattern?.angle ?? base.angle, -180, 180),
+        offsetX: clamp(pattern?.offsetX ?? base.offsetX, -2000, 2000)
+      };
     }
+    function createBackgroundLayer(index) {
+      return { id: `bg${index}`, nameKey: `bg${index}`, visible: false, dataUrl: "", fileName: "", width: 0, height: 0, x: 0, y: 0, scale: 1, rotation: 0, sourceType: "custom", mode: "custom", texturePresetId: "check01", textureBaseColor: "#ffffff", texturePatterns: [] };
+    }
+    function createBackgroundPanel() { return { visible: false, color: "#ffffff", exportEnabled: false }; }
     function createDefaultCanvasPresets() { return DEFAULT_CANVAS_PRESETS.map((preset) => ({ ...preset })); }
     function createLayerCategory(id, name, exclusive = false, transform = null) { return { id: id || uid("category"), name: String(name || t("unnamed")), exclusive: Boolean(exclusive), transform: normalizeTransform(transform || defaultTransform()) }; }
     function createDefaultLayerPreset() { return { id: "layerPreset-character-default", name: t("defaultLayerPresetName"), useBackgroundImages: true, categories: DEFAULT_LAYER_CATEGORIES.map((layer) => createLayerCategory(layer.id, layer.name, layer.exclusive)) }; }
@@ -1856,7 +1977,12 @@
     function createEffectLayer() {
       return {
         id: uid("effectLayer"), name: t("defaultEffectLayerName"), visible: true, type: "vignette", placement: "standing", stackIndex: 0,
-        color: "#000000", intensity: 0.35, radius: 0.58, shift: 6, blur: 6, toneMode: "grayscale", chromaticRedOpacity: 34, chromaticGreenOpacity: 33, chromaticBlueOpacity: 33, chromaticRedShift: -6, chromaticGreenShift: 0, chromaticBlueShift: 6
+        color: "#000000", intensity: 0.35, radius: 0.58, shift: 6, blur: 6, toneMode: "grayscale", duotoneShadowColor: "#1f2a44", duotoneHighlightColor: "#f6e7d8", chromaticRedOpacity: 34, chromaticGreenOpacity: 33, chromaticBlueOpacity: 33, chromaticRedShift: -6, chromaticGreenShift: 0, chromaticBlueShift: 6,
+        diffusionContrast: 115, diffusionBrightness: 115, diffusionOpacity: 35, diffusionBlur: 8,
+        overlayColor: "#ffb366", overlayOpacity: 35, overlayBlendMode: "multiply",
+        noiseAmount: 28, noiseSize: 1, noiseOpacity: 28, noiseMonochrome: true,
+        halftoneDotSize: 6, halftoneGap: 14, halftoneAngle: 45, halftoneColor: "#111111", halftoneOpacity: 80, halftoneBlendMode: "multiply", halftoneUniform: false,
+        scanlineThickness: 1, scanlineGap: 3, scanlineColor: "#000000", scanlineOpacity: 18
       };
     }
     function createCustomFont(fileName = "Custom Font", dataUrl = "") {
@@ -1873,7 +1999,7 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 28,
+        version: 63,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
         activeShapeLayerId: "",
@@ -2013,8 +2139,10 @@
     function normalizeEffectLayer(layer) {
       const base = createEffectLayer();
       const placement = ["background", "backText", "standing", "frontText"].includes(layer?.placement) ? layer.placement : base.placement;
-      const type = ["vignette", "chromatic", "blur", "tone"].includes(layer?.type) ? layer.type : base.type;
+      const type = ["vignette", "chromatic", "blur", "tone", "duotone", "diffusion", "overlay", "noise", "halftone", "scanline"].includes(layer?.type) ? layer.type : base.type;
       const toneMode = ["grayscale", "sepia"].includes(layer?.toneMode) ? layer.toneMode : base.toneMode;
+      const overlayBlendMode = ["source-over", "multiply", "screen", "overlay", "soft-light"].includes(layer?.overlayBlendMode) ? layer.overlayBlendMode : (base.overlayBlendMode || "multiply");
+      const halftoneBlendMode = ["source-over", "multiply", "screen", "overlay", "soft-light"].includes(layer?.halftoneBlendMode) ? layer.halftoneBlendMode : (base.halftoneBlendMode || "multiply");
       const normalized = {
         ...base,
         ...layer,
@@ -2029,12 +2157,36 @@
         shift: Math.round(clamp(layer?.shift ?? base.shift, 0, 60)),
         blur: Math.round(clamp(layer?.blur ?? base.blur, 0, 60)),
         toneMode,
+        duotoneShadowColor: /^#[0-9a-f]{6}$/i.test(layer?.duotoneShadowColor || "") ? layer.duotoneShadowColor : base.duotoneShadowColor,
+        duotoneHighlightColor: /^#[0-9a-f]{6}$/i.test(layer?.duotoneHighlightColor || "") ? layer.duotoneHighlightColor : base.duotoneHighlightColor,
         chromaticRedOpacity: Math.round(clamp(layer?.chromaticRedOpacity ?? 34, 0, 100)),
         chromaticGreenOpacity: Math.round(clamp(layer?.chromaticGreenOpacity ?? 33, 0, 100)),
         chromaticBlueOpacity: Math.round(clamp(layer?.chromaticBlueOpacity ?? 33, 0, 100)),
         chromaticRedShift: Math.round(clamp(layer?.chromaticRedShift ?? -6, -60, 60)),
         chromaticGreenShift: Math.round(clamp(layer?.chromaticGreenShift ?? 0, -60, 60)),
         chromaticBlueShift: Math.round(clamp(layer?.chromaticBlueShift ?? 6, -60, 60)),
+        diffusionContrast: Math.round(clamp(layer?.diffusionContrast ?? base.diffusionContrast ?? 115, 0, 300)),
+        diffusionBrightness: Math.round(clamp(layer?.diffusionBrightness ?? base.diffusionBrightness ?? 115, 0, 300)),
+        diffusionOpacity: Math.round(clamp(layer?.diffusionOpacity ?? base.diffusionOpacity ?? 35, 0, 100)),
+        diffusionBlur: Math.round(clamp(layer?.diffusionBlur ?? base.diffusionBlur ?? 8, 0, 80)),
+        overlayColor: /^#[0-9a-f]{6}$/i.test(layer?.overlayColor || "") ? layer.overlayColor : base.overlayColor,
+        overlayOpacity: Math.round(clamp(layer?.overlayOpacity ?? base.overlayOpacity ?? 35, 0, 100)),
+        overlayBlendMode,
+        noiseAmount: Math.round(clamp(layer?.noiseAmount ?? base.noiseAmount ?? 28, 0, 100)),
+        noiseSize: Math.round(clamp(layer?.noiseSize ?? base.noiseSize ?? 1, 1, 32)),
+        noiseOpacity: Math.round(clamp(layer?.noiseOpacity ?? base.noiseOpacity ?? 28, 0, 100)),
+        noiseMonochrome: layer?.noiseMonochrome !== false,
+        halftoneDotSize: Math.round(clamp(layer?.halftoneDotSize ?? base.halftoneDotSize ?? 6, 1, 48)),
+        halftoneGap: Math.round(clamp(layer?.halftoneGap ?? base.halftoneGap ?? 14, 4, 120)),
+        halftoneAngle: Math.round(clamp(layer?.halftoneAngle ?? base.halftoneAngle ?? 45, -180, 180)),
+        halftoneColor: /^#[0-9a-f]{6}$/i.test(layer?.halftoneColor || "") ? layer.halftoneColor : base.halftoneColor,
+        halftoneOpacity: Math.round(clamp(layer?.halftoneOpacity ?? base.halftoneOpacity ?? 80, 0, 100)),
+        halftoneBlendMode,
+        halftoneUniform: Boolean(layer?.halftoneUniform),
+        scanlineThickness: Math.round(clamp(layer?.scanlineThickness ?? base.scanlineThickness ?? 1, 1, 40)),
+        scanlineGap: Math.round(clamp(layer?.scanlineGap ?? base.scanlineGap ?? 3, 0, 80)),
+        scanlineColor: /^#[0-9a-f]{6}$/i.test(layer?.scanlineColor || "") ? layer.scanlineColor : base.scanlineColor,
+        scanlineOpacity: Math.round(clamp(layer?.scanlineOpacity ?? base.scanlineOpacity ?? 18, 0, 100)),
         stackIndex: Math.round(clamp(layer?.stackIndex ?? base.stackIndex ?? 0, 0, 999))
       };
       applyChromaticWeightNormalization(normalized);
@@ -2068,11 +2220,12 @@
       }
       if (!normalized.activeCharacterId || !normalized.characters.some((c) => c.id === normalized.activeCharacterId)) normalized.activeCharacterId = normalized.characters[0].id;
       normalized.backgroundLayers = safeArray(normalized.backgroundLayers).slice(0, 2).map((bg, index) => {
-        const base = { ...createBackgroundLayer(index + 1), ...(bg && typeof bg === "object" ? bg : {}), id: `bg${index + 1}`, nameKey: `bg${index + 1}` };
+        const base = { ...createBackgroundLayer(index + 1), ...(bg && typeof bg === "object" ? bg : {}) };
         const normalizedBg = {
           ...base,
+          id: `bg${index + 1}`,
+          nameKey: `bg${index + 1}`,
           visible: Boolean(bg?.visible),
-          mode: ["upload", "texture"].includes(bg?.mode) ? bg.mode : ((bg?.texturePresetId || bg?.texturePatterns?.length) ? "texture" : "upload"),
           dataUrl: bg?.dataUrl || "",
           fileName: bg?.fileName || "",
           width: Number(bg?.width || 0),
@@ -2081,30 +2234,20 @@
           y: Number(bg?.y || 0),
           scale: clamp(bg?.scale ?? 1, 0.05, 4),
           rotation: clamp(bg?.rotation ?? 0, -180, 180),
-          texturePresetId: String(bg?.texturePresetId || ""),
-          textureBaseColor: bg?.textureBaseColor || "#ffffff",
+          sourceType: (bg?.sourceType === "texture" || bg?.mode === "texture" || (safeArray(bg?.texturePatterns).length > 0 && Boolean(bg?.texturePresetId))) ? "texture" : "custom",
+          texturePresetId: getTexturePresetById(typeof bg?.texturePresetId === "string" ? bg.texturePresetId : (typeof bg?.presetId === "string" ? bg.presetId : "check01")).id,
+          textureBaseColor: typeof bg?.textureBaseColor === "string" ? bg.textureBaseColor : "#ffffff",
+          mode: (bg?.sourceType === "texture" || bg?.mode === "texture" || (safeArray(bg?.texturePatterns).length > 0 && Boolean(bg?.texturePresetId))) ? "texture" : "custom",
           texturePatterns: []
         };
-        const preset = getTextureBackgroundPresetById(normalizedBg.texturePresetId);
-        if (preset) {
-          normalizedBg.texturePatterns = preset.patterns.map((pattern, patternIndex) => {
-            const sourcePattern = safeArray(bg?.texturePatterns).find((item) => item?.id === pattern.id) || safeArray(bg?.texturePatterns)[patternIndex] || {};
-            return createTextureBackgroundPattern(patternIndex + 1, {
-              id: pattern.id,
-              nameKey: pattern.nameKey || `bgPattern${patternIndex + 1}`,
-              visible: sourcePattern.visible !== false,
-              color: sourcePattern.color || pattern.defaultColor || "#111827",
-              scale: clamp(sourcePattern.scale ?? 1, 0.05, getTexturePatternScaleMax(pattern)),
-              rotation: clamp(sourcePattern.rotation ?? 0, -180, 180),
-              assetPath: pattern.assetPath,
-              fileName: pattern.fileName || "",
-              tileWidth: pattern.tileWidth || preset.baseWidth || 500,
-              tileHeight: pattern.tileHeight || preset.baseHeight || 500
-            });
-          });
-          normalizedBg.fileName = normalizedBg.fileName || getLocalizedPresetLabel(preset.label);
-          normalizedBg.width = normalizedBg.width || Number(preset.baseWidth || 500);
-          normalizedBg.height = normalizedBg.height || Number(preset.baseHeight || 500);
+        if (normalizedBg.sourceType === "texture") {
+          const preset = getTexturePresetById(normalizedBg.texturePresetId);
+          normalizedBg.texturePresetId = preset.id;
+          const patterns = safeArray(bg?.texturePatterns).map((item, patternIndex) => normalizeTexturePattern(preset.id, item, patternIndex)).slice(0, preset.maxLayers);
+          normalizedBg.texturePatterns = patterns.length ? patterns : [createTexturePattern(preset.id, getTexturePatternDefaultType(preset.id), 0)];
+          normalizedBg.fileName = normalizedBg.fileName || t(preset.labelKey);
+          normalizedBg.width = normalizedBg.width || 500;
+          normalizedBg.height = normalizedBg.height || 500;
         }
         return normalizedBg;
       });
@@ -2321,33 +2464,25 @@
       const preset = activeLayerPreset();
       if (preset?.useBackgroundImages) {
         state.backgroundLayers.forEach((bg) => {
-          const box = document.createElement("div"); box.className = "background-box";
-          const statusText = bg.mode === "texture"
-            ? (bg.texturePresetId ? t("bgTextureLoaded", { name: getTextureBackgroundPresetName(bg.texturePresetId) || bg.fileName || t("bgNotLoaded") }) : t("bgNotLoaded"))
-            : (bg.fileName ? t("bgLoaded", { name: bg.fileName }) : t("bgNotLoaded"));
-          box.innerHTML = `
-            <div class="background-head">
-              <div class="background-title">${t(bg.nameKey)}</div>
-              <div class="background-file">${statusText}</div>
-            </div>
-          `;
-
-          const modeOptions = [
-            { value: "upload", label: t("bgSourceUpload") },
+          const box = document.createElement("div");
+          box.className = "background-box";
+          const title = document.createElement("div");
+          title.className = "background-head";
+          title.innerHTML = `<div class="background-title">${t(bg.nameKey)}</div>`;
+          box.appendChild(title);
+          box.appendChild(createSelectField(t("bgSourceType"), bg.sourceType || (bg.mode === "texture" ? "texture" : "custom"), [
+            { value: "custom", label: t("bgSourceCustom") },
             { value: "texture", label: t("bgSourceTexture") }
-          ];
-          box.appendChild(createSelectField(t("bgSourceType"), bg.mode || "upload", modeOptions, (value) => {
+          ], (value) => {
+            bg.sourceType = value;
             bg.mode = value;
-            if (value === "texture") {
-              applyTexturePresetToBackground(bg, bg.texturePresetId || TEXTURE_BACKGROUND_PRESETS[0]?.id || "");
-            }
+            if (value === "texture") resetTextureBackground(bg, bg.texturePresetId || "check01");
             renderAll();
           }));
 
-          if (bg.mode === "texture") {
-            const presetOptions = TEXTURE_BACKGROUND_PRESETS.map((item) => ({ value: item.id, label: getLocalizedPresetLabel(item.label) }));
-            box.appendChild(createSelectField(t("bgTexturePreset"), bg.texturePresetId || presetOptions[0]?.value || "", presetOptions, (value) => {
-              applyTexturePresetToBackground(bg, value);
+          if (bg.sourceType === "texture" || bg.mode === "texture") {
+            box.appendChild(createSelectField(t("bgTexturePreset"), bg.texturePresetId || "check01", TEXTURE_BACKGROUND_PRESETS.map((item) => ({ value: item.id, label: t(item.labelKey) })), (value) => {
+              resetTextureBackground(bg, value);
               renderAll();
             }));
             const hint = document.createElement("div");
@@ -2355,20 +2490,83 @@
             hint.textContent = t("bgTextureHint");
             box.appendChild(hint);
             box.appendChild(createCheckboxField(t("bgVisible"), bg.visible, (checked) => { bg.visible = checked; renderPreview(); }));
-
-            (bg.texturePatterns || []).forEach((patternState, patternIndex) => {
+            box.appendChild(createColorField(t("bgTextureBaseColor"), bg.textureBaseColor || "#ffffff", (value) => { bg.textureBaseColor = value; bg.visible = true; renderPreview(); }));
+            const presetInfo = getTexturePresetById(bg.texturePresetId || "check01");
+            const toolRow = document.createElement("div");
+            toolRow.className = "button-row";
+            const addBtn = document.createElement("button");
+            addBtn.type = "button";
+            addBtn.className = "small";
+            addBtn.textContent = t("bgTextureAddLayer");
+            addBtn.disabled = Boolean(presetInfo.fixedLayers) || (bg.texturePatterns?.length || 0) >= presetInfo.maxLayers;
+            addBtn.addEventListener("click", () => {
+              const orderIndex = bg.texturePatterns.length;
+              bg.texturePatterns.push(createTexturePattern(presetInfo.id, getTexturePatternDefaultType(presetInfo.id), orderIndex));
+              renderAll();
+            });
+            toolRow.appendChild(addBtn);
+            box.appendChild(toolRow);
+            [...bg.texturePatterns].map((patternState, actualIndex) => ({ patternState, actualIndex })).reverse().forEach(({ patternState, actualIndex }) => {
               const section = document.createElement("div");
               section.className = "preview-target-controls";
-              const title = document.createElement("div");
-              title.className = "row-title";
-              title.textContent = t(patternState.nameKey || `bgPattern${patternIndex + 1}`);
-              section.appendChild(title);
-              section.appendChild(createCheckboxField(t("bgPatternVisible"), patternState.visible !== false, (checked) => { patternState.visible = checked; renderPreview(); }));
-              section.appendChild(createColorField(t("bgPatternColor"), patternState.color || "#111827", (value) => { patternState.color = value; renderPreview(); }));
+              const head = document.createElement("div");
+              head.className = "button-row";
+              const label = document.createElement("div");
+              label.className = "row-title";
+              label.textContent = getTexturePatternDisplayName(bg, actualIndex);
+              const removeBtn = document.createElement("button");
+              removeBtn.type = "button";
+              removeBtn.className = "small danger";
+              removeBtn.textContent = t("deleteButton");
+              removeBtn.disabled = Boolean(presetInfo.fixedLayers) || (bg.texturePatterns?.length || 0) <= 1;
+              removeBtn.addEventListener("click", () => {
+                if (presetInfo.fixedLayers || (bg.texturePatterns?.length || 0) <= 1) return;
+                bg.texturePatterns.splice(actualIndex, 1);
+                renderAll();
+              });
+              head.append(label, removeBtn);
+              section.appendChild(head);
+              section.appendChild(createCheckboxField(t("bgVisible"), patternState.visible !== false, (checked) => { patternState.visible = checked; renderPreview(); }));
+              if (bg.texturePresetId === "border") {
+                section.appendChild(createSelectField(t("bgPatternType"), patternState.type || "border", [
+                  { value: "border", label: t("bgPatternTypeBorder") },
+                  { value: "dash", label: t("bgPatternTypeDash") },
+                  { value: "dotline", label: t("bgPatternTypeDotLine") }
+                ], (value) => {
+                  const next = normalizeTexturePattern("border", createTexturePattern("border", value, actualIndex), actualIndex);
+                  next.id = patternState.id;
+                  next.visible = patternState.visible;
+                  next.color = patternState.color || next.color;
+                  bg.texturePatterns[actualIndex] = next;
+                  renderAll();
+                }));
+              }
+              section.appendChild(createColorField(t("shapeColor"), patternState.color || "#1d4ed8", (value) => { patternState.color = value; renderPreview(); }));
+              if (bg.texturePresetId === "check01") {
+                // チェック柄は透過PNGの色変更だけ行う。柄パーツの追加・角度変更はしない。
+              } else if (bg.texturePresetId === "dot") {
+                addRange(section, t("bgPatternSize"), patternState.size ?? 10, 1, 200, 1, "px", (value) => { patternState.size = value; renderPreview(); });
+                addRange(section, t("bgPatternGap"), patternState.gap ?? 30, 1, 500, 1, "px", (value) => { patternState.gap = value; renderPreview(); });
+                addRange(section, t("bgPatternAngle"), patternState.angle ?? 0, -180, 180, 1, "°", (value) => { patternState.angle = value; renderPreview(); });
+              } else if (patternState.type === "border") {
+                addRange(section, t("bgPatternThickness"), patternState.thickness ?? 24, 1, 300, 1, "px", (value) => { patternState.thickness = value; renderPreview(); });
+                addRange(section, t("bgPatternGap"), patternState.gap ?? 20, 1, 500, 1, "px", (value) => { patternState.gap = value; renderPreview(); });
+                addRange(section, t("bgPatternAngle"), patternState.angle ?? 0, -180, 180, 1, "°", (value) => { patternState.angle = value; renderPreview(); });
+                addRange(section, t("bgPatternOffsetX"), patternState.offsetX ?? 0, -2000, 2000, 1, "px", (value) => { patternState.offsetX = value; renderPreview(); });
+              } else {
+                addRange(section, t("bgPatternSize"), patternState.size ?? 10, 1, 200, 1, "px", (value) => { patternState.size = value; renderPreview(); });
+                addRange(section, t("bgPatternItemGap"), patternState.gap ?? 30, 1, 500, 1, "px", (value) => { patternState.gap = value; renderPreview(); });
+                addRange(section, t("bgPatternLineGap"), patternState.lineGap ?? 24, 1, 500, 1, "px", (value) => { patternState.lineGap = value; renderPreview(); });
+                addRange(section, t("bgPatternAngle"), patternState.angle ?? 90, -180, 180, 1, "°", (value) => { patternState.angle = value; renderPreview(); });
+                addRange(section, t("bgPatternOffsetX"), patternState.offsetX ?? 0, -2000, 2000, 1, "px", (value) => { patternState.offsetX = value; renderPreview(); });
+              }
               box.appendChild(section);
             });
-            box.appendChild(createColorField(t("bgTextureBaseColor"), bg.textureBaseColor || "#ffffff", (value) => { bg.textureBaseColor = value; bg.visible = true; renderPreview(); }));
           } else {
+            const status = document.createElement("div");
+            status.className = "background-file";
+            status.textContent = bg.fileName ? t("bgLoaded", { name: bg.fileName }) : t("bgNotLoaded");
+            box.appendChild(status);
             const uploadRow = document.createElement("div");
             uploadRow.className = "button-row";
             const uploadBtn = document.createElement("button");
@@ -2385,30 +2583,24 @@
             fileInput.accept = "image/png,image/jpeg,image/webp";
             fileInput.hidden = true;
             uploadBtn.addEventListener("click", () => fileInput.click());
-            clearBtn.addEventListener("click", () => { clearBackgroundLayer(bg); renderAll(); });
+            clearBtn.addEventListener("click", () => { Object.assign(bg, createBackgroundLayer(Number(String(bg.id).replace(/\D+/g, "") || 1))); renderAll(); });
             fileInput.addEventListener("change", async (event) => {
               const file = event.target.files?.[0];
               if (!file) return;
               const dataUrl = await fileToDataUrl(file); const size = await getImageSize(dataUrl);
-              bg.mode = "upload";
-              bg.dataUrl = dataUrl;
-              bg.fileName = file.name;
-              bg.width = size.width;
-              bg.height = size.height;
-              bg.visible = true;
-              fileInput.value = "";
-              renderAll();
-              setStatusT("bgAdded");
+              bg.sourceType = "custom";
+              bg.mode = "custom";
+              bg.dataUrl = dataUrl; bg.fileName = file.name; bg.width = size.width; bg.height = size.height; bg.visible = true;
+              fileInput.value = ""; renderAll(); setStatusT("bgAdded");
             });
             uploadRow.append(uploadBtn, clearBtn, fileInput);
             box.appendChild(uploadRow);
             box.appendChild(createCheckboxField(t("bgVisible"), bg.visible, (checked) => { bg.visible = checked; renderPreview(); }));
           }
-
           addRange(box, t("bgX"), bg.x, -2000, 2000, 1, "px", (value) => { bg.x = value; renderPreview(); });
           addRange(box, t("bgY"), bg.y, -2000, 2000, 1, "px", (value) => { bg.y = value; renderPreview(); });
           addRange(box, t("bgScale"), bg.scale, 0.05, 4, 0.01, "", (value) => { bg.scale = value; renderPreview(); }, 2);
-          addRange(box, t("bgRotation"), bg.rotation || 0, -180, 180, 1, "°", (value) => { bg.rotation = value; renderPreview(); });
+          addRange(box, t("bgRotation"), bg.rotation ?? 0, -180, 180, 1, "°", (value) => { bg.rotation = value; renderPreview(); });
           root.appendChild(box);
         });
       } else {
@@ -2998,7 +3190,7 @@
 
     const EFFECT_STACK_ORDER = ["background", "backText", "standing", "frontText"];
     function effectPlacementIndex(value) { const index = EFFECT_STACK_ORDER.indexOf(value); return index >= 0 ? index : 2; }
-    function effectTypeLabel(value) { return { vignette: t("effectTypeVignette"), chromatic: t("effectTypeChromatic"), blur: t("effectTypeBlur"), tone: t("effectTypeTone") }[value] || value; }
+    function effectTypeLabel(value) { return { vignette: t("effectTypeVignette"), chromatic: t("effectTypeChromatic"), blur: t("effectTypeBlur"), tone: t("effectTypeTone"), duotone: t("effectTypeDuotone"), diffusion: t("effectTypeDiffusion"), overlay: t("effectTypeOverlay"), noise: t("effectTypeNoise"), halftone: t("effectTypeHalftone"), scanline: t("effectTypeScanline") }[value] || value; }
     function effectPlacementLabel(value) { return { background: t("effectPlacementBg"), backText: t("effectPlacementBackText"), standing: t("effectPlacementStanding"), frontText: t("effectPlacementFrontText") }[value] || value; }
     function getEffectStackMax() { return Math.max(0, getStandingLayerEntries().length); }
     function normalizeEffectStackIndex(layer) {
@@ -3121,7 +3313,13 @@
           { value: "vignette", label: t("effectTypeVignette") },
           { value: "chromatic", label: t("effectTypeChromatic") },
           { value: "blur", label: t("effectTypeBlur") },
-          { value: "tone", label: t("effectTypeTone") }
+          { value: "tone", label: t("effectTypeTone") },
+          { value: "duotone", label: t("effectTypeDuotone") },
+          { value: "diffusion", label: t("effectTypeDiffusion") },
+          { value: "overlay", label: t("effectTypeOverlay") },
+          { value: "noise", label: t("effectTypeNoise") },
+          { value: "halftone", label: t("effectTypeHalftone") },
+          { value: "scanline", label: t("effectTypeScanline") }
         ], (value) => { layer.type = value; rerender(); })
       );
       root.appendChild(basic);
@@ -3149,6 +3347,58 @@
         ], (value) => { layer.toneMode = value; renderPreview(); });
         root.appendChild(toneField);
         addRange(root, t("effectIntensity"), layer.intensity, 0, 1, 0.01, "", (value) => { layer.intensity = value; renderPreview(); }, 2);
+      } else if (layer.type === "duotone") {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = t("effectDuotoneHint");
+        root.appendChild(hint);
+        const colorGrid = document.createElement("div");
+        colorGrid.className = "grid-2";
+        colorGrid.append(
+          createColorField(t("effectDuotoneShadowColor"), layer.duotoneShadowColor || "#1f2a44", (value) => { layer.duotoneShadowColor = value; renderPreview(); }),
+          createColorField(t("effectDuotoneHighlightColor"), layer.duotoneHighlightColor || "#f6e7d8", (value) => { layer.duotoneHighlightColor = value; renderPreview(); })
+        );
+        root.appendChild(colorGrid);
+        addRange(root, t("effectIntensity"), layer.intensity, 0, 1, 0.01, "", (value) => { layer.intensity = value; renderPreview(); }, 2);
+      } else if (layer.type === "diffusion") {
+        addRange(root, t("effectContrast"), layer.diffusionContrast ?? 115, 0, 300, 1, "%", (value) => { layer.diffusionContrast = Math.round(value); renderPreview(); });
+        addRange(root, t("effectBrightness"), layer.diffusionBrightness ?? 115, 0, 300, 1, "%", (value) => { layer.diffusionBrightness = Math.round(value); renderPreview(); });
+        addRange(root, t("effectOpacityLabel"), layer.diffusionOpacity ?? 35, 0, 100, 1, "%", (value) => { layer.diffusionOpacity = Math.round(value); renderPreview(); });
+        addRange(root, t("effectBlur"), layer.diffusionBlur ?? 8, 0, 80, 1, "px", (value) => { layer.diffusionBlur = Math.round(value); renderPreview(); });
+      } else if (layer.type === "overlay") {
+        root.appendChild(createColorField(t("effectColor"), layer.overlayColor || "#ffb366", (value) => { layer.overlayColor = value; renderPreview(); }));
+        addRange(root, t("effectOpacityLabel"), layer.overlayOpacity ?? 35, 0, 100, 1, "%", (value) => { layer.overlayOpacity = Math.round(value); renderPreview(); });
+        root.appendChild(createSelectField(t("effectBlendMode"), layer.overlayBlendMode || "multiply", [
+          { value: "source-over", label: t("effectBlendNormal") },
+          { value: "multiply", label: t("effectBlendMultiply") },
+          { value: "screen", label: t("effectBlendScreen") },
+          { value: "overlay", label: t("effectBlendOverlay") },
+          { value: "soft-light", label: t("effectBlendSoftLight") }
+        ], (value) => { layer.overlayBlendMode = value; renderPreview(); }));
+      } else if (layer.type === "noise") {
+        addRange(root, t("effectIntensity"), layer.noiseAmount ?? 28, 0, 100, 1, "%", (value) => { layer.noiseAmount = Math.round(value); renderPreview(); });
+        addRange(root, t("effectNoiseSize"), layer.noiseSize ?? 1, 1, 32, 1, "px", (value) => { layer.noiseSize = Math.round(value); renderPreview(); });
+        addRange(root, t("effectOpacityLabel"), layer.noiseOpacity ?? 28, 0, 100, 1, "%", (value) => { layer.noiseOpacity = Math.round(value); renderPreview(); });
+        root.appendChild(createCheckboxField(t("effectMonochrome"), layer.noiseMonochrome !== false, (checked) => { layer.noiseMonochrome = checked; renderPreview(); }));
+      } else if (layer.type === "halftone") {
+        addRange(root, t("effectDotSize"), layer.halftoneDotSize ?? 6, 1, 48, 1, "px", (value) => { layer.halftoneDotSize = Math.round(value); renderPreview(); });
+        addRange(root, t("effectDotGap"), layer.halftoneGap ?? 14, 4, 120, 1, "px", (value) => { layer.halftoneGap = Math.round(value); renderPreview(); });
+        addRange(root, t("effectAngle"), layer.halftoneAngle ?? 45, -180, 180, 1, "°", (value) => { layer.halftoneAngle = Math.round(value); renderPreview(); });
+        root.appendChild(createColorField(t("effectColor"), layer.halftoneColor || "#111111", (value) => { layer.halftoneColor = value; renderPreview(); }));
+        addRange(root, t("effectOpacityLabel"), layer.halftoneOpacity ?? 80, 0, 100, 1, "%", (value) => { layer.halftoneOpacity = Math.round(value); renderPreview(); });
+        root.appendChild(createSelectField(t("effectBlendMode"), layer.halftoneBlendMode || "multiply", [
+          { value: "source-over", label: t("effectBlendNormal") },
+          { value: "multiply", label: t("effectBlendMultiply") },
+          { value: "screen", label: t("effectBlendScreen") },
+          { value: "overlay", label: t("effectBlendOverlay") },
+          { value: "soft-light", label: t("effectBlendSoftLight") }
+        ], (value) => { layer.halftoneBlendMode = value; renderPreview(); }));
+        root.appendChild(createCheckboxField(t("effectHalftoneUniform"), Boolean(layer.halftoneUniform), (checked) => { layer.halftoneUniform = checked; renderPreview(); }));
+      } else if (layer.type === "scanline") {
+        addRange(root, t("effectLineThickness"), layer.scanlineThickness ?? 1, 1, 40, 1, "px", (value) => { layer.scanlineThickness = Math.round(value); renderPreview(); });
+        addRange(root, t("effectLineGap"), layer.scanlineGap ?? 3, 0, 80, 1, "px", (value) => { layer.scanlineGap = Math.round(value); renderPreview(); });
+        root.appendChild(createColorField(t("effectColor"), layer.scanlineColor || "#000000", (value) => { layer.scanlineColor = value; renderPreview(); }));
+        addRange(root, t("effectOpacityLabel"), layer.scanlineOpacity ?? 18, 0, 100, 1, "%", (value) => { layer.scanlineOpacity = Math.round(value); renderPreview(); });
       }
     }
 
@@ -4089,7 +4339,7 @@
         }
       }
       if (activeLayerPreset()?.useBackgroundImages) {
-        for (const bg of state.backgroundLayers) if (bg.dataUrl || (bg.mode === "texture" && bg.texturePresetId)) { width = Math.max(width, Number(bg.width || 0)); height = Math.max(height, Number(bg.height || 0)); }
+        for (const bg of state.backgroundLayers) if (bg.dataUrl || bg.sourceType === "texture" || bg.mode === "texture") { width = Math.max(width, Number(bg.width || 500)); height = Math.max(height, Number(bg.height || 500)); }
       }
       if (!width || !height) return { width: 1200, height: 1200 };
       return { width, height };
@@ -4247,7 +4497,36 @@
       const b = int & 255;
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
+    function hexToRgb(hex, fallback = { r: 0, g: 0, b: 0 }) {
+      const clean = String(hex || "").trim();
+      const normalized = /^#([0-9a-f]{3})$/i.test(clean)
+        ? `#${clean.slice(1).split("").map((ch) => ch + ch).join("")}`
+        : clean;
+      const match = normalized.match(/^#([0-9a-f]{6})$/i);
+      if (!match) return fallback;
+      const int = parseInt(match[1], 16);
+      return { r: (int >> 16) & 255, g: (int >> 8) & 255, b: int & 255 };
+    }
+    function lerpValue(a, b, t) { return a + (b - a) * t; }
+    function clampByte(value) { return Math.max(0, Math.min(255, Math.round(value))); }
     function clamp01(value) { return Math.max(0, Math.min(1, Number(value) || 0)); }
+    function createSeededRandom(seed) {
+      let state = Math.floor(Number(seed) || 1) % 2147483647;
+      if (state <= 0) state += 2147483646;
+      return () => {
+        state = state * 16807 % 2147483647;
+        return (state - 1) / 2147483646;
+      };
+    }
+    function stringToSeed(value) {
+      let hash = 2166136261;
+      const str = String(value || "seed");
+      for (let index = 0; index < str.length; index++) {
+        hash ^= str.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return Math.abs(hash);
+    }
     function distributeRounded(values, total) {
       const floors = values.map((v) => Math.floor(v));
       let remainder = total - floors.reduce((sum, v) => sum + v, 0);
@@ -4402,6 +4681,146 @@
         ctx.restore();
         return;
       }
+      if (effect.type === "duotone") {
+        applyDuotoneEffect(canvas, source, normalizeEffectLayer(effect));
+        return;
+      }
+      if (effect.type === "diffusion") {
+        const normalized = normalizeEffectLayer(effect);
+        const contrast = Math.round(clamp(normalized.diffusionContrast ?? 115, 0, 300));
+        const brightness = Math.round(clamp(normalized.diffusionBrightness ?? 115, 0, 300));
+        const opacity = clamp((normalized.diffusionOpacity ?? 35) / 100, 0, 1);
+        const blur = Math.round(clamp(normalized.diffusionBlur ?? 8, 0, 80));
+        ctx.save();
+        ctx.drawImage(source, 0, 0);
+        if (opacity > 0 && (blur > 0 || contrast !== 100 || brightness !== 100)) {
+          ctx.globalAlpha = opacity;
+          ctx.globalCompositeOperation = "screen";
+          ctx.filter = `blur(${blur}px) brightness(${brightness}%) contrast(${contrast}%)`;
+          ctx.drawImage(source, 0, 0);
+        }
+        ctx.restore();
+        return;
+      }
+      if (effect.type === "overlay") {
+        const normalized = normalizeEffectLayer(effect);
+        ctx.save();
+        ctx.drawImage(source, 0, 0);
+        ctx.globalAlpha = clamp((normalized.overlayOpacity ?? 35) / 100, 0, 1);
+        ctx.globalCompositeOperation = normalized.overlayBlendMode || "multiply";
+        ctx.fillStyle = normalized.overlayColor || "#ffb366";
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+        return;
+      }
+      if (effect.type === "noise") {
+        const normalized = normalizeEffectLayer(effect);
+        const noiseCanvas = document.createElement("canvas");
+        noiseCanvas.width = w;
+        noiseCanvas.height = h;
+        const noiseCtx = noiseCanvas.getContext("2d", { alpha: true });
+        ctx.save();
+        ctx.drawImage(source, 0, 0);
+        if (noiseCtx) {
+          const image = noiseCtx.createImageData(w, h);
+          const data = image.data;
+          const cell = Math.max(1, Math.round(normalized.noiseSize ?? 1));
+          const amount = clamp((normalized.noiseAmount ?? 28) / 100, 0, 1);
+          const mono = normalized.noiseMonochrome !== false;
+          const random = createSeededRandom(stringToSeed(`${normalized.id || "noise"}:${w}x${h}:${cell}:${amount}`));
+          for (let y = 0; y < h; y += cell) {
+            for (let x = 0; x < w; x += cell) {
+              const base = 128;
+              const variance = 127 * amount;
+              let r = Math.round(base + (random() * 2 - 1) * variance);
+              let g = mono ? r : Math.round(base + (random() * 2 - 1) * variance);
+              let b = mono ? r : Math.round(base + (random() * 2 - 1) * variance);
+              r = Math.max(0, Math.min(255, r));
+              g = Math.max(0, Math.min(255, g));
+              b = Math.max(0, Math.min(255, b));
+              for (let yy = y; yy < Math.min(h, y + cell); yy++) {
+                for (let xx = x; xx < Math.min(w, x + cell); xx++) {
+                  const i = (yy * w + xx) * 4;
+                  data[i] = r;
+                  data[i + 1] = g;
+                  data[i + 2] = b;
+                  data[i + 3] = 255;
+                }
+              }
+            }
+          }
+          noiseCtx.putImageData(image, 0, 0);
+          ctx.globalAlpha = clamp((normalized.noiseOpacity ?? 28) / 100, 0, 1);
+          ctx.globalCompositeOperation = "soft-light";
+          ctx.drawImage(noiseCanvas, 0, 0);
+        }
+        ctx.restore();
+        return;
+      }
+      if (effect.type === "halftone") {
+        const normalized = normalizeEffectLayer(effect);
+        const sourceCtx = source.getContext("2d", { alpha: true });
+        const dotsCanvas = document.createElement("canvas");
+        dotsCanvas.width = w;
+        dotsCanvas.height = h;
+        const dotsCtx = dotsCanvas.getContext("2d", { alpha: true });
+        ctx.save();
+        ctx.drawImage(source, 0, 0);
+        if (dotsCtx) {
+          const src = sourceCtx ? sourceCtx.getImageData(0, 0, w, h).data : null;
+          const gap = Math.max(4, Math.round(normalized.halftoneGap ?? 14));
+          const maxRadius = Math.max(1, Math.round(normalized.halftoneDotSize ?? 6));
+          const angle = ((normalized.halftoneAngle ?? 45) * Math.PI) / 180;
+          const sin = Math.sin(angle);
+          const cos = Math.cos(angle);
+          const uniform = Boolean(normalized.halftoneUniform);
+          dotsCtx.save();
+          dotsCtx.translate(w / 2, h / 2);
+          dotsCtx.rotate(angle);
+          dotsCtx.fillStyle = normalized.halftoneColor || "#111111";
+          const bound = Math.ceil(Math.sqrt(w * w + h * h));
+          for (let y = -bound; y <= bound; y += gap) {
+            for (let x = -bound; x <= bound; x += gap) {
+              let radius = maxRadius;
+              if (!uniform) {
+                const sx = Math.round(cos * x - sin * y + w / 2);
+                const sy = Math.round(sin * x + cos * y + h / 2);
+                if (sx < 0 || sx >= w || sy < 0 || sy >= h || !src) continue;
+                const i = (sy * w + sx) * 4;
+                const alpha = src[i + 3] / 255;
+                if (alpha <= 0.01) continue;
+                const lum = src[i] * 0.299 + src[i + 1] * 0.587 + src[i + 2] * 0.114;
+                const darkness = (1 - lum / 255) * alpha;
+                radius = maxRadius * darkness;
+                if (radius < 0.35) continue;
+              }
+              dotsCtx.beginPath();
+              dotsCtx.arc(x, y, radius, 0, Math.PI * 2);
+              dotsCtx.fill();
+            }
+          }
+          dotsCtx.restore();
+          ctx.globalAlpha = clamp((normalized.halftoneOpacity ?? 80) / 100, 0, 1);
+          ctx.globalCompositeOperation = normalized.halftoneBlendMode || "multiply";
+          ctx.drawImage(dotsCanvas, 0, 0);
+        }
+        ctx.restore();
+        return;
+      }
+      if (effect.type === "scanline") {
+        const normalized = normalizeEffectLayer(effect);
+        const thickness = Math.max(1, Math.round(normalized.scanlineThickness ?? 1));
+        const gap = Math.max(0, Math.round(normalized.scanlineGap ?? 3));
+        const step = thickness + gap;
+        ctx.save();
+        ctx.drawImage(source, 0, 0);
+        ctx.globalAlpha = clamp((normalized.scanlineOpacity ?? 18) / 100, 0, 1);
+        ctx.globalCompositeOperation = "multiply";
+        ctx.fillStyle = normalized.scanlineColor || "#000000";
+        for (let y = 0; y < h; y += step) ctx.fillRect(0, y, w, thickness);
+        ctx.restore();
+        return;
+      }
       if (effect.type === "chromatic") {
         const sourceCtx = source.getContext("2d", { alpha: true });
         if (!sourceCtx) {
@@ -4454,57 +4873,126 @@
       ctx.fillRect(0, 0, width, height);
       ctx.restore();
     }
-    async function createTintedAlphaPatternSource(sourceKey, imageSource, color) {
-      const cacheKey = `${sourceKey}::${color}`;
-      if (imageCache.has(cacheKey)) return imageCache.get(cacheKey);
-      const img = typeof imageSource === "string" ? await loadImage(imageSource) : imageSource;
+    async function createTintedAlphaPatternSource(pattern) {
+      const key = `imagePattern:${pattern.assetPath}:${pattern.color || "#111827"}`;
+      if (imageCache.has(key)) return imageCache.get(key);
+      const img = await loadImage(pattern.assetPath);
       const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
-      const ctx = canvas.getContext("2d", { alpha: true });
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.globalCompositeOperation = "source-in";
-      ctx.fillStyle = color || "#111827";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.globalCompositeOperation = "source-over";
-      imageCache.set(cacheKey, canvas);
+      canvas.width = img.naturalWidth || img.width || pattern.tileWidth || 500;
+      canvas.height = img.naturalHeight || img.height || pattern.tileHeight || 500;
+      const c = canvas.getContext("2d", { alpha: true });
+      c.clearRect(0, 0, canvas.width, canvas.height);
+      c.drawImage(img, 0, 0, canvas.width, canvas.height);
+      c.globalCompositeOperation = "source-in";
+      c.fillStyle = pattern.color || "#111827";
+      c.fillRect(0, 0, canvas.width, canvas.height);
+      c.globalCompositeOperation = "source-over";
+      imageCache.set(key, canvas);
       return canvas;
     }
+    function createDotPatternSource(pattern) {
+      const size = Math.max(1, Number(pattern.size || 10));
+      const gap = Math.max(size + 1, Number(pattern.gap || 30));
+      const tile = Math.max(8, Math.ceil(gap));
+      const key = `dot:${tile}:${size}:${pattern.color}`;
+      if (imageCache.has(key)) return imageCache.get(key);
+      const canvas = document.createElement("canvas");
+      canvas.width = tile;
+      canvas.height = tile;
+      const c = canvas.getContext("2d", { alpha: true });
+      c.clearRect(0, 0, tile, tile);
+      c.fillStyle = pattern.color || "#1d4ed8";
+      c.beginPath();
+      c.arc(tile / 2, tile / 2, size / 2, 0, Math.PI * 2);
+      c.fill();
+      imageCache.set(key, canvas);
+      return canvas;
+    }
+    function createBorderPatternSource(pattern) {
+      const thickness = Math.max(1, Number(pattern.thickness || 24));
+      const gap = Math.max(1, Number(pattern.gap || 20));
+      const tile = Math.max(8, Math.ceil(thickness + gap));
+      const key = `border:${tile}:${thickness}:${pattern.color}`;
+      if (imageCache.has(key)) return imageCache.get(key);
+      const canvas = document.createElement("canvas");
+      canvas.width = tile;
+      canvas.height = tile;
+      const c = canvas.getContext("2d", { alpha: true });
+      c.clearRect(0, 0, tile, tile);
+      c.fillStyle = pattern.color || "#1d4ed8";
+      c.fillRect(0, 0, thickness, tile);
+      imageCache.set(key, canvas);
+      return canvas;
+    }
+    function createDashPatternSource(pattern, dotted = false) {
+      const size = Math.max(1, Number(pattern.size || 10));
+      const itemGap = Math.max(1, Number(pattern.gap || 30));
+      const lineGap = Math.max(size + 1, Number(pattern.lineGap || 24));
+      const itemLength = dotted ? size : Math.max(size * 3, size + 4);
+      const tileW = Math.max(8, Math.ceil(itemLength + itemGap));
+      const tileH = Math.max(8, Math.ceil(lineGap));
+      const key = `${dotted ? "dotline" : "dash"}:${tileW}:${tileH}:${size}:${pattern.color}`;
+      if (imageCache.has(key)) return imageCache.get(key);
+      const canvas = document.createElement("canvas");
+      canvas.width = tileW;
+      canvas.height = tileH;
+      const c = canvas.getContext("2d", { alpha: true });
+      c.clearRect(0, 0, tileW, tileH);
+      c.fillStyle = pattern.color || "#334155";
+      if (dotted) {
+        c.beginPath();
+        c.arc(size / 2, tileH / 2, size / 2, 0, Math.PI * 2);
+        c.fill();
+      } else {
+        c.fillRect(0, (tileH - size) / 2, itemLength, size);
+      }
+      imageCache.set(key, canvas);
+      return canvas;
+    }
+    async function getTexturePatternSource(pattern) {
+      if (pattern.type === "image") return createTintedAlphaPatternSource(pattern);
+      if (pattern.type === "border") return createBorderPatternSource(pattern);
+      if (pattern.type === "dash") return createDashPatternSource(pattern, false);
+      if (pattern.type === "dotline") return createDashPatternSource(pattern, true);
+      return createDotPatternSource(pattern);
+    }
     async function drawTextureBackground(ctx, bg, width, height) {
-      const preset = getTextureBackgroundPresetById(bg.texturePresetId);
-      if (!preset) return;
       const fillPad = Math.max(width, height) * 2;
       ctx.save();
       ctx.translate(width / 2 + Number(bg.x || 0), height / 2 + Number(bg.y || 0));
-      ctx.rotate(Number(bg.rotation || 0) * Math.PI / 180);
+      ctx.rotate(((Number(bg.rotation || 0)) * Math.PI) / 180);
       ctx.scale(Number(bg.scale || 1), Number(bg.scale || 1));
       ctx.translate(-width / 2, -height / 2);
       ctx.fillStyle = bg.textureBaseColor || "#ffffff";
       ctx.fillRect(-fillPad, -fillPad, width + fillPad * 2, height + fillPad * 2);
-      for (const patternState of [...(bg.texturePatterns || [])].reverse()) {
-        if (patternState.visible === false || !patternState.assetPath) continue;
-        const source = await createTintedAlphaPatternSource(patternState.assetPath, patternState.assetPath, patternState.color || "#111827");
-        const pattern = ctx.createPattern(source, "repeat");
-        if (!pattern) continue;
-        ctx.fillStyle = pattern;
+      for (const pattern of bg.texturePatterns || []) {
+        if (pattern.visible === false) continue;
+        const source = await getTexturePatternSource(pattern);
+        const paint = ctx.createPattern(source, "repeat");
+        if (!paint) continue;
+        if (typeof paint.setTransform === "function") {
+          const matrix = new DOMMatrix();
+          matrix.rotateSelf(Number(pattern.angle || 0));
+          matrix.translateSelf(Number(pattern.offsetX || 0), 0);
+          paint.setTransform(matrix);
+        }
+        ctx.fillStyle = paint;
         ctx.fillRect(-fillPad, -fillPad, width + fillPad * 2, height + fillPad * 2);
       }
       ctx.restore();
     }
     async function drawBackground(ctx, bg, width, height) {
       if (!bg.visible) return;
-      if (bg.mode === "texture") {
-        if (!bg.texturePresetId) return;
+      if (bg.sourceType === "texture" || bg.mode === "texture") {
         await drawTextureBackground(ctx, bg, width, height);
         return;
       }
       if (!bg.dataUrl) return;
       const img = await loadImage(bg.dataUrl);
       ctx.save();
-      ctx.translate(width / 2 + Number(bg.x || 0), height / 2 + Number(bg.y || 0));
-      ctx.rotate(Number(bg.rotation || 0) * Math.PI / 180);
-      ctx.scale(Number(bg.scale || 1), Number(bg.scale || 1));
+      ctx.translate(width / 2 + (bg.x || 0), height / 2 + (bg.y || 0));
+      ctx.rotate(((bg.rotation || 0) * Math.PI) / 180);
+      ctx.scale(bg.scale || 1, bg.scale || 1);
       ctx.drawImage(img, -width / 2, -height / 2, width, height);
       ctx.restore();
     }
