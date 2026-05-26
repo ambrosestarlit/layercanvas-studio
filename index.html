@@ -1129,6 +1129,13 @@
     };
 
     Object.assign(I18N.ja, {
+      bgCustomSource: "任意読み込み",
+      bgHandwrittenSource: "手書き背景イラスト",
+      bgAiFinishedSource: "AI仕上げ背景イラスト",
+      bgPresetEmpty: "素材を選択",
+      bgHandwrittenNote: "この素材は管理人の手書きのみで作成されています。",
+      bgAiFinishedNote: "この素材はベース作画：管理人/仕上げAIで作成されています。",
+      bgRotation: "背景回転",
       effectTypeDiffusion: "ディフュージョン",
       effectTypeOverlay: "オーバーレイカラー",
       effectTypeGlow: "グロー / 発光",
@@ -1170,6 +1177,13 @@
       handMaterialMoved: "手元素材レイヤーの並び順を変更しました。"
     });
     Object.assign(I18N.en, {
+      bgCustomSource: "Custom upload",
+      bgHandwrittenSource: "Hand-drawn background illustration",
+      bgAiFinishedSource: "AI-finished background illustration",
+      bgPresetEmpty: "Select material",
+      bgHandwrittenNote: "This material was created entirely by the administrator's hand drawing.",
+      bgAiFinishedNote: "This material was created with base art by the administrator and AI finishing.",
+      bgRotation: "BG Rotation",
       effectTypeDiffusion: "Diffusion",
       effectTypeOverlay: "Overlay Color",
       effectTypeGlow: "Glow",
@@ -1211,6 +1225,13 @@
       handMaterialMoved: "Hand material layer order changed."
     });
     Object.assign(I18N.ko, {
+      bgCustomSource: "임의 불러오기",
+      bgHandwrittenSource: "손그림 배경 일러스트",
+      bgAiFinishedSource: "AI 마감 배경 일러스트",
+      bgPresetEmpty: "소재 선택",
+      bgHandwrittenNote: "이 소재는 관리자의 손그림만으로 제작되었습니다.",
+      bgAiFinishedNote: "이 소재는 베이스 작화: 관리자 / 마감 AI로 제작되었습니다.",
+      bgRotation: "배경 회전",
       effectTypeDiffusion: "디퓨전",
       effectTypeOverlay: "오버레이 컬러",
       effectTypeGlow: "글로우 / 발광",
@@ -1454,6 +1475,13 @@
       const scale = currentSize / maxSize;
       return { width: natural.width * scale, height: natural.height * scale, maxSize, scale };
     }
+
+    const BUILTIN_BACKGROUND_PRESETS = {
+      handwritten: [{"id": "hand-bg-01", "label": "室内：キッチン", "src": "img/backgrounds/handwritten/hand-bg-01.png"}, {"id": "hand-bg-02", "label": "室内：ソファと照明スタンド", "src": "img/backgrounds/handwritten/hand-bg-02.png"}, {"id": "hand-bg-03", "label": "室内：天井の照明 　off", "src": "img/backgrounds/handwritten/hand-bg-03.png"}, {"id": "hand-bg-04", "label": "室内：天井の照明", "src": "img/backgrounds/handwritten/hand-bg-04.png"}, {"id": "hand-bg-05", "label": "野外：ビルと空", "src": "img/backgrounds/handwritten/hand-bg-05.png"}, {"id": "hand-bg-06", "label": "食べ物：洋菓子セット", "src": "img/backgrounds/handwritten/hand-bg-06.png"}, {"id": "hand-bg-07", "label": "食べ物：洋菓子セットB", "src": "img/backgrounds/handwritten/hand-bg-07.png"}],
+      aiFinished: [{"id": "ai-bg-01", "label": "学校：放課後の外観", "src": "img/backgrounds/ai-finish/ai-bg-01.png"}, {"id": "ai-bg-02", "label": "学校：放課後の廊下", "src": "img/backgrounds/ai-finish/ai-bg-02.png"}, {"id": "ai-bg-03", "label": "学校：放課後の生徒会室", "src": "img/backgrounds/ai-finish/ai-bg-03.png"}, {"id": "ai-bg-04", "label": "学校：放課後の階段", "src": "img/backgrounds/ai-finish/ai-bg-04.png"}]
+    };
+    const BUILTIN_BACKGROUND_MAP = Object.fromEntries(Object.values(BUILTIN_BACKGROUND_PRESETS).flat().map((item) => [item.id, item]));
+
     const HAND_MATERIAL_PRESETS = [
       {
         id: "gao",
@@ -1745,7 +1773,7 @@
     }
 
     function defaultTransform() { return { x: 0, y: 0, scale: 1, rotation: 0 }; }
-    function createBackgroundLayer(index) { return { id: `bg${index}`, nameKey: `bg${index}`, visible: false, dataUrl: "", fileName: "", width: 0, height: 0, x: 0, y: 0, scale: 1 }; }
+    function createBackgroundLayer(index) { return { id: `bg${index}`, nameKey: `bg${index}`, visible: false, dataUrl: "", fileName: "", width: 0, height: 0, x: 0, y: 0, scale: 1, rotation: 0, sourceType: "custom", presetId: "" }; }
     function createBackgroundPanel() { return { visible: false, color: "#ffffff", exportEnabled: false }; }
     function createDefaultCanvasPresets() { return DEFAULT_CANVAS_PRESETS.map((preset) => ({ ...preset })); }
     function createLayerCategory(id, name, exclusive = false, transform = null) { return { id: id || uid("category"), name: String(name || t("unnamed")), exclusive: Boolean(exclusive), transform: normalizeTransform(transform || defaultTransform()) }; }
@@ -1824,7 +1852,7 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 46,
+        version: 47,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
         activeShapeLayerId: "",
@@ -2048,7 +2076,7 @@
         character.presets = character.presets.map((preset) => ({ id: preset.id || uid("preset"), name: preset.name || t("unnamed"), selection: preset.selection && typeof preset.selection === "object" ? preset.selection : {} }));
       }
       if (!normalized.activeCharacterId || !normalized.characters.some((c) => c.id === normalized.activeCharacterId)) normalized.activeCharacterId = normalized.characters[0].id;
-      normalized.backgroundLayers = safeArray(normalized.backgroundLayers).slice(0, 2).map((bg, index) => ({ ...createBackgroundLayer(index + 1), ...bg, id: `bg${index + 1}`, nameKey: `bg${index + 1}`, visible: Boolean(bg?.visible), dataUrl: bg?.dataUrl || "", fileName: bg?.fileName || "", width: Number(bg?.width || 0), height: Number(bg?.height || 0), x: Number(bg?.x || 0), y: Number(bg?.y || 0), scale: clamp(bg?.scale ?? 1, 0.05, 4) }));
+      normalized.backgroundLayers = safeArray(normalized.backgroundLayers).slice(0, 2).map((bg, index) => ({ ...createBackgroundLayer(index + 1), ...bg, id: `bg${index + 1}`, nameKey: `bg${index + 1}`, visible: Boolean(bg?.visible), dataUrl: bg?.dataUrl || "", fileName: bg?.fileName || "", width: Number(bg?.width || 0), height: Number(bg?.height || 0), x: Number(bg?.x || 0), y: Number(bg?.y || 0), scale: clamp(bg?.scale ?? 1, 0.05, 4), rotation: clamp(bg?.rotation ?? 0, -180, 180), sourceType: ["custom", "handwritten", "aiFinished"].includes(bg?.sourceType) ? bg.sourceType : "custom", presetId: bg?.presetId || "" }));
       while (normalized.backgroundLayers.length < 2) normalized.backgroundLayers.push(createBackgroundLayer(normalized.backgroundLayers.length + 1));
       normalized.backgroundPanel = { ...createBackgroundPanel(), ...(normalized.backgroundPanel && typeof normalized.backgroundPanel === "object" ? normalized.backgroundPanel : {}), visible: Boolean(normalized.backgroundPanel?.visible), color: normalized.backgroundPanel?.color || "#ffffff", exportEnabled: Boolean(normalized.backgroundPanel?.exportEnabled) };
       normalized.textLayers = safeArray(normalized.textLayers).map(normalizeTextLayer);
@@ -2257,6 +2285,38 @@
       for (const preset of character.presets) { const option = document.createElement("option"); option.value = preset.id; option.textContent = preset.name; select.appendChild(option); }
     }
 
+
+    async function applyBuiltinBackground(bg, presetId, sourceType) {
+      const item = BUILTIN_BACKGROUND_MAP[presetId];
+      if (!bg || !item) return;
+      const size = await getImageSize(item.src);
+      bg.dataUrl = item.src;
+      bg.fileName = item.label;
+      bg.width = size.width;
+      bg.height = size.height;
+      bg.visible = true;
+      bg.sourceType = sourceType;
+      bg.presetId = item.id;
+      renderAll();
+      setStatusT("bgAdded");
+    }
+
+    function appendBuiltinBackgroundSelect(box, bg, type, noteKey, labelKey) {
+      const note = document.createElement("div");
+      note.className = "hint";
+      note.textContent = t(noteKey);
+      box.appendChild(note);
+      const field = createSelectField(t(labelKey), bg.sourceType === type ? bg.presetId : "", [
+        { value: "", label: t("bgPresetEmpty") },
+        ...BUILTIN_BACKGROUND_PRESETS[type].map((item) => ({ value: item.id, label: item.label }))
+      ], async (value) => {
+        if (!value) return;
+        await applyBuiltinBackground(bg, value, type);
+      });
+      field.classList.add("full");
+      box.appendChild(field);
+    }
+
     function renderBackgroundControls() {
       const root = $("#backgroundControls"); root.innerHTML = "";
       const preset = activeLayerPreset();
@@ -2274,18 +2334,21 @@
           `;
           const fileInput = box.querySelector(".bg-file");
           box.querySelector(".bg-upload").addEventListener("click", () => fileInput.click());
-          box.querySelector(".bg-clear").addEventListener("click", () => { bg.dataUrl = ""; bg.fileName = ""; bg.width = 0; bg.height = 0; bg.visible = false; renderAll(); });
+          box.querySelector(".bg-clear").addEventListener("click", () => { bg.dataUrl = ""; bg.fileName = ""; bg.width = 0; bg.height = 0; bg.visible = false; bg.sourceType = "custom"; bg.presetId = ""; bg.rotation = 0; renderAll(); });
           box.querySelector(".bg-visible").addEventListener("change", (event) => { bg.visible = event.target.checked; renderPreview(); });
           fileInput.addEventListener("change", async (event) => {
             const file = event.target.files?.[0];
             if (!file) return;
             const dataUrl = await fileToDataUrl(file); const size = await getImageSize(dataUrl);
-            bg.dataUrl = dataUrl; bg.fileName = file.name; bg.width = size.width; bg.height = size.height; bg.visible = true;
+            bg.dataUrl = dataUrl; bg.fileName = file.name; bg.width = size.width; bg.height = size.height; bg.visible = true; bg.sourceType = "custom"; bg.presetId = "";
             fileInput.value = ""; renderAll(); setStatusT("bgAdded");
           });
+          appendBuiltinBackgroundSelect(box, bg, "handwritten", "bgHandwrittenNote", "bgHandwrittenSource");
+          appendBuiltinBackgroundSelect(box, bg, "aiFinished", "bgAiFinishedNote", "bgAiFinishedSource");
           addRange(box, t("bgX"), bg.x, -2000, 2000, 1, "px", (value) => { bg.x = value; renderPreview(); });
           addRange(box, t("bgY"), bg.y, -2000, 2000, 1, "px", (value) => { bg.y = value; renderPreview(); });
           addRange(box, t("bgScale"), bg.scale, 0.05, 4, 0.01, "", (value) => { bg.scale = value; renderPreview(); }, 2);
+          addRange(box, t("bgRotation"), bg.rotation || 0, -180, 180, 1, "°", (value) => { bg.rotation = Math.round(value); renderPreview(); });
           root.appendChild(box);
         });
       } else {
@@ -4600,7 +4663,13 @@
     }
     async function drawBackground(ctx, bg, width, height) {
       if (!bg.visible || !bg.dataUrl) return;
-      const img = await loadImage(bg.dataUrl); ctx.save(); ctx.translate(width / 2 + (bg.x || 0), height / 2 + (bg.y || 0)); ctx.scale(bg.scale || 1, bg.scale || 1); ctx.drawImage(img, -width / 2, -height / 2, width, height); ctx.restore();
+      const img = await loadImage(bg.dataUrl);
+      ctx.save();
+      ctx.translate(width / 2 + (bg.x || 0), height / 2 + (bg.y || 0));
+      ctx.rotate(((bg.rotation || 0) * Math.PI) / 180);
+      ctx.scale(bg.scale || 1, bg.scale || 1);
+      ctx.drawImage(img, -width / 2, -height / 2, width, height);
+      ctx.restore();
     }
     function getStandingDrawLayers() {
       const drawLayers = [...getActiveLayers()].reverse();

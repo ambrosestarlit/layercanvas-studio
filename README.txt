@@ -46,3 +46,12 @@ Version 46: Halftone update and Glow removal.
 - Added Blend Mode to Halftone.
 - Added a "Apply Uniformly" checkbox to Halftone.
 - When Apply Uniformly is enabled, evenly sized dots are drawn across the full canvas regardless of the image content.
+
+Version 47: Added built-in background illustration presets.
+- Added Hand-drawn background illustration selector to each background layer.
+- Added AI-finished background illustration selector to each background layer.
+- Hand-drawn note: この素材は管理人の手書きのみで作成されています。
+- AI-finished note: この素材はベース作画：管理人/仕上げAIで作成されています。
+- Added background rotation slider.
+- Background layers now support move / scale / rotation.
+- Added bundled assets under img/backgrounds/handwritten/ and img/backgrounds/ai-finish/.
