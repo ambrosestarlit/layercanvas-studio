@@ -38,3 +38,10 @@ Version 63: Restored texture backgrounds while keeping missing effects.
 - Re-added only missing effect types from the attached reference file.
 - Kept Glow removed.
 - Included img/background-textures/check01 assets in the ZIP.
+
+
+Version 65:
+- Based on v63 texture/effects restored file.
+- Fixed only the effect type dropdown inside the effect layer card.
+- The effect layer card dropdown now matches the Selected Effect Detail dropdown.
+- Texture backgrounds, including Check 01 / Dot Background / Border Background, were left intact.

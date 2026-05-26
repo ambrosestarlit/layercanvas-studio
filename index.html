@@ -1999,7 +1999,7 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 63,
+        version: 65,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
         activeShapeLayerId: "",
@@ -3684,7 +3684,13 @@
           { value: "vignette", label: t("effectTypeVignette") },
           { value: "chromatic", label: t("effectTypeChromatic") },
           { value: "blur", label: t("effectTypeBlur") },
-          { value: "tone", label: t("effectTypeTone") }
+          { value: "tone", label: t("effectTypeTone") },
+          { value: "duotone", label: t("effectTypeDuotone") },
+          { value: "diffusion", label: t("effectTypeDiffusion") },
+          { value: "overlay", label: t("effectTypeOverlay") },
+          { value: "noise", label: t("effectTypeNoise") },
+          { value: "halftone", label: t("effectTypeHalftone") },
+          { value: "scanline", label: t("effectTypeScanline") }
         ], (value) => { layer.type = value; renderLayers(); renderEffectDetailEditor(); renderPreview(); })
       );
       body.appendChild(controls);
