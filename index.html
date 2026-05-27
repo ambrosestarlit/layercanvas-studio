@@ -1764,7 +1764,7 @@
       });
     }
 
-    function snapshotState() { return JSON.stringify(state); }
+    function snapshotState() { syncActiveLayerPresetScopedState(); return JSON.stringify(state); }
     function pushUndoSnapshot() {
       if (!state || isRestoringHistory) return;
       const snapshot = snapshotState();
@@ -1926,7 +1926,7 @@
     function createDefaultCanvasPresets() { return DEFAULT_CANVAS_PRESETS.map((preset) => ({ ...preset })); }
     function createLayerCategory(id, name, exclusive = false, transform = null) { return { id: id || uid("category"), name: String(name || t("unnamed")), exclusive: Boolean(exclusive), transform: normalizeTransform(transform || defaultTransform()) }; }
     function createDefaultLayerPreset() { return { id: "layerPreset-character-default", name: t("defaultLayerPresetName"), useBackgroundImages: true, categories: DEFAULT_LAYER_CATEGORIES.map((layer) => createLayerCategory(layer.id, layer.name, layer.exclusive)) }; }
-    function createLayerPreset(name) { return { id: uid("layerPreset"), name: String(name || t("unnamed")), useBackgroundImages: false, categories: [] }; }
+    function createLayerPreset(name) { return { id: uid("layerPreset"), name: String(name || t("unnamed")), useBackgroundImages: true, categories: [] }; }
     function normalizeLayerCategory(category, index = 0) { return createLayerCategory(category?.id || uid("category"), category?.name || I18N.ja[`layer_${category?.id}`] || `${t("categoryNameLabel")} ${index + 1}`, Boolean(category?.exclusive), category?.transform); }
     function normalizeLayerPreset(preset) { const fallback = createDefaultLayerPreset(); return { id: preset?.id || uid("layerPreset"), name: String(preset?.name || fallback.name), useBackgroundImages: typeof preset?.useBackgroundImages === "boolean" ? preset.useBackgroundImages : (preset?.id === "layerPreset-character-default"), categories: safeArray(preset?.categories || preset?.layers).map(normalizeLayerCategory) }; }
     function activeLayerPreset() { return (state.layerPresets || []).find((preset) => preset.id === state.settings.activeLayerPresetId) || state.layerPresets?.[0] || createDefaultLayerPreset(); }
@@ -1999,7 +1999,7 @@
       const firstLayerPreset = createDefaultLayerPreset();
       const firstChar = createCharacter(I18N[getInitialLanguage()].newCharacter);
       return {
-        version: 65,
+        version: 71,
         activeCharacterId: firstChar.id,
         activeTextLayerId: "",
         activeShapeLayerId: "",
@@ -2016,10 +2016,130 @@
         frameLayers: [],
         effectLayers: [],
         layerPresets: [firstLayerPreset],
+        layerPresetStates: { [firstLayerPreset.id]: createPresetScopedLayerState() },
         canvasPresets: createDefaultCanvasPresets(),
         customFonts: [],
         settings: { uiLanguage: getInitialLanguage(), leftMode: "parts", activeLayerPresetId: firstLayerPreset.id, previewBg: "transparent", exportMode: "original", exportHeight: 1200, toolMode: "move", previewView: "fit", previewZoom: 1, previewPanX: 0, previewPanY: 0, browsAboveHairFront: false, canvasWidth: 0, canvasHeight: 0, activeCanvasPresetId: "" }
       };
+    }
+    function createPresetScopedLayerState() {
+      return {
+        backgroundLayers: [createBackgroundLayer(1), createBackgroundLayer(2)],
+        backgroundPanel: createBackgroundPanel(),
+        textLayers: [],
+        activeTextLayerId: "",
+        shapeLayers: [],
+        activeShapeLayerId: "",
+        handMaterialLayers: [],
+        activeHandMaterialLayerId: "",
+        frameLayers: [],
+        activeFrameLayerId: "",
+        effectLayers: [],
+        activeEffectLayerId: ""
+      };
+    }
+    function normalizePresetScopedLayerState(data, preset) {
+      const source = data && typeof data === "object" ? data : {};
+      const normalizedData = createPresetScopedLayerState();
+      normalizedData.backgroundLayers = safeArray(source.backgroundLayers).slice(0, 2).map((bg, index) => {
+        const base = { ...createBackgroundLayer(index + 1), ...(bg && typeof bg === "object" ? bg : {}) };
+        const normalizedBg = {
+          ...base,
+          id: `bg${index + 1}`,
+          nameKey: `bg${index + 1}`,
+          visible: Boolean(bg?.visible),
+          dataUrl: bg?.dataUrl || "",
+          fileName: bg?.fileName || "",
+          width: Number(bg?.width || 0),
+          height: Number(bg?.height || 0),
+          x: Number(bg?.x || 0),
+          y: Number(bg?.y || 0),
+          scale: clamp(bg?.scale ?? 1, 0.05, 4),
+          rotation: clamp(bg?.rotation ?? 0, -180, 180),
+          sourceType: (bg?.sourceType === "texture" || bg?.mode === "texture") ? "texture" : "custom",
+          texturePresetId: typeof bg?.texturePresetId === "string" ? bg.texturePresetId : (typeof bg?.presetId === "string" ? bg.presetId : "dot"),
+          textureBaseColor: typeof bg?.textureBaseColor === "string" ? bg.textureBaseColor : "#ffffff",
+          texturePatterns: []
+        };
+        if (normalizedBg.sourceType === "texture") {
+          const texturePreset = getTexturePresetById(normalizedBg.texturePresetId);
+          normalizedBg.texturePresetId = texturePreset.id;
+          const patterns = safeArray(bg?.texturePatterns).map((item, patternIndex) => normalizeTexturePattern(texturePreset.id, item, patternIndex)).slice(0, texturePreset.maxLayers);
+          normalizedBg.texturePatterns = patterns.length ? patterns : [createTexturePattern(texturePreset.id, getTexturePatternDefaultType(texturePreset.id), 0)];
+          normalizedBg.fileName = normalizedBg.fileName || t(texturePreset.labelKey);
+          normalizedBg.width = normalizedBg.width || 500;
+          normalizedBg.height = normalizedBg.height || 500;
+        }
+        return normalizedBg;
+      });
+      while (normalizedData.backgroundLayers.length < 2) normalizedData.backgroundLayers.push(createBackgroundLayer(normalizedData.backgroundLayers.length + 1));
+      normalizedData.backgroundPanel = { ...createBackgroundPanel(), ...(source.backgroundPanel && typeof source.backgroundPanel === "object" ? source.backgroundPanel : {}), visible: Boolean(source.backgroundPanel?.visible), color: source.backgroundPanel?.color || "#ffffff", exportEnabled: Boolean(source.backgroundPanel?.exportEnabled) };
+      const stackMax = safeArray(preset?.categories).length;
+      normalizedData.textLayers = safeArray(source.textLayers).map(normalizeTextLayer);
+      normalizedData.activeTextLayerId = source.activeTextLayerId || "";
+      if (!normalizedData.activeTextLayerId || !normalizedData.textLayers.some((layer) => layer.id === normalizedData.activeTextLayerId)) normalizedData.activeTextLayerId = normalizedData.textLayers[0]?.id || "";
+      normalizedData.textLayers.forEach((layer, index) => {
+        layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, stackMax));
+        layer.stackOrder = Math.round(Number(layer.stackOrder ?? index));
+        layer.stackIntegrated = layer.stackIntegrated !== false;
+      });
+      normalizedData.shapeLayers = safeArray(source.shapeLayers).map(normalizeShapeLayer);
+      normalizedData.activeShapeLayerId = source.activeShapeLayerId || "";
+      if (!normalizedData.activeShapeLayerId || !normalizedData.shapeLayers.some((layer) => layer.id === normalizedData.activeShapeLayerId)) normalizedData.activeShapeLayerId = normalizedData.shapeLayers[0]?.id || "";
+      normalizedData.handMaterialLayers = safeArray(source.handMaterialLayers).map(normalizeHandMaterialLayer);
+      normalizedData.activeHandMaterialLayerId = source.activeHandMaterialLayerId || "";
+      if (!normalizedData.activeHandMaterialLayerId || !normalizedData.handMaterialLayers.some((layer) => layer.id === normalizedData.activeHandMaterialLayerId)) normalizedData.activeHandMaterialLayerId = normalizedData.handMaterialLayers[0]?.id || "";
+      for (const layer of normalizedData.handMaterialLayers) layer.stackIndex = Math.round(clamp(layer.stackIndex ?? 0, 0, stackMax));
+      normalizedData.frameLayers = safeArray(source.frameLayers).map(normalizeFrameLayer);
+      normalizedData.activeFrameLayerId = source.activeFrameLayerId || "";
+      if (!normalizedData.activeFrameLayerId || !normalizedData.frameLayers.some((layer) => layer.id === normalizedData.activeFrameLayerId)) normalizedData.activeFrameLayerId = normalizedData.frameLayers[0]?.id || "";
+      normalizedData.effectLayers = safeArray(source.effectLayers).map(normalizeEffectLayer);
+      normalizedData.activeEffectLayerId = source.activeEffectLayerId || "";
+      if (!normalizedData.activeEffectLayerId || !normalizedData.effectLayers.some((layer) => layer.id === normalizedData.activeEffectLayerId)) normalizedData.activeEffectLayerId = normalizedData.effectLayers[0]?.id || "";
+      return normalizedData;
+    }
+    function makePresetScopedLayerStateFromRoot(targetState, preset) {
+      return normalizePresetScopedLayerState({
+        backgroundLayers: clone(targetState.backgroundLayers || []),
+        backgroundPanel: clone(targetState.backgroundPanel || createBackgroundPanel()),
+        textLayers: clone(targetState.textLayers || []),
+        activeTextLayerId: targetState.activeTextLayerId || "",
+        shapeLayers: clone(targetState.shapeLayers || []),
+        activeShapeLayerId: targetState.activeShapeLayerId || "",
+        handMaterialLayers: clone(targetState.handMaterialLayers || []),
+        activeHandMaterialLayerId: targetState.activeHandMaterialLayerId || "",
+        frameLayers: clone(targetState.frameLayers || []),
+        activeFrameLayerId: targetState.activeFrameLayerId || "",
+        effectLayers: clone(targetState.effectLayers || []),
+        activeEffectLayerId: targetState.activeEffectLayerId || ""
+      }, preset);
+    }
+    function syncActiveLayerPresetScopedState(targetState = state) {
+      if (!targetState?.settings?.activeLayerPresetId) return;
+      const preset = safeArray(targetState.layerPresets).find((item) => item.id === targetState.settings.activeLayerPresetId) || targetState.layerPresets?.[0];
+      if (!preset) return;
+      if (!targetState.layerPresetStates || typeof targetState.layerPresetStates !== "object") targetState.layerPresetStates = {};
+      targetState.layerPresetStates[preset.id] = makePresetScopedLayerStateFromRoot(targetState, preset);
+    }
+    function applyLayerPresetScopedState(targetState = state, presetId = null) {
+      const resolvedPresetId = presetId || targetState?.settings?.activeLayerPresetId;
+      const preset = safeArray(targetState.layerPresets).find((item) => item.id === resolvedPresetId) || targetState.layerPresets?.[0];
+      if (!preset) return;
+      if (!targetState.layerPresetStates || typeof targetState.layerPresetStates !== "object") targetState.layerPresetStates = {};
+      const scoped = normalizePresetScopedLayerState(targetState.layerPresetStates[preset.id], preset);
+      targetState.layerPresetStates[preset.id] = clone(scoped);
+      targetState.backgroundLayers = clone(scoped.backgroundLayers);
+      targetState.backgroundPanel = clone(scoped.backgroundPanel);
+      targetState.textLayers = clone(scoped.textLayers);
+      targetState.activeTextLayerId = scoped.activeTextLayerId || "";
+      targetState.shapeLayers = clone(scoped.shapeLayers);
+      targetState.activeShapeLayerId = scoped.activeShapeLayerId || "";
+      targetState.handMaterialLayers = clone(scoped.handMaterialLayers);
+      targetState.activeHandMaterialLayerId = scoped.activeHandMaterialLayerId || "";
+      targetState.frameLayers = clone(scoped.frameLayers);
+      targetState.activeFrameLayerId = scoped.activeFrameLayerId || "";
+      targetState.effectLayers = clone(scoped.effectLayers);
+      targetState.activeEffectLayerId = scoped.activeEffectLayerId || "";
     }
 
     function normalizeTransform(value) {
@@ -2277,6 +2397,27 @@
       if (!normalized.activeFrameLayerId || !normalized.frameLayers.some((layer) => layer.id === normalized.activeFrameLayerId)) normalized.activeFrameLayerId = normalized.frameLayers[0]?.id || "";
       normalized.effectLayers = safeArray(normalized.effectLayers).map(normalizeEffectLayer);
       if (!normalized.activeEffectLayerId || !normalized.effectLayers.some((layer) => layer.id === normalized.activeEffectLayerId)) normalized.activeEffectLayerId = normalized.effectLayers[0]?.id || "";
+      const scopedStateInput = normalized.layerPresetStates && typeof normalized.layerPresetStates === "object" ? normalized.layerPresetStates : {};
+      const rootScopedSource = {
+        backgroundLayers: normalized.backgroundLayers,
+        backgroundPanel: normalized.backgroundPanel,
+        textLayers: normalized.textLayers,
+        activeTextLayerId: normalized.activeTextLayerId,
+        shapeLayers: normalized.shapeLayers,
+        activeShapeLayerId: normalized.activeShapeLayerId,
+        handMaterialLayers: normalized.handMaterialLayers,
+        activeHandMaterialLayerId: normalized.activeHandMaterialLayerId,
+        frameLayers: normalized.frameLayers,
+        activeFrameLayerId: normalized.activeFrameLayerId,
+        effectLayers: normalized.effectLayers,
+        activeEffectLayerId: normalized.activeEffectLayerId
+      };
+      normalized.layerPresetStates = {};
+      for (const preset of normalized.layerPresets) {
+        const source = scopedStateInput[preset.id] || (preset.id === normalized.settings.activeLayerPresetId ? rootScopedSource : null);
+        normalized.layerPresetStates[preset.id] = normalizePresetScopedLayerState(source, preset);
+      }
+      applyLayerPresetScopedState(normalized, normalized.settings.activeLayerPresetId);
       normalized.customFonts = safeArray(normalized.customFonts).map((font) => ({ id: font.id || uid("font"), name: font.name || font.fileName || "Custom Font", family: font.family || `CustomFont_${uid("f")}`, dataUrl: font.dataUrl || "", fileName: font.fileName || font.name || "Custom Font" })).filter((font) => font.dataUrl);
       normalized.activeToolTarget = normalized.activeToolTarget || "standing";
       const validTextTarget = normalized.textLayers.some((layer) => `text:${layer.id}` === normalized.activeToolTarget);
@@ -3589,18 +3730,25 @@
       const input = $("#layerPresetNameInput");
       const name = input.value.trim();
       if (!name) { setStatusT("enterLayerPresetName", {}, true); return; }
+      syncActiveLayerPresetScopedState();
       const preset = createLayerPreset(name);
       state.layerPresets.push(preset);
+      if (!state.layerPresetStates || typeof state.layerPresetStates !== "object") state.layerPresetStates = {};
+      state.layerPresetStates[preset.id] = createPresetScopedLayerState();
       state.settings.activeLayerPresetId = preset.id;
+      applyLayerPresetScopedState(state, preset.id);
       ensureAllCharacterLayerKeys();
       input.value = "";
       renderAll(); setStatusT("layerPresetAdded");
     }
     function deleteActiveLayerPreset() {
       if ((state.layerPresets || []).length <= 1) { setStatusT("cannotDeleteLastLayerPreset", {}, true); return; }
+      syncActiveLayerPresetScopedState();
       const id = state.settings.activeLayerPresetId;
       state.layerPresets = state.layerPresets.filter((preset) => preset.id !== id);
+      if (state.layerPresetStates && typeof state.layerPresetStates === "object") delete state.layerPresetStates[id];
       state.settings.activeLayerPresetId = state.layerPresets[0].id;
+      applyLayerPresetScopedState(state, state.settings.activeLayerPresetId);
       renderAll(); setStatusT("layerPresetDeleted");
     }
 
@@ -4648,6 +4796,68 @@
       return tinted;
     }
 
+    function applyDuotoneEffect(targetCanvas, sourceCanvas, effect) {
+      if (!targetCanvas || !sourceCanvas || !effect) return;
+      const targetCtx = targetCanvas.getContext("2d", { alpha: true });
+      const sourceCtx = sourceCanvas.getContext("2d", { alpha: true });
+      if (!targetCtx || !sourceCtx || !targetCanvas.width || !targetCanvas.height || !sourceCanvas.width || !sourceCanvas.height) return;
+
+      const restoreOriginal = () => {
+        targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+        targetCtx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
+      };
+
+      try {
+        const w = sourceCanvas.width;
+        const h = sourceCanvas.height;
+        const image = sourceCtx.getImageData(0, 0, w, h);
+        const data = image.data;
+        const shadow = hexToRgb(effect.duotoneShadowColor || "#1f2a44", { r: 31, g: 42, b: 68 });
+        const highlight = hexToRgb(effect.duotoneHighlightColor || "#f6e7d8", { r: 246, g: 231, b: 216 });
+        const amount = clamp01(effect.intensity ?? 1);
+
+        if (amount <= 0) {
+          restoreOriginal();
+          return;
+        }
+
+        for (let index = 0; index < data.length; index += 4) {
+          const alpha = data[index + 3];
+          if (alpha <= 0) continue;
+
+          const originalR = data[index];
+          const originalG = data[index + 1];
+          const originalB = data[index + 2];
+          const luminance = clamp01((originalR * 0.299 + originalG * 0.587 + originalB * 0.114) / 255);
+
+          const toneR = lerpValue(shadow.r, highlight.r, luminance);
+          const toneG = lerpValue(shadow.g, highlight.g, luminance);
+          const toneB = lerpValue(shadow.b, highlight.b, luminance);
+
+          data[index] = clampByte(lerpValue(originalR, toneR, amount));
+          data[index + 1] = clampByte(lerpValue(originalG, toneG, amount));
+          data[index + 2] = clampByte(lerpValue(originalB, toneB, amount));
+          data[index + 3] = alpha;
+        }
+
+        const resultCanvas = document.createElement("canvas");
+        resultCanvas.width = w;
+        resultCanvas.height = h;
+        const resultCtx = resultCanvas.getContext("2d", { alpha: true });
+        if (!resultCtx) {
+          restoreOriginal();
+          return;
+        }
+        resultCtx.putImageData(image, 0, 0);
+
+        targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+        targetCtx.drawImage(resultCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
+      } catch (error) {
+        console.warn("Duotone effect failed; restored original canvas.", error);
+        restoreOriginal();
+      }
+    }
+
     function applySingleEffect(canvas, effect) {
       if (!canvas || !effect) return;
       const w = canvas.width;
@@ -4671,6 +4881,16 @@
         return;
       }
       const source = createOffscreenCopy(canvas);
+      if (effect.type === "duotone") {
+        try {
+          applyDuotoneEffect(canvas, source, normalizeEffectLayer(effect));
+        } catch (error) {
+          console.warn("Duotone effect failed; restored original canvas.", error);
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(source, 0, 0);
+        }
+        return;
+      }
       ctx.clearRect(0, 0, w, h);
       if (effect.type === "blur") {
         ctx.save();
@@ -4685,10 +4905,6 @@
         ctx.filter = effect.toneMode === "sepia" ? `sepia(${amount}%)` : `grayscale(${amount}%)`;
         ctx.drawImage(source, 0, 0);
         ctx.restore();
-        return;
-      }
-      if (effect.type === "duotone") {
-        applyDuotoneEffect(canvas, source, normalizeEffectLayer(effect));
         return;
       }
       if (effect.type === "diffusion") {
@@ -5482,10 +5698,10 @@
     }
     function sanitizeFileName(name) { return String(name).replace(/[\\/:*?"<>|]/g, "_").replace(/\s+/g, "_").slice(0, 80) || "character"; }
     function formatDateForFile() { const d = new Date(); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, "0"); const day = String(d.getDate()).padStart(2, "0"); const h = String(d.getHours()).padStart(2, "0"); const min = String(d.getMinutes()).padStart(2, "0"); return `${y}${m}${day}_${h}${min}`; }
-    function downloadJson() { const json = JSON.stringify(state, null, 2); const blob = new Blob([json], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.download = `stand_diff_project_${formatDateForFile()}.json`; link.href = url; link.click(); URL.revokeObjectURL(url); setStatusT("jsonSaved"); }
-    async function importJsonFile(file) { try { const text = await file.text(); const project = JSON.parse(text); state = normalizeState(project); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("jsonLoaded"); } catch (error) { console.error(error); setStatusT("jsonLoadFailed", {}, true); } }
+    function downloadJson() { syncActiveLayerPresetScopedState(); const json = JSON.stringify(state, null, 2); const blob = new Blob([json], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.download = `stand_diff_project_${formatDateForFile()}.json`; link.href = url; link.click(); URL.revokeObjectURL(url); setStatusT("jsonSaved"); }
+    async function importJsonFile(file) { try { const text = await file.text(); const project = JSON.parse(text); state = normalizeState(project); applyLayerPresetScopedState(state, state.settings.activeLayerPresetId); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("jsonLoaded"); } catch (error) { console.error(error); setStatusT("jsonLoadFailed", {}, true); } }
     function openDb() { return new Promise((resolve, reject) => { const request = indexedDB.open(DB_NAME, DB_VERSION); request.onupgradeneeded = () => { const db = request.result; if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: "key" }); }; request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); }); }
-    async function saveToCache() { const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readwrite"); tx.objectStore(STORE_NAME).put({ key: CACHE_KEY, updatedAt: new Date().toISOString(), project: state }); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => { db.close(); reject(tx.error); }; }); }
+    async function saveToCache() { syncActiveLayerPresetScopedState(); const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readwrite"); tx.objectStore(STORE_NAME).put({ key: CACHE_KEY, updatedAt: new Date().toISOString(), project: state }); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => { db.close(); reject(tx.error); }; }); }
     async function loadFromCache() { const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readonly"); const request = tx.objectStore(STORE_NAME).get(CACHE_KEY); request.onsuccess = () => { db.close(); resolve(request.result?.project || null); }; request.onerror = () => { db.close(); reject(request.error); }; }); }
     async function clearCache() { const db = await openDb(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, "readwrite"); tx.objectStore(STORE_NAME).delete(CACHE_KEY); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => { db.close(); reject(tx.error); }; }); }
 
@@ -5522,7 +5738,7 @@
         if (exportModal.classList.contains("show")) closeExportModal();
       });
       $("#languageSelect").addEventListener("change", (event) => { state.settings.uiLanguage = event.target.value; safeStorageSet(LANG_STORAGE_KEY, state.settings.uiLanguage); renderAll(); setStatusT("languageChanged"); });
-      $("#layerPresetSelect").addEventListener("change", (event) => { state.settings.activeLayerPresetId = event.target.value; ensureAllCharacterLayerKeys(); renderAll(); setStatusT("layerPresetChanged"); });
+      $("#layerPresetSelect").addEventListener("change", (event) => { syncActiveLayerPresetScopedState(); state.settings.activeLayerPresetId = event.target.value; applyLayerPresetScopedState(state, state.settings.activeLayerPresetId); ensureAllCharacterLayerKeys(); renderAll(); setStatusT("layerPresetChanged"); });
       $("#addLayerPresetBtn").addEventListener("click", createEmptyLayerPresetFromInput);
       $("#deleteLayerPresetBtn").addEventListener("click", deleteActiveLayerPreset);
       $("#addCategoryBtn").addEventListener("click", addCategoryToActivePreset);
@@ -5653,7 +5869,7 @@
       $("#downloadJsonBtn").addEventListener("click", downloadJson); $("#importJsonBtn").addEventListener("click", () => $("#jsonFileInput").click());
       $("#jsonFileInput").addEventListener("change", async (event) => { const file = event.target.files?.[0]; if (file) await importJsonFile(file); event.target.value = ""; });
       $("#saveCacheBtn").addEventListener("click", async () => { try { await saveToCache(); setStatusT("cacheSaved"); } catch (error) { console.error(error); setStatusT("cacheSaveFailed", {}, true); } });
-      $("#loadCacheBtn").addEventListener("click", async () => { try { const cached = await loadFromCache(); if (!cached) { setStatusT("cacheMissing", {}, true); return; } state = normalizeState(cached); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("cacheLoaded"); } catch (error) { console.error(error); setStatusT("cacheLoadFailed", {}, true); } });
+      $("#loadCacheBtn").addEventListener("click", async () => { try { const cached = await loadFromCache(); if (!cached) { setStatusT("cacheMissing", {}, true); return; } state = normalizeState(cached); applyLayerPresetScopedState(state, state.settings.activeLayerPresetId); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("cacheLoaded"); } catch (error) { console.error(error); setStatusT("cacheLoadFailed", {}, true); } });
       $("#clearCacheBtn").addEventListener("click", async () => { if (!confirm(t("cacheDeleteConfirm"))) return; try { await clearCache(); setStatusT("cacheDeleted"); } catch (error) { console.error(error); setStatusT("cacheDeleteFailed", {}, true); } });
       bindPreviewPointerEvents();
     }
@@ -5770,10 +5986,11 @@
     }
 
     function applySelectedPreset() { const character = activeCharacter(); const presetId = $("#presetSelect").value; if (!presetId) return; const preset = character.presets.find((item) => item.id === presetId); if (!preset) return; applySelectionSnapshot(preset.selection, character); renderLayers(); renderPreview(); setStatusT("presetApplied", { name: preset.name }); }
-    async function tryAutoLoadCache() { try { const cached = await loadFromCache(); if (cached) { const currentLang = state.settings.uiLanguage; state = normalizeState(cached); state.settings.uiLanguage = currentLang; imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("cacheAutoLoaded"); } } catch (error) { console.warn("cache auto load skipped:", error); } }
+    async function tryAutoLoadCache() { try { const cached = await loadFromCache(); if (cached) { const currentLang = state.settings.uiLanguage; state = normalizeState(cached); state.settings.uiLanguage = currentLang; applyLayerPresetScopedState(state, state.settings.activeLayerPresetId); imageCache.clear(); registeredFonts.clear(); await registerCustomFonts(); renderAll(); setStatusT("cacheAutoLoaded"); } } catch (error) { console.warn("cache auto load skipped:", error); } }
 
     state = normalizeState(createDefaultState());
     bindEvents();
+    applyLayerPresetScopedState(state, state.settings.activeLayerPresetId);
     registerCustomFonts().then(() => { renderAll(); tryAutoLoadCache(); });
   </script>
 </body>
