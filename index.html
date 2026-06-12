@@ -1565,6 +1565,22 @@
     let pointerState = null;
 
     Object.assign(I18N.ja, {
+      partTintEnabled: "色変更",
+      partTintColor: "塗りつぶし色",
+      partTintHint: "ONにすると画像のアルファ情報を維持したまま指定色で塗りつぶします。"
+    });
+    Object.assign(I18N.en, {
+      partTintEnabled: "Recolor",
+      partTintColor: "Fill color",
+      partTintHint: "When enabled, the image is filled with the selected color while preserving alpha."
+    });
+    Object.assign(I18N.ko, {
+      partTintEnabled: "색 변경",
+      partTintColor: "채우기 색",
+      partTintHint: "켜면 이미지의 알파 정보를 유지한 채 지정 색으로 채웁니다."
+    });
+
+    Object.assign(I18N.ja, {
       frameSection: "枠レイヤー",
       frameDetailSection: "選択中枠詳細",
       addFrameLayer: "枠追加",
@@ -2150,7 +2166,16 @@
     }
     function normalizePartList(parts) {
       if (!Array.isArray(parts)) return [];
-      return parts.map((part) => ({ id: part.id || uid("part"), name: part.name || t("unnamed"), dataUrl: part.dataUrl || part.dataURL || "", width: Number(part.width || part.w || 0), height: Number(part.height || part.h || 0), selected: Boolean(part.selected) })).filter((part) => part.dataUrl);
+      return parts.map((part) => ({
+        id: part.id || uid("part"),
+        name: part.name || t("unnamed"),
+        dataUrl: part.dataUrl || part.dataURL || "",
+        width: Number(part.width || part.w || 0),
+        height: Number(part.height || part.h || 0),
+        selected: Boolean(part.selected),
+        tintEnabled: Boolean(part.tintEnabled),
+        tintColor: part.tintColor || "#ffffff"
+      })).filter((part) => part.dataUrl);
     }
     function normalizeInlineStyle(style) {
       if (!style || typeof style !== "object") return null;
@@ -4118,7 +4143,40 @@
           for (const part of parts) {
             const row = document.createElement("div"); row.className = `part-row${part.selected ? " active" : ""}`;
             const img = document.createElement("img"); img.className = "thumb"; img.src = part.dataUrl; img.alt = part.name;
-            const meta = document.createElement("div"); meta.className = "part-meta"; const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = part.name; nameInput.placeholder = t("partNamePlaceholder"); nameInput.addEventListener("input", () => { part.name = nameInput.value.trim() || t("unnamed"); }); const size = document.createElement("div"); size.className = "part-size"; size.textContent = `${part.width || "-"} × ${part.height || "-"} px${part.selected ? ` / ${t("displaying")}` : ""}`; meta.append(nameInput, size);
+            const meta = document.createElement("div"); meta.className = "part-meta";
+            const nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.value = part.name;
+            nameInput.placeholder = t("partNamePlaceholder");
+            nameInput.addEventListener("input", () => { part.name = nameInput.value.trim() || t("unnamed"); });
+            const size = document.createElement("div");
+            size.className = "part-size";
+            size.textContent = `${part.width || "-"} × ${part.height || "-"} px${part.selected ? ` / ${t("displaying")}` : ""}`;
+            const tintRow = document.createElement("div");
+            tintRow.className = "check-row";
+            const tintLabel = document.createElement("label");
+            const tintCheckbox = document.createElement("input");
+            tintCheckbox.type = "checkbox";
+            tintCheckbox.checked = Boolean(part.tintEnabled);
+            const tintText = document.createElement("span");
+            tintText.textContent = t("partTintEnabled");
+            tintLabel.append(tintCheckbox, tintText);
+            const tintColorInput = document.createElement("input");
+            tintColorInput.type = "color";
+            tintColorInput.value = part.tintColor || "#ffffff";
+            tintColorInput.title = t("partTintColor");
+            tintColorInput.disabled = !part.tintEnabled;
+            tintCheckbox.addEventListener("change", () => {
+              part.tintEnabled = tintCheckbox.checked;
+              tintColorInput.disabled = !part.tintEnabled;
+              renderPreview();
+            });
+            tintColorInput.addEventListener("input", () => {
+              part.tintColor = tintColorInput.value || "#ffffff";
+              renderPreview();
+            });
+            tintRow.append(tintLabel, tintColorInput);
+            meta.append(nameInput, size, tintRow);
             const removeBtn = document.createElement("button"); removeBtn.className = "small danger"; removeBtn.textContent = t("deleteButton");
             const checkbox = document.createElement("input"); checkbox.type = "checkbox"; checkbox.checked = part.selected; checkbox.title = t("applyDisplay");
             const toggle = () => { setPartSelection(layer.id, part.id, !part.selected); if (!activeLayerPreset()?.useBackgroundImages) state.activeToolTarget = `layer:${layer.id}`; renderLayers(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); };
@@ -4473,7 +4531,7 @@
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
         const dataUrl = await fileToDataUrl(file); const size = await getImageSize(dataUrl); const shouldSelect = mode === "diff" && store[layerId].length === 0 && addedCount === 0;
-        store[layerId].push({ id: uid("part"), name: file.name.replace(/\.[^.]+$/, ""), dataUrl, width: size.width, height: size.height, selected: shouldSelect }); addedCount++;
+        store[layerId].push({ id: uid("part"), name: file.name.replace(/\.[^.]+$/, ""), dataUrl, width: size.width, height: size.height, selected: shouldSelect, tintEnabled: false, tintColor: "#ffffff" }); addedCount++;
       }
       renderLayers(); renderCanvasSettingsControls(); syncCanvasSizeInputs(); renderPreview(); setStatusT("addedImages", { count: addedCount });
     }
@@ -4638,6 +4696,38 @@
       copyContext.drawImage(sourceCanvas, 0, 0);
       return copy;
     }
+    function safeGetImageData(context, x, y, width, height) {
+      if (!context || !width || !height) return null;
+      try {
+        return context.getImageData(x, y, width, height);
+      } catch (error) {
+        console.warn("Canvas pixel read was blocked, so this effect used a safe fallback.", error);
+        return null;
+      }
+    }
+    function applyChromaticFallback(ctx, source, effect, width, height) {
+      const normalized = normalizeEffectLayer(effect);
+      const rOpacity = clamp((normalized.chromaticRedOpacity ?? 34) / 100, 0, 1);
+      const gOpacity = clamp((normalized.chromaticGreenOpacity ?? 33) / 100, 0, 1);
+      const bOpacity = clamp((normalized.chromaticBlueOpacity ?? 33) / 100, 0, 1);
+      const rShift = Math.round(normalized.chromaticRedShift ?? -6);
+      const gShift = Math.round(normalized.chromaticGreenShift ?? 0);
+      const bShift = Math.round(normalized.chromaticBlueShift ?? 6);
+      ctx.save();
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = Math.max(gOpacity, 0.2);
+      ctx.drawImage(source, gShift, 0);
+      ctx.globalCompositeOperation = "screen";
+      ctx.globalAlpha = Math.max(rOpacity, 0.05);
+      ctx.drawImage(source, rShift, 0);
+      ctx.globalAlpha = Math.max(bOpacity, 0.05);
+      ctx.drawImage(source, bShift, 0);
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.globalAlpha = 1;
+      ctx.drawImage(source, 0, 0);
+      ctx.restore();
+    }
     function hexToRgba(hex, alpha = 1) {
       const clean = String(hex || "#000000").trim();
       const normalized = /^#([0-9a-f]{3})$/i.test(clean)
@@ -4722,7 +4812,8 @@
       const srcCtx = sourceCanvas.getContext("2d", { alpha: true });
       const maskCtx = mask.getContext("2d", { alpha: true });
       if (!srcCtx || !maskCtx || !w || !h) return mask;
-      const src = srcCtx.getImageData(0, 0, w, h);
+      const src = safeGetImageData(srcCtx, 0, 0, w, h);
+      if (!src) return mask;
       const data = src.data;
       const out = maskCtx.createImageData(w, h);
       const outData = out.data;
@@ -4810,7 +4901,11 @@
       try {
         const w = sourceCanvas.width;
         const h = sourceCanvas.height;
-        const image = sourceCtx.getImageData(0, 0, w, h);
+        const image = safeGetImageData(sourceCtx, 0, 0, w, h);
+        if (!image) {
+          restoreOriginal();
+          return;
+        }
         const data = image.data;
         const shadow = hexToRgb(effect.duotoneShadowColor || "#1f2a44", { r: 31, g: 42, b: 68 });
         const highlight = hexToRgb(effect.duotoneHighlightColor || "#f6e7d8", { r: 246, g: 231, b: 216 });
@@ -4989,7 +5084,8 @@
         ctx.save();
         ctx.drawImage(source, 0, 0);
         if (dotsCtx) {
-          const src = sourceCtx ? sourceCtx.getImageData(0, 0, w, h).data : null;
+          const imageData = sourceCtx ? safeGetImageData(sourceCtx, 0, 0, w, h) : null;
+          const src = imageData ? imageData.data : null;
           const gap = Math.max(4, Math.round(normalized.halftoneGap ?? 14));
           const maxRadius = Math.max(1, Math.round(normalized.halftoneDotSize ?? 6));
           const angle = ((normalized.halftoneAngle ?? 45) * Math.PI) / 180;
@@ -5049,7 +5145,11 @@
           ctx.drawImage(source, 0, 0);
           return;
         }
-        const src = sourceCtx.getImageData(0, 0, w, h);
+        const src = safeGetImageData(sourceCtx, 0, 0, w, h);
+        if (!src) {
+          applyChromaticFallback(ctx, source, effect, w, h);
+          return;
+        }
         const srcData = src.data;
         const out = ctx.createImageData(w, h);
         const outData = out.data;
@@ -5251,7 +5351,8 @@
           ctx.rotate(Number(tr.rotation || 0) * Math.PI / 180);
           ctx.scale(Number(tr.scale || 1), Number(tr.scale || 1));
         }
-        ctx.drawImage(img, -contentWidth / 2, -contentHeight / 2 + layerY, contentWidth, contentHeight);
+        const source = part.tintEnabled ? (getTintedAlphaCanvas(img, part.tintColor || "#ffffff") || img) : img;
+        ctx.drawImage(source, -contentWidth / 2, -contentHeight / 2 + layerY, contentWidth, contentHeight);
         ctx.restore();
         hasAny = true;
       }
