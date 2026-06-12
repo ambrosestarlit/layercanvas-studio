@@ -3692,6 +3692,17 @@
         else if (exclusive && selected) item.selected = false;
       }
     }
+    function movePartInLayer(layerId, partId, direction) {
+      const store = getLayerStore(activeCharacter());
+      const parts = store[layerId] || [];
+      const index = parts.findIndex((item) => item.id === partId);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= parts.length) return;
+      [parts[index], parts[nextIndex]] = [parts[nextIndex], parts[index]];
+      renderLayers();
+      renderPreview();
+    }
+
     function enforceSingleSelectionForCategory(categoryId) {
       for (const character of state.characters || []) {
         const parts = character.layers?.[categoryId] || [];
@@ -4141,6 +4152,7 @@
         if (!parts.length) { const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = t("emptyParts"); list.appendChild(empty); }
         else {
           for (const part of parts) {
+            const partIndex = parts.findIndex((item) => item.id === part.id);
             const row = document.createElement("div"); row.className = `part-row${part.selected ? " active" : ""}`;
             const img = document.createElement("img"); img.className = "thumb"; img.src = part.dataUrl; img.alt = part.name;
             const meta = document.createElement("div"); meta.className = "part-meta";
@@ -4177,12 +4189,27 @@
             });
             tintRow.append(tintLabel, tintColorInput);
             meta.append(nameInput, size, tintRow);
+            const partActionWrap = document.createElement("div");
+            partActionWrap.className = "button-row layer-header-actions";
+            const partUpBtn = document.createElement("button");
+            partUpBtn.type = "button";
+            partUpBtn.className = "small secondary";
+            partUpBtn.textContent = t("moveUpButton");
+            partUpBtn.disabled = partIndex <= 0;
+            const partDownBtn = document.createElement("button");
+            partDownBtn.type = "button";
+            partDownBtn.className = "small secondary";
+            partDownBtn.textContent = t("moveDownButton");
+            partDownBtn.disabled = partIndex < 0 || partIndex >= parts.length - 1;
             const removeBtn = document.createElement("button"); removeBtn.className = "small danger"; removeBtn.textContent = t("deleteButton");
+            partActionWrap.append(partUpBtn, partDownBtn, removeBtn);
             const checkbox = document.createElement("input"); checkbox.type = "checkbox"; checkbox.checked = part.selected; checkbox.title = t("applyDisplay");
             const toggle = () => { setPartSelection(layer.id, part.id, !part.selected); if (!activeLayerPreset()?.useBackgroundImages) state.activeToolTarget = `layer:${layer.id}`; renderLayers(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); };
             row.addEventListener("click", (event) => { const tag = event.target.tagName.toLowerCase(); if (tag === "input" || tag === "button" || tag === "select" || tag === "label") return; toggle(); });
-            checkbox.addEventListener("change", () => { setPartSelection(layer.id, part.id, checkbox.checked); if (!activeLayerPreset()?.useBackgroundImages) state.activeToolTarget = `layer:${layer.id}`; renderLayers(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); }); row.append(checkbox, img, meta, removeBtn);
-            removeBtn.addEventListener("click", () => { store[layer.id] = parts.filter((item) => item.id !== part.id); imageCache.delete(part.dataUrl); renderLayers(); renderPreview(); }); list.appendChild(row);
+            checkbox.addEventListener("change", () => { setPartSelection(layer.id, part.id, checkbox.checked); if (!activeLayerPreset()?.useBackgroundImages) state.activeToolTarget = `layer:${layer.id}`; renderLayers(); renderToolTargetOptions(); syncTargetSliders(); renderPreview(); }); row.append(checkbox, img, meta, partActionWrap);
+            partUpBtn.addEventListener("click", (event) => { event.stopPropagation(); movePartInLayer(layer.id, part.id, -1); });
+            partDownBtn.addEventListener("click", (event) => { event.stopPropagation(); movePartInLayer(layer.id, part.id, 1); });
+            removeBtn.addEventListener("click", (event) => { event.stopPropagation(); store[layer.id] = parts.filter((item) => item.id !== part.id); imageCache.delete(part.dataUrl); renderLayers(); renderPreview(); }); list.appendChild(row);
           }
         }
         card.append(head, bodyControls, list); root.appendChild(card);
@@ -5334,7 +5361,7 @@
 
     async function drawStandingLayer(ctx, width, height, character, layer, contentWidth, contentHeight) {
       const store = getLayerStore(character);
-      const parts = (store[layer.id] || []).filter((part) => part.selected);
+      const parts = (store[layer.id] || []).filter((part) => part.selected).reverse();
       if (!parts.length) return false;
       const groupTr = character.transform || defaultTransform();
       const tr = layer.transform || defaultTransform();
